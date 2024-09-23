@@ -1,0 +1,1 @@
+# plugins-automatic-translate-addon-for-translatepress
