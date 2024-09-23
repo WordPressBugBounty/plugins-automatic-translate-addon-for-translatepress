@@ -1,0 +1,100 @@
+h3.tpa-license-title {
+    background: linear-gradient(to right, #e55860, #28aef6);
+    padding: 20px 10px;
+    margin: 0;
+    display: inline-block;
+    width: 100%;
+    color: #fff;
+    font-size: 22px;
+    line-height: 22px;
+    margin-top: 25px;
+}
+.tpa-license-form {
+    padding-right: 40px;
+}
+.tpa-license-content {
+    padding: 25px;
+    width: 100%;
+    display: inline-block;
+}
+.tpa-license-field label {
+    display: block;
+    margin-bottom: 5px;
+}
+.tpa-license-form, .tpa-license-textbox {
+    display: inline-block;
+    width: calc(50% - 5px);
+    vertical-align: top;
+}
+input.regular-text.code {
+    font-size: 150%;
+    padding: 8px 10px 10px;
+    width: 100%;
+}
+span.tpa-license-valid {
+    padding: 0px 5px 2px;
+    color: #fff;
+    background-color: #e55860;
+    border-radius: 3px;
+}
+span.tpa-license-key {
+    font-weight: 700;
+    opacity: 0.8;
+}
+span.tpa-license-info-title:after {
+    content: ':';
+    position: absolute;
+    right: 2px;
+}
+li {
+    list-style: none;
+    padding: 0;
+}
+span.tpa-license-info-title {
+    width: 150px;
+    display: inline-block;
+    position: relative;
+    padding-right: 5px;
+}
+.tpa-license-textbox ol {
+    border: 3px solid #e55860;
+    padding: 5px 20px;
+    margin-left: 0;
+}
+.tpa-license-container *{
+    box-sizing: border-box;
+}
+.tpa-pluginby {
+    width: 100%;
+    display: block;
+    text-align: right;
+    font-style: italic;
+}
+.tpa-license-container {
+    margin: 5px 15px;
+    display: block;
+}
+table.tp-addon-license {
+    table-layout: fixed !IMPORTANT;
+    width: 100%;
+}
+table.tp-addon-license tr th, table.tp-addon-license tr td {
+    border: 1px solid #bbb;
+    padding: 12px;
+    text-align: center;
+    width: 33%;
+}
+table.tp-addon-license img {
+    max-width: 100%;
+}
+.tpa-license-form a.button-primary:hover {
+    background: #e77279;
+    border-color: #e45860;
+}
+
+@media only screen and (max-width: 600px) {
+    .tpa-license-form, .tpa-license-textbox {
+        width: 100%;
+        padding: 0;
+    }
+}
