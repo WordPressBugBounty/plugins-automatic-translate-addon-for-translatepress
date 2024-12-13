@@ -5,7 +5,7 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/
  * Plugin URI:
- * Version: 1.1.1
+ * Version: 1.1.2
  * License: GPL2
  * Text Domain:TPA
  * Domain Path: languages
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.1.1' );
+define( 'TPA_VERSION', '1.1.2' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -35,6 +35,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function __construct() {
 			register_activation_hook( __FILE__, array( $this, 'tpa_activate' ) );
 			add_filter( 'trp_string_groups', array( $this, 'tpa_string_groups' ) );
+			add_action( 'init', array( $this, 'tpap_load_plugin_text_domain' ) );
 			add_action( 'plugins_loaded', array( $this, 'tpa_check_required_plugin' ) );
 			if ( ! is_admin() ) {
 				add_action( 'trp_translation_manager_footer', array( $this, 'tpa_register_assets' ) );
@@ -83,6 +84,11 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		 * Check if required "TranslatePress - Multilingual" plugin is activeF
 		 * also register the plugin text domain
 		 */
+
+		public function tpap_load_plugin_text_domain(){
+			load_plugin_textdomain( 'TPA', false, basename( dirname( TPA_FILE ) ) . '/languages/' );
+		}
+
 		public function tpa_check_required_plugin() {
 			if ( ! function_exists( 'trp_enable_translatepress' ) ) {
 				add_action( 'admin_notices', array( $this, 'tpa_plugin_required_admin_notice' ) );
@@ -96,7 +102,6 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				require_once TPA_PATH . 'admin/tpa-feedback-notice.php';
 				new TPAFeedbackNotice();
 			}
-			load_plugin_textdomain( 'TPA', false, basename( dirname( TPA_FILE ) ) . '/languages/' );
 		}
 		/**
 		 * Notice to 'Admin' if "TranslatePress - Multilingual" is not active
