@@ -1,38 +1,67 @@
 ﻿=== Automatic Translate Addon For TranslatePress ===
 Contributors: narinder-singh,satindersingh,coolplugins
 Donate link: https://paypal.me/CoolPlugins/10USD/
-Tags: Automatic translation, translate, TranslatePress addon, Free translation,Machine translation
+Tags: Automatic translation, translate, TranslatePress addon, Free translation,Machine translation,AI
 Requires at least: 5.0
 Tested up to :6.7.1
 Requires PHP: 5.6
 Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-TranslatePress addon for automatically translate a website page content using machine translation tools without any auto translator API key.
+
+Effortless Automatic Translation for TranslatePress: Use AI & Machine Translation Tools—No API Key Needed!
 
 == Description ==
-### Automatic Machine Translator Add-on For TranslatePress
-> Install this plugin along with **[TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/#description)** plugin and make your life easier.
-* Free version supports Yandex translate widget.
-* **[Pro version 💎](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)** supports Google translate widget along with Yandex and provides unlimited translations without any API key.
-**Are you spending a lot of time and money on website translation tasks?**
-This addon saves your time and money, Automatic Translate Addon For TranslatePress helps you to translate entire page content with one click. You don't need to translate page content manually one by one. 
-https://www.youtube.com/watch?v=kgu4hWn7bms
 
-### 🤖 No Translate API Required! + Unlimited Translations!
-* Yes, it's true, there is no requirement to use any translate API key to use this addon for automatic translations, just install it and translate unlimited characters with one click.
-* Free version of this addon supports **Yandex Page Translate Widget**. By using this translate widget you can translate any page content with one click.
-* We also provide **[pro version 💎](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)** that supports **Google Page Translate Widget**. You can also use it for unlimited translations without any API key.
+https://www.youtube.com/watch?v=kgu4hWn7bms&ab_channel=CoolPlugins
 
-### ⚡ Automatic Translate Addon For TranslatePress Features
-* One-click translate any page content. It will only translate plain text strings means if a string will contain HTML or a special character then it will be skipped from automatic translations.
-* You can automatically translate **unlimited characters** free of cost without any API key. You just need to install this addon and click on the translate button to translate any page content.
-* After auto translations, you can also manually edit any machine translated string using TranslatePress.
-* “If you spend too much time thinking about a thing, you'll never get it done. Stop wasting time, complete work smartly & quickly!”
-* **[AI Auto Translator (PRO)](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro):** Moreover, we have added the feature to translate Content using Chrome’s built-in AI. This feature enables real-time translation directly within the browser, without any paid API services. This means you can easily translate content without additional setup, saving time and costs.
-As this is the beta version, follow the instructions in the **[Chrome AI Translator API ](https://developer.chrome.com/docs/ai/translator-api)** documentation for detailed setup steps to configure the translation.
+**Automatic AI and Machine Translation Addon for TranslatePress** makes website translations faster and more efficient.  
 
-https://youtu.be/OyTHWn5CyKw
+> Install this addon alongside the **[TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/#description)** plugin to automate translations and streamline your workflow.  
+
+- **Free Version:**  Includes the Yandex Translate widget for automatic translations.  
+
+- **Pro Version 💎:**  Unlocks premium features like:  
+
+  - **Google Translate widget**  
+  - **Google Chrome built-in AI translation**  
+  - Yandex Translate  
+  - Provides unlimited translations without requiring an API key.  
+  [Upgrade to Pro here!](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)  
+
+  https://youtu.be/OyTHWn5CyKw
+  
+### Why Choose This Addon?  
+
+Tired of spending time and money on website translations? This addon saves you both. 
+
+- Automatically translates entire pages with one click.  
+- Eliminates manual translation tasks.  
+- Reduces the cost and effort of managing multilingual websites.  
+
+
+
+Use advanced AI and machine translation tools to handle translations without the need for an API key.  
+
+🤖 **No Translate API Required! + Unlimited Translations!**  
+Yes, it’s true! There is no requirement to use any translate API key for this addon. Just install it and translate unlimited characters with one click.  
+
+- **Free Version:**  Supports the Yandex Page Translate widget, allowing you to translate any page content with one click.  
+
+- **Pro Version 💎:**  Adds support for Google Page Translate widget and Chrome’s built-in AI translator. Translate unlimited characters without any API key setup.  
+
+
+
+
+⚡ **Automatic Translate Addon for TranslatePress Features:**  
+
+- One-click translation of any page content (plain text strings only; HTML or special characters will be skipped).  
+- Unlimited character translations at no additional cost—no API key required!  
+- Post-translation editing with TranslatePress for fine-tuning any machine-translated strings.  
+- **AI Auto Translator (PRO):** Use Chrome’s built-in AI for real-time translations directly in the browser, saving time and costs.  
+
+> *“If you spend too much time thinking about a thing, you’ll never get it done. Stop wasting time, complete work smartly & quickly!”*  
+
 
 ### Check out our advanced Automatic Translate Addon for Loco Translate
 The  **[Automatic Translate Addon for Loco Translate](https://locoaddon.com/plugin/automatic-translate-addon-for-loco-translate-pro//?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)** is an essential tool for website owners and developers who want to quickly and efficiently translate WordPress plugins and themes. By integrating with the popular Loco Translate plugin, this addon leverages advanced machine translation services to automate the translation of PO files, significantly reducing the time and effort required.
