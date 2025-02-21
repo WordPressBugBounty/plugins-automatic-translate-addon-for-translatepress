@@ -16,7 +16,7 @@ Auto-translate unlimited strings and characters using AI & Machine Translation t
 
 https://www.youtube.com/watch?v=kgu4hWn7bms&ab_channel=CoolPlugins  
 
-**AI Translation for TranslatePress** is an addon for **[TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/#description)** that makes website translation easy. It automatically translates entire web pages, eliminating the need for manual translation.
+**AI Translation for TranslatePress** is an addon for **[TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/#description)** that makes website translation easy. It **automatically translates entire web pages**, eliminating the need for manual translation.
 
 Powered by advanced **AI translator** resources, it delivers accurate and fast translations, helping you reach a global audience with ease. Whether you run a blog, an eCommerce store, or a business website, this addon makes your website multilingual within a few minutes.
 
@@ -53,15 +53,27 @@ https://youtu.be/OyTHWn5CyKw
 ✅ Unlimited translations without API keys  
 ✅ Premium Support (24-48 hour response time)  
 
+**[Upgrade to Pro!!](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)**  
+
+
 **❗ Important Notice:** This addon only provides settings to use third-party auto-translation widgets and services (Yandex), it does not provide any translation service. So, we don't guarantee 100% correctness, please check all translated text carefully before making it live on your production site. If any auto-translate provider stops providing an auto-translation widget or service in the future, in that case, the plugin will not support that translation provider.
 
 ### Check out our other advanced Automatic Translate Addons
 
-The **[Automatic Translate Addon for Loco Translate](https://locoaddon.com/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=atlt_get_pro&utm_content=check_out)** is an essential tool for website owners and developers who want to quickly and efficiently translate WordPress plugins and themes.
+The  **[Automatic Translate Addon for Loco Translate](https://locoaddon.com/plugin/automatic-translate-addon-for-loco-translate-pro//?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)** is an essential tool for website owners and developers who want to quickly and efficiently translate WordPress plugins and themes. By integrating with the popular Loco Translate plugin, this addon leverages advanced machine translation services to automate the translation of PO files, significantly reducing the time and effort required.
 
-Additionally, **[Automatic Translations For Polylang](https://coolplugins.net/product/automatic-translations-for-polylang/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=atfp_get_pro&utm_content=check_out)** is a powerful addon that streamlines the process of translating WordPress content.
+#### Key Features:
+- **Automatic Translations:** Utilizes machine translation to translate WordPress plugin and theme strings automatically.
+- **No API Key Required for Free Version:** Allows unlimited character translations using the Yandex Page Translate Widget without needing a paid API key.
+- **Premium Version Enhancements:** Provides additional translation options with Google Translate Widget, DeepL Doc Translator, ChatGPT, and Gemini, all without requiring a paid API key.
+- **User-Friendly Interface:** Features a one-click translation button within the Loco Translate editor, making translations quick and easy.
+- **Unlimited Translations:** Both free and premium versions support unlimited character translations, with premium users accessing more advanced and accurate translation tools.
 
-> Install this addon alongside the **[TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/#description)** plugin to automate translations and streamline your workflow.  
+**[Check It Now ](https://locoaddon.com/plugin/automatic-translate-addon-for-loco-translate-pro//?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)**
+
+
+ **[AI Translation For Polylang](https://coolplugins.net/product/automatic-translations-for-polylang/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=atfp_get_pro&utm_content=check_out)** is a powerful addon that streamlines the process of translating WordPress content.
+
 
 
 ### ✍ Special THANKS!
