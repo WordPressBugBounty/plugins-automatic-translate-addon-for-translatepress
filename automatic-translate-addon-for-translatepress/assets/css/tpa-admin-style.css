@@ -85,7 +85,8 @@ table.tp-addon-license tr th, table.tp-addon-license tr td {
     width: 33%;
 }
 table.tp-addon-license img {
-    max-width: 100%;
+    height: 21px !important;
+    width: auto !important;
 }
 .tpa-license-form a.button-primary:hover {
     background: #e77279;

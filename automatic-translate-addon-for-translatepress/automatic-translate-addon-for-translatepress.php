@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Automatic Translate Addon For TranslatePress
- * Description: Auto language translator add-on for TranslatePress official plugin to translate website into any language via fully automatic machine translations via Yandex Translate Widget.
+ * Plugin Name: AI Translation For TranslatePress
+ * Description: Auto language translator add-on for TranslatePress to translate your website into any language using AI & Machine Translation tools—No API Key Needed!.
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/
  * Plugin URI:
- * Version: 1.1.2
+ * Version: 1.2.0
  * License: GPL2
  * Text Domain:TPA
  * Domain Path: languages
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.1.2' );
+define( 'TPA_VERSION', '1.2.0' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -35,15 +35,20 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function __construct() {
 			register_activation_hook( __FILE__, array( $this, 'tpa_activate' ) );
 			add_filter( 'trp_string_groups', array( $this, 'tpa_string_groups' ) );
-			add_action( 'init', array( $this, 'tpap_load_plugin_text_domain' ) );
+			add_action( 'init', array( $this, 'tpa_load_plugin_text_domain' ) );
 			add_action( 'plugins_loaded', array( $this, 'tpa_check_required_plugin' ) );
 			if ( ! is_admin() ) {
 				add_action( 'trp_translation_manager_footer', array( $this, 'tpa_register_assets' ) );
 			}
+			add_action( 'admin_init', array( $this, 'tpa_tranlatedata_review_notice' ) );
 			add_action( 'wp_ajax_tpa_get_strings', array( $this, 'tpa_getstrings' ) );
 			add_action( 'wp_ajax_tpa_save_translations', array( $this, 'tpa_save_translations' ) );
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'tpa_settings_page_link' ) );
-
+			add_action('wp_ajax_tpa_update_translate_data', array($this, 'tpa_update_translate_data'));
+			if(!class_exists('CPT_Dashboard')) {
+				require_once TPA_PATH . 'admin/cpt_dashboard/cpt_dashboard.php';
+				new CPT_Dashboard();
+			}
 		}
 
 		/**
@@ -81,11 +86,78 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		}
 
 		/**
+		 * Update translation data
+		 */
+		public function tpa_update_translate_data() {
+			if ( ! check_ajax_referer( 'auto-translate-press-nonces', false ) ) {
+				wp_send_json_error( __( 'Invalid security token sent.', 'automatic-translations-for-polylang' ) );
+				wp_die( '0', 400 );
+				exit();
+			}
+			// Decode the JSON data
+			$data = json_decode(stripslashes($_POST['data']), true);
+			$provider = isset($data['provider']) ? sanitize_text_field($data['provider']) : '';
+			$total_word_count = isset($data['totalWordCount']) ? absint($data['totalWordCount']) : 0;
+			$total_char_count = isset($data['totalCharacterCount']) ? absint($data['totalCharacterCount']) : 0;
+			$date = isset($data['date']) ? date('Y-m-d H:i:s', strtotime(sanitize_text_field($data['date']))) : '';
+			$source_lang = isset($data['default_lang']) ? sanitize_text_field($data['default_lang']) : '';
+			$target_lang = isset($data['language_code']) ? sanitize_text_field($data['language_code']) : '';
+			$time_taken = isset($data['timeTaken']) ? absint($data['timeTaken']) : 0;
+			$post_id = isset($data['post_id']) ? absint($data['post_id']) : 0;
+			if (class_exists('CPT_Dashboard')) {
+				$translation_data = array(
+					'post_id' => $post_id,
+					'service_provider' => $provider,
+					'source_language' => $source_lang,
+					'target_language' => $target_lang,
+					'time_taken' => $time_taken,
+					'string_count' => $total_word_count,
+					'character_count' => $total_char_count,
+					'date_time' => $date,
+					'version_type' => 'free'
+				);
+
+				CPT_Dashboard::store_options(
+					'tpa',
+					'post_id', 
+					'update',
+					$translation_data
+				);
+
+				wp_send_json_success(
+					die()
+				// 	array(
+				// 	'message' => __('Translation data updated successfully', 'tpap')
+				// )
+			);
+			} else {
+				wp_send_json_error(array(
+					'message' => __('CPT_Dashboard class not found', 'tpap') 
+				));
+			}
+			exit;
+		}
+
+		/**
+		 *  Show review notice of translate data.
+		 */
+		public function tpa_tranlatedata_review_notice() {
+			$already_rated     = get_option( 'tpa-ratingDiv' ) != false ? get_option( 'tpa-ratingDiv' ) : 'no';
+			if(class_exists('Cpt_Dashboard') && ($already_rated === 'no')) {
+				Cpt_Dashboard::review_notice(
+					'tpa', // Required
+					'AI Translation For TranslatePress', // Required
+					'https://wordpress.org/plugins/automatic-translate-addon-for-translatepress/reviews/#new-post', // Required
+					TPA_URL . 'assets/images/tpa-icon.png'
+				);
+			}
+		}
+		/**
 		 * Check if required "TranslatePress - Multilingual" plugin is activeF
 		 * also register the plugin text domain
 		 */
 
-		public function tpap_load_plugin_text_domain(){
+		public function tpa_load_plugin_text_domain(){
 			load_plugin_textdomain( 'TPA', false, basename( dirname( TPA_FILE ) ) . '/languages/' );
 		}
 
@@ -135,9 +207,14 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			$extra_data['preloader_path'] = TPA_URL . '/assets/images/preloader.gif';
 			$extra_data['gt_preview']     = TPA_URL . '/assets/images/powered-by-google.png';
 			$extra_data['yt_preview']     = TPA_URL . '/assets/images/powered-by-yandex.png';
+			$extra_data['chrome_preview']     = TPA_URL . '/assets/images/powered-by-chrome-api.png';
+			$extra_data['document_preview']  = TPA_URL . '/assets/images/document.svg';
+        	$extra_data['information_preview'] = TPA_URL . '/assets/images/information.svg';
+			$extra_data['extra_class']= is_rtl() ? 'tpa-rtl' : '';
 			$extra_data['ajax_url']       = admin_url( 'admin-ajax.php' );
 			$extra_data['nonce']          = wp_create_nonce( 'auto-translate-press-nonces' );
 			$extra_data['plugin_url']     = plugins_url();
+			$extra_data['post_id']        = get_the_ID();
 			wp_enqueue_script( 'tpscript' );
 			wp_localize_script( 'tpscript', 'extradata', $extra_data );
 			wp_enqueue_script( 'tpa-yandex-widget' );

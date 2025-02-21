@@ -169,6 +169,7 @@ var page_lang = localStorage.getItem("page_lang");
             }
         };
         select.onSelect = function(lang) {
+            localStorage.setItem("translationStartTime", new Date().toISOString()); // Store start time
             rightButton.setText(lang);
             this.setHidden(true);
             self.translate(lang);
@@ -220,6 +221,7 @@ var page_lang = localStorage.getItem("page_lang");
                     break;
 
                 case 100:
+                    localStorage.setItem("translationEndTime", new Date().toISOString()); // Store end time
                     self.setState('done', true)
                         .setState('busy', false);
                     break;
@@ -236,12 +238,23 @@ var page_lang = localStorage.getItem("page_lang");
             }
             if (scrollHeight !== undefined && scrollHeight > 100) {
                 container.find(".my_translate_progress").fadeIn("slow");
+                container.find(".progress-wrapper").show();
+                const progressBar = container.find(".progress-wrapper .progress-bar");
+
                 setTimeout(() => {
                     container.find(".string_container").animate({
                         scrollTop: scrollHeight + 2000
                     }, scrollSpeed * 2, 'linear');
                 }, 1000);
-                container.find('.string_container').on('scroll', function() {
+                container.find('.string_container').on('scroll', function(e) {
+
+                    var scrollTop = e.target.scrollTop;
+                    var scrollHeight = e.target.scrollHeight;
+                    var clientHeight = e.target.clientHeight;
+                    var scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+                    progressBar.css('width', scrollPercentage + '%');
+                    progressBar.find('#progressText').text((Math.round(scrollPercentage * 10) / 10).toFixed(1) + '%');
+
                     if ($(this).scrollTop() + $(this).innerHeight() + 50 >= $(this)[0].scrollHeight) {
                         setTimeout(() => {
                             container.find(".save_it").prop("disabled", false);

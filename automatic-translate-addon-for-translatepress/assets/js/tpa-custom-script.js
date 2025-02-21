@@ -1,7 +1,7 @@
 const tpAutoTranslator = (function (window, $) {
   // get plugin configuration object.
   const configData = window.extradata;
-  const { ajax_url: ajaxUrl, nonce: nonce } = configData;
+  const { ajax_url: ajaxUrl, extra_class: rtlClass, nonce: nonce } = configData;
   var dict_id = new Array();
   var gettxt_id = new Array();
   onLoad();
@@ -38,7 +38,7 @@ const tpAutoTranslator = (function (window, $) {
     });
 
     //on click on yandex transllate button
-    $("#tpa_yandex_transate_btn").on("click", function () {
+    $("#tpa_yandex_translate_btn").on("click", function () {
       onYandexTranslateClick();
     });
 
@@ -89,13 +89,14 @@ const tpAutoTranslator = (function (window, $) {
       '<div><label class="tpa-steps">Step 1 - Select Language</label></div>'
     );
     $("#trp-next-previous").after(
-      '<div><label class="tpa-steps">Step 2 - Click Auto Translate Button</label></div><button id="tpa-auto-btn">Auto Translate</button><div class="tpa-user-message">Translate all plain strings of current page </div>'
+      '<div><label class="tpa-steps">Step 2 - Click Auto Translate Button</label></div><button id="tpa-auto-btn">Auto Translate</button><div class="tpa-user-message"></div>'
     );
 
     // if (default_lang == getSelectedlang) {
     $("#tpa-auto-btn").removeClass("is-enable");
     $("#tpa-auto-btn").addClass("is-disable");
     $("#tpa-auto-btn").attr('disabled', true);
+    $(".tpa-user-message").html('*To enable the button, change the default language in Step 1.');
     // } else {
     //   $("#tpa-auto-btn").addClass("is-enable");
     //   $("#tpa-auto-btn").removeClass("is-disable");
@@ -117,9 +118,11 @@ const tpAutoTranslator = (function (window, $) {
     if (newButtonState) {
       $("#tpa-auto-btn").addClass("is-enable").removeClass("is-disable");
       $("#tpa-auto-btn").attr('disabled', false);
+      $(".tpa-user-message").html('Translate all plain strings of current page.');
     } else {
       $("#tpa-auto-btn").addClass("is-disable").removeClass("is-enable");
       $("#tpa-auto-btn").attr('disabled', true);
+      $(".tpa-user-message").html('*To enable the button, change the default language in Step 1.');
     }
   }
 
@@ -131,6 +134,8 @@ const tpAutoTranslator = (function (window, $) {
         height: "auto",
         width: 400,
         modal: true,
+        draggable: false,
+        dialogClass: rtlClass,
         buttons: {
           Cancel: function () {
             $(this).dialog("close");
@@ -280,7 +285,7 @@ const tpAutoTranslator = (function (window, $) {
 
     //show yandex pop-up
     var style1 = {};
-    $("#tpa_yandex_transate_btn").css(style1);
+    $("#tpa_yandex_translate_btn").css(style1);
     $("#tpa-dialog").dialog("close");
     $("#tpa_strings_model").addClass("tpa_custom_model").fadeIn("slow");
   }
@@ -338,23 +343,51 @@ const tpAutoTranslator = (function (window, $) {
   //Save strings translation
   function onSaveClick() {
     var translatedObj = [];
+    var updatedataObj = [];
+    let totalCharacterCount = 0;
+    let totalWordCount = 0;
+    let startTime = new Date(localStorage.getItem("translationStartTime"));
+    let endTime = new Date(localStorage.getItem("translationEndTime"));
+    let totalTranslationTime = (endTime - startTime) / 1000;
     $("#stringTemplate tbody tr").each(function (index) {
-      var index = $(this).find("td.source").text();
-      var source = $(this).find("td.source").text();
-      var target = $(this).find("td.target").text();
-      var type = $(this).find("td.source").data("group");
-      var db_id = $(this).find("td.source").data("db-id");
-      var language_code = localStorage.getItem("language_name");
-      var default_lang = localStorage.getItem("default_language");
-      translatedObj.push({
-        original: source,
-        translated: target,
-        data_group: type,
-        language_code: language_code,
-        id: db_id,
-        status: "2",
-        default_lang: default_lang,
-      });
+        // Get the source text from the current tr
+        var sourceText = $(this).find("td.source").text().trim();
+
+        // Calculate the word count
+        var sourceWordCount = sourceText ? sourceText.trim().split(/\s+/).filter(word => /[^\p{L}\p{N}]/.test(word)).length : 0; // Split by whitespace
+
+        // Calculate the character count
+        var sourceCharacterCount = sourceText.length;
+        totalCharacterCount += sourceCharacterCount;
+        totalWordCount += sourceWordCount;
+        var index = $(this).find("td.source").text();
+        var source = $(this).find("td.source").text();
+        var target = $(this).find("td.target").text();
+        var type = $(this).find("td.source").data("group");
+        var db_id = $(this).find("td.source").data("db-id");
+        var language_code = localStorage.getItem("language_name");
+        var default_lang = localStorage.getItem("default_language");
+        var date = new Date().toISOString();
+        post_id = extradata["post_id"];
+        translatedObj.push({
+          original: source,
+          translated: target,
+          data_group: type,
+          language_code: language_code,
+          id: db_id,
+          status: "2",
+          default_lang: default_lang,
+        });
+        updatedataObj = {
+            'language_code': language_code,
+            'default_lang': default_lang,
+            'provider' : 'yandex',
+            'timeTaken' : totalTranslationTime,
+            'totalWordCount' : totalWordCount,
+            'totalCharacterCount' : totalCharacterCount,
+            'date' : date,
+            'post_id' : post_id
+          };
     });
     var data = {
       action: "tpa_save_translations",
@@ -363,41 +396,78 @@ const tpAutoTranslator = (function (window, $) {
     };
     // Close merge translation function
     jQuery.post(ajaxUrl, data, function (response) {
+      var updateData = {
+        'action': 'tpa_update_translate_data',
+        'data': JSON.stringify(updatedataObj),
+        '_ajax_nonce': nonce,
+      };
+
+      jQuery.post(ajaxUrl, updateData, function (updateResponse) {
+        if (updateResponse.success) {
+            console.log("Translation metadata saved successfully.");
+        } else {
+            
+        }
+      });
       $("#tpa_strings_model").fadeOut("slow");
       location.reload();
-    });
+  });
   }
 
   function settingsModel() {
     let ytPreviewImg = extradata["yt_preview"];
     let gtPreviewImg = extradata["gt_preview"];
-    const getProLink =
-      "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup";
+    let chromePreviewImg = extradata["chrome_preview"];
+    const documentPreviewImg = extradata['document_preview'];
+    const informationPreviewImg = extradata['information_preview'];
+    const getGTProLink =
+      "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_google";
+    const getChromeProLink =
+      "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_chrome";
+          
+      const modelHTML = `
+          <div id="tpa-dialog" title="Step 3 - Select Translation Provider" style="display:none;">
+              <div class="tpa-settings" style="opacity:1;">
+                  <div class="tpa-translator-row">
+                      <div class="tpa-translator tpa-yandex-translator">
+                          <div class="tpa-translator-icon">
+                              <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_yandex" target="_blank"><img src="${documentPreviewImg}" alt="Documentation"></a>
+                              <a href="https://translate.yandex.com/" target="_blank"><img src="${informationPreviewImg}" alt="Information"></a>
+                          </div>
+                          <strong class="tpa-heading">Translate Using Yandex Page Translate Widget</strong>
+                          <div class="inputGroup">
+                               <a href="https://translate.yandex.com/" target="_blank" title="View More"><img class="pro-features-img" src="${ytPreviewImg}" alt="powered by Yandex Translate Widget" title="View More"></a><br/>
+                              <button id="tpa_yandex_translate_btn" class="notranslate button button-primary">Yandex Translate</button>
+                          </div>
+                      </div>   
 
-    let modelHTML = `<!-- The Modal -->
-        <div id="tpa-dialog" title="Step 3 - Select Translation Provider" >
-        <div class="tpa-settings" style="opacity:1;">
-        <strong class="tpa-heading" style="margin-bottom:10px;display:inline-block;">Translate Using Yandex Page Translate Widget</strong>
-        <div class="inputGroup">
-        <button id="tpa_yandex_transate_btn" class="notranslate button button-primary">Yandex Translate</button>
-        <span class="proonly-button alsofree">✔ Available</span>
-        <br/><a href="https://translate.yandex.com/" target="_blank"><img style="margin-top: 5px;" src="${ytPreviewImg}" alt="powered by Yandex Translate Widget"></a>
-        </div>
-        <hr/>
-      <strong class="tpa-heading" style="margin-bottom:10px;display:inline-block;">Translate Using Google Page Translate Widget</strong>
-        <div class="inputGroup">
-        <button id="tpa_gtranslate_btn" disabled="disabled" class="notranslate button button-primary">Google Translate</button>
-        <span class="proonly-button"><a href="${getProLink}" target="_blank" title="Buy Pro">💎 Buy Pro</a></span>
-        <br/><a href="https://translate.google.com/" target="_blank"><img style="margin-top: 5px;" src="${gtPreviewImg}" alt="powered by Google Translate Widget"></a>
-        </div>
-        <hr/>
-        <ul class="tpa-feature" style="margin: 0;">
-          <li><span style="color:green">✔</span> Unlimited Translations<br/></li>
-          <li><span style="color:green">✔</span> No API Key Required</li>
-          <li><span style="color:green">✔</span> Check Languages Support - <a href="https://yandex.com/support/translate/supported-langs.html" target="_blank">Yandex</a>, <a href="https://en.wikipedia.org/wiki/Google_Translate#Supported_languages" target="_blank">Google</a></li>
-        </ul>
+                      <div class="tpa-translator tpa-pro-translator"> 
+                          <div class="tpa-translator-icon">
+                              <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google" target="_blank"><img src="${documentPreviewImg}" alt="Documentation"></a>
+                              <a href="https://translate.google.com/" target="_blank"><img src="${informationPreviewImg}" alt="Information"></a>
+                          </div>
+                          <strong class="tpa-heading">Translate Using Google Page Translate Widget</strong>
+                          <div class="inputGroup">
+                               <a href="https://translate.google.com/" target="_blank"><img class="pro-features-img" src="${gtPreviewImg}" alt="powered by Google Translate Widget" title="View More"></a><br/>
+                              <button id="tpa_gtranslate_btn" class="notranslate button button-primary" disabled="disabled">Google Translate</button><span class="proonly-button"><a href="${getGTProLink}" target="_blank" title="Buy Pro">💎 Buy Pro</a></span>
+                          </div>
+                      </div>                         
+                      
+                      <div class="tpa-translator tpa-pro-translator">
+                          <div class="tpa-translator-icon">
+                              <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome" target="_blank"><img src="${documentPreviewImg}" alt="Documentation"></a>
+                              <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank"><img src="${informationPreviewImg}" alt="Information"></a>
+                          </div>
+                          <strong class="tpa-heading">Translate Using Chrome Built-in AI</strong>
+                          <div class="inputGroup">
+                              <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" title="View More"><img class="pro-features-img" src="${chromePreviewImg}" width="100" alt="powered by Chrome built-in API"></a><br/>
+                              <button id="tpa_chrometranslate_btn" class="button button-primary" disabled="disabled">Chrome AI Translator</button><span class="proonly-button"><a href="${getChromeProLink}" target="_blank" title="Buy Pro">💎 Buy Pro</a></span>
+                          </div>
+                      </div>
+                  </div>
+              </div> 
           </div>
-          </div>`;
+      `;
     $("body").append(modelHTML);
   }
 
@@ -407,7 +477,7 @@ const tpAutoTranslator = (function (window, $) {
     let { wrapperCls, headerCls, bodyCls, footerCls } =
       getWidgetClasses("yandex");
     let modelHTML = `
-        <div id="tpa_strings_model" class="modal tpa_custom_model ${wrapperCls}">
+        <div id="tpa_strings_model" class="modal tpa_custom_model ${wrapperCls} ${rtlClass}">
                 <div class="modal-content">
                     <input type="hidden" id="project_id"> 
                     ${modelHeaderHTML(widgetType, headerCls)}   
@@ -456,7 +526,7 @@ const tpAutoTranslator = (function (window, $) {
                  <strong class="totalChars"> </strong> characters  using 
                   <strong> 
                   <a href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post" target="_new">
-                  Automatic Translate Addon For TranslatePress</a>
+                  AI Translation For TranslatePress</a>
                 </strong>     
               </div>
                     </div>
@@ -473,7 +543,18 @@ const tpAutoTranslator = (function (window, $) {
   function modelBodyHTML(widgetType, bodyCls) {
     const HTML = `
         <div class="modal-body  ${bodyCls}">
-        <div class="my_translate_progress">Automatic translation is in progress....<br/>It will take few minutes, enjoy ☕ coffee in this time!<br/><br/>Please do not leave this window or browser tab while translation is in progress...</div>
+          <div class="my_translate_progress">
+            Automatic translation is in progress....<br/>
+            It will take a few minutes, enjoy ☕ coffee in this time!<br/><br/>
+            Please do not leave this window or browser tab while the translation is in progress...
+              <div class="progress-wrapper">
+                <div class="progress-container">
+                  <div class="progress-bar" id="myProgressBar">
+                    <span id="progressText">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
             ${translatorWidget(widgetType)}
             <div class="string_container">
                 <table class="scrolldown" id="stringTemplate">
@@ -501,7 +582,7 @@ const tpAutoTranslator = (function (window, $) {
                    <strong class="totalChars"></strong> characters  using 
                     <strong> 
                     <a href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post" target="_new">
-                    Automatic Translate Addon For TranslatePress</a>
+                    AI Translation For TranslatePress</a>
                   </strong>     
                 </div>
     </div>`;

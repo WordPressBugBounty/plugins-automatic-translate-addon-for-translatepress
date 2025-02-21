@@ -58,7 +58,7 @@ class TranslatepressAutomaticTranslateAddonFree {
 		<form method="post">
 			<input type="hidden" name="action">
 			<div class="tpa-license-container">
-				<h3 class="tpa-license-title"><i class="dashicons-before dashicons-translation"></i> <?php esc_html_e( 'Automatic Translate Addon For TranslatePress', $this->slug ); ?></h3>
+				<h3 class="tpa-license-title"><i class="dashicons-before dashicons-translation"></i> <?php esc_html_e( 'AI Translation For TranslatePress', $this->slug ); ?></h3>
 				<div class="tpa-license-content">
 					<div class="tpa-license-form">
 						<?php
@@ -66,7 +66,7 @@ class TranslatepressAutomaticTranslateAddonFree {
 						?>
 
 						<p><?php esc_html_e( 'Thanks for using automatic translate addon free version that supports Yandex page translate widget for unlimited translations. You can also use', $this->slug ); ?>
-							<b><?php esc_html_e( 'Google page translate widget', $this->slug ); ?></b>
+							<b><?php esc_html_e( 'Google page translate widget and Chrome AI translate', $this->slug ); ?></b>
 							<?php esc_html_e( 'in our pro version for a better translation experience.', $this->slug ); ?></p>
 						<a class="button button-primary" href='https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=dashboard'
 						   target='_blank'>✅ <?php esc_html_e( 'Buy Pro Plugin', $this->slug ); ?></a>
@@ -86,32 +86,37 @@ class TranslatepressAutomaticTranslateAddonFree {
 							</tr>
 							<tr>
 								<td><?php esc_html_e( 'Yandex Translate Widget Support', $this->slug ); ?><br/><img
-											style="border: 1px solid;"
 											src="<?php echo esc_url( TPA_URL . '/assets/images/powered-by-yandex.png' ); ?>"/></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?></td>
 							</tr>
 							<tr style="background:#fffb7a;font-weight: bold;">
 								<td><?php esc_html_e( 'Google Translate Widget Support', $this->slug ); ?><br/><img
-											style="border: 1px solid;"
 											src="<?php echo esc_url( TPA_URL . '/assets/images/powered-by-google.png' ); ?>"/></td>
 								<td>❌ <?php esc_html_e( 'Not Available', $this->slug ); ?></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Better than Yandex)', $this->slug ); ?></span></td>
+											style="font-size:11px;font-weight:bold;"></span></td>
+							</tr>
+							<tr style="background:#fffb7a;font-weight: bold;">
+								<td><?php esc_html_e( 'Chrome AI Translate Widget Support', $this->slug ); ?><br/><img
+											src="<?php echo esc_url( TPA_URL . '/assets/images/powered-by-chrome-api.png' ); ?>"/></td>
+								<td>❌ <?php esc_html_e( 'Not Available', $this->slug ); ?></td>
+								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
+											style="font-size:11px;font-weight:bold;"></span></td>
 							</tr>
 							<tr>
 								<td><?php esc_html_e( 'Unlimited Translations', $this->slug ); ?></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
 											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Via Yandex Only)', $this->slug ); ?></span></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Via Yandex, Google)', $this->slug ); ?></td>
+											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Via Yandex, Google, Chrome AI)', $this->slug ); ?></td>
 							</tr>
 							<tr>
 								<td><?php esc_html_e( 'No API Key Required', $this->slug ); ?></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'API Not Required', $this->slug ); ?><br/><span
 											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Only Yandex Support)', $this->slug ); ?></span></td>
 								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'API Not Required', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Yandex, Google)', $this->slug ); ?></span></td>
+											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Yandex, Google, Chrome AI)', $this->slug ); ?></span></td>
 							</tr>
 							<tr>
 								<td><strong><?php esc_html_e( 'Premium Support', $this->slug ); ?></strong></td>
@@ -132,7 +137,7 @@ class TranslatepressAutomaticTranslateAddonFree {
 						</ol>
 						<div class="tpa-pluginby">
 							<?php esc_html_e( 'Plugin by', $this->slug ); ?><br/>
-							<a href="https://coolplugins.net/?utm_source=plugin_dashboard&utm_medium=image" target="_blank"><img
+							<a href="https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=dashboard" target="_blank"><img
 										src="<?php echo esc_url( TPA_URL . '/assets/images/coolplugins-logo.png' ); ?>"/></a>
 						</div>
 					</div>
