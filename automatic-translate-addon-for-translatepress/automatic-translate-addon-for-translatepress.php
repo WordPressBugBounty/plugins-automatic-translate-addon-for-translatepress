@@ -5,7 +5,7 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/
  * Plugin URI:
- * Version: 1.2.0
+ * Version: 1.2.1
  * License: GPL2
  * Text Domain:TPA
  * Domain Path: languages
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.2.0' );
+define( 'TPA_VERSION', '1.2.1' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -143,7 +143,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		 */
 		public function tpa_tranlatedata_review_notice() {
 			$already_rated     = get_option( 'tpa-ratingDiv' ) != false ? get_option( 'tpa-ratingDiv' ) : 'no';
-			if(class_exists('Cpt_Dashboard') && ($already_rated === 'no')) {
+			if(class_exists('Cpt_Dashboard') && ($already_rated === 'no') && !defined( 'TPAP_VERSION' )) {
 				Cpt_Dashboard::review_notice(
 					'tpa', // Required
 					'AI Translation For TranslatePress', // Required

@@ -357,6 +357,13 @@ var page_lang = localStorage.getItem("page_lang");
                     if (params.widgetTheme) {
                         element.setAttribute('data-theme', params.widgetTheme);
                     }
+
+                    $('.yandex-widget-container').on('click', '.yt-button__icon.yt-button__icon_type_right', function() {
+                        const $container = $(this).closest('.yandex-widget-container');
+                        $container.find(".save_btn_cont > .save_it").prop("disabled", true);
+                        $container.find(".ytstats").hide();
+                    });
+
                     new Widget({
                         select: new Select(element.querySelector('.yt-listbox'), 'yt-lang'),
                         element: element,

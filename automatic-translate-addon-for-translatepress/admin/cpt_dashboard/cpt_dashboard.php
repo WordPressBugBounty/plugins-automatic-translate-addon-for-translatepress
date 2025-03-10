@@ -66,6 +66,10 @@ if(!defined('ABSPATH')){
  * if(class_exists('Cpt_Dashboard')){
  *  Cpt_Dashboard::get_translation_data(
  *      'prefix', // Required
+ *      array(
+ *          'editor_type' => 'gutenberg', // optional return data based on editor type
+ *          'post_id' => '123', // optional return data based on post id
+ *      ) // Optional
  *  );
  * }
  */
@@ -227,7 +231,7 @@ if(!class_exists('Cpt_Dashboard')){
          * @param string $prefix
          * @return array
          */
-        public static function get_translation_data($prefix){
+        public static function get_translation_data($prefix, $key_exists=array()){
             $prefix = sanitize_key($prefix);
             $all_data = get_option('cpt_dashboard_data', array());
             $data = array();
@@ -235,8 +239,21 @@ if(!class_exists('Cpt_Dashboard')){
             if(isset($all_data[$prefix])){
                 $total_string_count = 0;
                 $total_character_count = 0;
-                $total_time_taken = 0;
+
                 foreach($all_data[$prefix] as $key => $value){
+
+                    $continue=false;
+                    foreach($key_exists as $key_exists_key => $key_exists_value){
+                        if(!isset($value[$key_exists_key]) || (isset($value[$key_exists_key]) && $value[$key_exists_key] !== $key_exists_value)){
+                            $continue=true;
+                            break;
+                        }
+                    }
+
+                    if($continue){
+                        continue;
+                    }
+
                     $total_string_count += isset($value['string_count']) ? absint($value['string_count']) : 0;
                     $total_character_count += isset($value['character_count']) ? absint($value['character_count']) : 0;
                 }
@@ -246,30 +263,20 @@ if(!class_exists('Cpt_Dashboard')){
                     'data' => array_map(function($item) {
                         return array_map('sanitize_text_field', $item);
                     }, $all_data[$prefix]),
-                    'total_string_count' => self::format_number($total_string_count),
-                    'total_character_count' => self::format_number($total_character_count),
+                    'total_string_count' => $total_string_count,
+                    'total_character_count' => $total_character_count,
+                );
+            }else{
+                $data = array(
+                    'prefix' => $prefix,
+                    'total_string_count' => 0,
+                    'total_character_count' => 0,
                 );
             }
 
             return $data;
         }
 
-        /**
-         * Format number
-         * @param int $number
-         * @return string
-         */
-        public static function format_number($number) {
-            if ($number >= 1000000000) {
-                return round($number / 1000000000, 1) . 'B';
-            } elseif ($number >= 1000000) {
-                return round($number / 1000000, 1) . 'M';
-            } elseif ($number >= 1000) {
-                return round($number / 1000, 1) . 'K';
-            }
-            return $number;
-        }
-        
         public function dashboard_assets($page){
             if($page === 'settings_page_cool-translate-dashboard'){
                 self::ctp_enqueue_assets();
@@ -284,28 +291,41 @@ if(!class_exists('Cpt_Dashboard')){
             }
         }
 
+        public static function format_number_count($number){
+            if ($number >= 1000000) {
+                return round($number / 1000000, 1) . 'M';
+            } elseif ($number >= 1000) {
+                return round($number / 1000, 1) . 'K';
+            }
+            return $number;
+        }
+
         public static function review_notice($prefix, $plugin_name, $url, $icon=''){
             if(self::cpt_hide_review_notice_status($prefix)){
                 return;
             }
+            
             $translation_data = self::get_translation_data($prefix);
+            
             $total_character_count = is_array($translation_data) && isset($translation_data['total_character_count']) ? $translation_data['total_character_count'] : 0;
             
-            if($total_character_count < 5000){ 
+            if($total_character_count < 50000){ 
                 return;
             }
+
+            $total_character_count = self::format_number_count($total_character_count);
 
             add_action('admin_enqueue_scripts', array(self::class, 'ctp_enqueue_assets'));
 
             
 
             $message = sprintf(
-                '%s! %s <strong>%s</strong> %s<br>%s %s<br>',
+                ' %s! %s <strong>%s</strong> %s <br>%s %s <br>',
                 __('Thank You For Using', 'cp-notice').' '.$plugin_name,
                 __('You\'ve translated', 'cp-notice'),
                 esc_html__(esc_html($total_character_count).' characters', 'cp-notice'),
                 esc_html__('so far using our plugin!', 'cp-notice'),
-                __('If our plugin has saved you time and effort, please consider leaving a', 'cp-notice'),
+                __('If our plugin has saved your time and effort, please consider leaving a', 'cp-notice'),
                 __('review to support our work. Your feedback means the world to us!', 'cp-notice')
             );
 
@@ -320,7 +340,7 @@ if(!class_exists('Cpt_Dashboard')){
                 if($icon){
                     $html .= '<img class="cpt-review-notice-icon" src="'.$icon.'" alt="'.$plugin_name.'">';
                 }
-                $html .= '<div><p>'.$message.'</p><div class="cpt-review-notice-dismiss" data-prefix="'.$prefix.'" data-nonce="'.wp_create_nonce('cpt_hide_review_notice').'"><a href="'. $url .'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.__('Not Interested', 'cp-notice').'</button><button class="button cpt-already-reviewed">'.__('Already Reviewed', 'cp-notice').'</button></div></div></div>';
+                $html .= '<div class="cpt-review-notice-content"><p>'.$message.'</p><div class="cpt-review-notice-dismiss" data-prefix="'.$prefix.'" data-nonce="'.wp_create_nonce('cpt_hide_review_notice').'"><a href="'. $url .'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.__('Not Interested', 'cp-notice').'</button><button class="button cpt-already-reviewed">'.__('Already Reviewed', 'cp-notice').'</button></div></div></div>';
                 
                 echo $html;
             });

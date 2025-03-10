@@ -6,7 +6,7 @@ Tags: ai translation, translate, translatepress, multilingual, automatic transla
 Requires at least: 5.0  
 Tested up to: 6.7.2  
 Requires PHP: 5.6  
-Stable tag: 1.2.0  
+Stable tag: 1.2.1  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -128,21 +128,27 @@ Since this is a beta feature, detailed setup instructions are required. Please r
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities.[Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
-<strong>Version 1.2.0 || 21/Feb/2024</strong>
+<strong>Version 1.2.1 || 10/Mar/2025</strong>
+<pre>
+Fixed: Review notice issue.
+Fixed: Merge Translation issue.
+Fixed: Compatibilty issue with pro version.
+</pre>
+<strong>Version 1.2.0 || 21/Feb/2025</strong>
 <pre>
 Added: Progress bar in yandex & google translator.
 Added: Integrated new Popup.
 Added: Stored translated strings information.
-Improved: User experience on translation provider popup.
 Fixed: Minor Issues.
+Improved: User experience on translation provider popup.
 Improved: Minor textual changes.
-Tested Up To: Wordpress 6.7.2.
-Tested Upto: TranslatePress version 2.9.5.
+Tested upto: Wordpress 6.7.2.
+Tested upto: TranslatePress version 2.9.5.
 </pre>
 <strong>Version 1.1.2 || 13/Dec/2024</strong>
 <pre>
 Fixed: load_textdomain issue.
-Tested Up To: Wordpress 6.7.1.
+Tested upto: Wordpress 6.7.1.
 </pre>
 <strong>Version 1.1.1 || 22/July/2024</strong>
 <pre>
@@ -196,7 +202,7 @@ Fixed: Wrong HTML rendering bug
 Integrated:- Feedback Form
 Improvements:- Minor Code improved
 </pre>
-<strong>Version 0.1 || 21/JAN/2021</strong>
+<strong>Version 0.1 || 21/Jan/2021</strong>
 <pre>
 New: Initial plugin release.
 </pre>
