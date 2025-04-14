@@ -168,8 +168,11 @@ var page_lang = localStorage.getItem("page_lang");
                 storage.setValue('active', enable);
             }
         };
+
+        var startTime;
+        var endTime;
         select.onSelect = function(lang) {
-            localStorage.setItem("translationStartTime", new Date().toISOString()); // Store start time
+            startTime = new Date()
             rightButton.setText(lang);
             this.setHidden(true);
             self.translate(lang);
@@ -221,7 +224,6 @@ var page_lang = localStorage.getItem("page_lang");
                     break;
 
                 case 100:
-                    localStorage.setItem("translationEndTime", new Date().toISOString()); // Store end time
                     self.setState('done', true)
                         .setState('busy', false);
                     break;
@@ -256,6 +258,8 @@ var page_lang = localStorage.getItem("page_lang");
                     progressBar.find('#progressText').text((Math.round(scrollPercentage * 10) / 10).toFixed(1) + '%');
 
                     if ($(this).scrollTop() + $(this).innerHeight() + 50 >= $(this)[0].scrollHeight) {
+                        endTime = new Date();
+                        localStorage.setItem("total_translation_time", (endTime - startTime) / 1000);
                         setTimeout(() => {
                             container.find(".save_it").prop("disabled", false);
                             container.find(".ytstats").fadeIn("slow");
@@ -266,6 +270,8 @@ var page_lang = localStorage.getItem("page_lang");
                     }
                 });
                 if (container.find('.string_container').innerHeight() + 10 >= scrollHeight) {
+                    endTime = new Date();
+                    localStorage.setItem("total_translation_time", (endTime - startTime) / 1000);
                     setTimeout(() => {
                         container.find(".save_it").prop("disabled", false);
                         container.find(".ytstats").fadeIn("slow");

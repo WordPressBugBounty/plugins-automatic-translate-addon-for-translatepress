@@ -346,9 +346,7 @@ const tpAutoTranslator = (function (window, $) {
     var updatedataObj = [];
     let totalCharacterCount = 0;
     let totalWordCount = 0;
-    let startTime = new Date(localStorage.getItem("translationStartTime"));
-    let endTime = new Date(localStorage.getItem("translationEndTime"));
-    let totalTranslationTime = (endTime - startTime) / 1000;
+    let totalTranslationTime = localStorage.getItem("total_translation_time");
     $("#stringTemplate tbody tr").each(function (index) {
         // Get the source text from the current tr
         var sourceText = $(this).find("td.source").text().trim();

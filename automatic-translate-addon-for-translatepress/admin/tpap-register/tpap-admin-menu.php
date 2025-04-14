@@ -15,7 +15,7 @@ class TranslatepressAutomaticTranslateAddonFree {
 	 *
 	 * @var slug
 	 */
-	public $slug = 'translatepress-tpap-register';
+	public $slug = 'translatepress-tpap-dashboard';
 
 	/**
 	 * Constructor
@@ -23,15 +23,17 @@ class TranslatepressAutomaticTranslateAddonFree {
 	 * @access public
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'set_admin_style' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'tpa_set_admin_style' ) );
 		add_action( 'admin_menu', array( $this, 'tpa_free_active_admin_menu' ), 11 );
 	}
 
 	/**
 	 * Css file loaded for registration page.
 	 */
-	public function set_admin_style() {
-		wp_enqueue_style( 'tpap-free-editor-styles', TPA_URL . 'assets/css/tpa-admin-style.css', null, TPA_VERSION, 'all' );
+	public function tpa_set_admin_style() {
+		if(isset($_GET['page']) && $_GET['page'] == 'translatepress-tpap-dashboard') {
+			wp_enqueue_style( 'tpap-dashboard-style', TPA_URL . 'admin/tpa-dashboard/css/admin-styles.css',null, TPA_VERSION, 'all' );
+		}
 	}
 
 	/**
@@ -39,13 +41,13 @@ class TranslatepressAutomaticTranslateAddonFree {
 	 */
 	public function tpa_free_active_admin_menu() {
 		add_options_page(
-			__( 'TranslatePress - Auto Translate Addon', 'tpap' ),
-			__( 'TranslatePress - Auto Translate Addon', 'tpap' ),
+			__( 'TranslatePress - Auto Translate Addon', 'TPA' ),
+			__( 'TranslatePress - Auto Translate Addon', 'TPA' ),
 			'manage_options',
 			$this->slug,
 			array(
 				$this,
-				'tpa_free_license_form',
+				'tpa_dashboard_page',
 			)
 		);
 	}
@@ -53,97 +55,89 @@ class TranslatepressAutomaticTranslateAddonFree {
 	/**
 	 * Free license fom.
 	 */
-	public function tpa_free_license_form() {
+	public function tpa_dashboard_page() {
+		$text_domain = 'TPA';
+		$file_prefix = 'admin/tpa-dashboard/views/';
+		
+		$valid_tabs = [
+			'dashboard'       => __('Dashboard', $text_domain),
+			'ai-translations' => __('AI Translations', $text_domain),
+			'license'         => __('License', $text_domain),
+			'free-vs-pro'     => __('Free vs Pro', $text_domain)
+		];
+
+		// Get current tab with fallback
+
+		$tab 			= isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'dashboard';
+		$current_tab 	= array_key_exists($tab, $valid_tabs) ? $tab : 'dashboard';
+		
+		// Action buttons configuration
+		$buttons = [
+			[
+				'url'  => 'https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=dashboard_header#pricing',
+				'img'  => 'upgrade-now.svg',
+				'alt'  => __('premium', $text_domain),
+				'text' => __('Unlock Pro Features', $text_domain)
+			],
+			[
+				'url' => 'https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_header',
+				'img' => 'document.svg',
+				'alt' => __('document', $text_domain)
+			],
+			[
+				'url' => 'https://coolplugins.net/support/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=support&utm_content=dashboard_header',
+				'img' => 'contact.svg',
+				'alt' => __('contact', $text_domain)
+			]
+		];
+
+		// Start HTML output
 		?>
-		<form method="post">
-			<input type="hidden" name="action">
-			<div class="tpa-license-container">
-				<h3 class="tpa-license-title"><i class="dashicons-before dashicons-translation"></i> <?php esc_html_e( 'AI Translation For TranslatePress', $this->slug ); ?></h3>
-				<div class="tpa-license-content">
-					<div class="tpa-license-form">
-						<?php
-						$site_url = esc_url( get_site_url() );
-						?>
-
-						<p><?php esc_html_e( 'Thanks for using automatic translate addon free version that supports Yandex page translate widget for unlimited translations. You can also use', $this->slug ); ?>
-							<b><?php esc_html_e( 'Google page translate widget and Chrome AI translate', $this->slug ); ?></b>
-							<?php esc_html_e( 'in our pro version for a better translation experience.', $this->slug ); ?></p>
-						<a class="button button-primary" href='https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=dashboard'
-						   target='_blank'>✅ <?php esc_html_e( 'Buy Pro Plugin', $this->slug ); ?></a>
-						<a class="button button-secondary"
-						   href="<?php echo esc_url( $site_url ); ?>/?trp-edit-translation=true"
-						   target='_blank'>🔄 <?php esc_html_e( 'Auto Translate Site', $this->slug ); ?></a>
-						<a class="button button-secondary"
-						   href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post"
-						   target="_blank">🌟 <?php esc_html_e( 'Submit Review', $this->slug ); ?></a>
-
-						<h3><?php esc_html_e( 'Compare Free vs Pro', $this->slug ); ?></h3>
-						<table class="tp-addon-license">
-							<tr>
-								<th><?php esc_html_e( 'Features', $this->slug ); ?></th>
-								<th><?php esc_html_e( 'Free License', $this->slug ); ?></th>
-								<th><?php esc_html_e( 'Premium License', $this->slug ); ?></th>
-							</tr>
-							<tr>
-								<td><?php esc_html_e( 'Yandex Translate Widget Support', $this->slug ); ?><br/><img
-											src="<?php echo esc_url( TPA_URL . '/assets/images/powered-by-yandex.png' ); ?>"/></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?></td>
-							</tr>
-							<tr style="background:#fffb7a;font-weight: bold;">
-								<td><?php esc_html_e( 'Google Translate Widget Support', $this->slug ); ?><br/><img
-											src="<?php echo esc_url( TPA_URL . '/assets/images/powered-by-google.png' ); ?>"/></td>
-								<td>❌ <?php esc_html_e( 'Not Available', $this->slug ); ?></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"></span></td>
-							</tr>
-							<tr style="background:#fffb7a;font-weight: bold;">
-								<td><?php esc_html_e( 'Chrome AI Translate Widget Support', $this->slug ); ?><br/><img
-											src="<?php echo esc_url( TPA_URL . '/assets/images/powered-by-chrome-api.png' ); ?>"/></td>
-								<td>❌ <?php esc_html_e( 'Not Available', $this->slug ); ?></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"></span></td>
-							</tr>
-							<tr>
-								<td><?php esc_html_e( 'Unlimited Translations', $this->slug ); ?></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Via Yandex Only)', $this->slug ); ?></span></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Via Yandex, Google, Chrome AI)', $this->slug ); ?></td>
-							</tr>
-							<tr>
-								<td><?php esc_html_e( 'No API Key Required', $this->slug ); ?></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'API Not Required', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Only Yandex Support)', $this->slug ); ?></span></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'API Not Required', $this->slug ); ?><br/><span
-											style="font-size:11px;font-weight:bold;"><?php esc_html_e( '(Yandex, Google, Chrome AI)', $this->slug ); ?></span></td>
-							</tr>
-							<tr>
-								<td><strong><?php esc_html_e( 'Premium Support', $this->slug ); ?></strong></td>
-								<td>❌ <?php esc_html_e( 'Not Available', $this->slug ); ?><br/><strong><?php esc_html_e( '(Support Time: 7 – 10 days)', $this->slug ); ?></strong></td>
-								<td><span style="color:green;font-size:1.4em;">✅</span> <?php esc_html_e( 'Available', $this->slug ); ?><br/><strong><?php esc_html_e( '(Support Time: 24 - 48 Hrs)', $this->slug ); ?></strong></td>
-							</tr>
-						</table>
-					</div>
-
-					<div class="tpa-license-textbox">
-						<strong style="color:#e00b0b;"><?php esc_html_e( '*Important Points', $this->slug ); ?></strong>
-						<ol>
-							<li><b>1)</b> <?php esc_html_e( 'Automatic translate providers do not support HTML and special characters translations. So the plugin will not translate any string that contains HTML or special characters.', $this->slug ); ?></li>
-							<li><b>2)</b> <?php esc_html_e( 'If any auto-translation provider stops any of its free translation service then the plugin will not support that translation service provider.', $this->slug ); ?></li>
-							<li><b>3)</b> <?php esc_html_e( 'Translate plugins and themes internal strings using', $this->slug ); ?>
-								<a href="https://wordpress.org/plugins/automatic-translator-addon-for-loco-translate/"
-								   target="_blank"><?php esc_html_e( 'Automatic Translate Addon For Loco Translate', $this->slug ); ?></a>.</li>
-						</ol>
-						<div class="tpa-pluginby">
-							<?php esc_html_e( 'Plugin by', $this->slug ); ?><br/>
-							<a href="https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=dashboard" target="_blank"><img
-										src="<?php echo esc_url( TPA_URL . '/assets/images/coolplugins-logo.png' ); ?>"/></a>
-						</div>
+		<div class="tpa-dashboard-wrapper">
+			<div class="tpa-dashboard-header">
+				<div class="tpa-dashboard-header-left">
+					<img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/translatepress-addon.svg'); ?>" 
+						alt="<?php esc_attr_e('TranslatePress Addon Logo', $text_domain); ?>">
+					<div class="tpa-dashboard-tab-title">
+						<span>↳</span> <?php echo esc_html($valid_tabs[$current_tab]); ?>
 					</div>
 				</div>
+				<div class="tpa-dashboard-header-right">
+					<span><?php esc_html_e('Auto translate pages and posts.', $text_domain); ?></span>
+					<?php foreach ($buttons as $button): ?>
+						<a href="<?php echo esc_url($button['url']); ?>" 
+						class="tpa-dashboard-btn" 
+						target="_blank"
+						aria-label="<?php echo isset($button['alt']) ? esc_attr($button['alt']) : ''; ?>">
+							<img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/' . $button['img']); ?>" 
+								alt="<?php echo esc_attr($button['alt']); ?>">
+							<?php if (isset($button['text'])): ?>
+								<span><?php echo esc_html($button['text']); ?></span>
+							<?php endif; ?>
+						</a>
+					<?php endforeach; ?>
+				</div>
 			</div>
-		</form>
+			
+			<nav class="nav-tab-wrapper" aria-label="<?php esc_attr_e('Dashboard navigation', $text_domain); ?>">
+				<?php foreach ($valid_tabs as $tab_key => $tab_title): ?>
+					<a href="?page=translatepress-tpap-dashboard&tab=<?php echo esc_attr($tab_key); ?>" 
+					class="nav-tab <?php echo esc_attr($tab === $tab_key ? 'nav-tab-active' : ''); ?>">
+						<?php echo esc_html($tab_title); ?>
+					</a>
+				<?php endforeach; ?>
+			</nav>
+			
+			<div class="tab-content">
+				<?php
+				require_once TPA_PATH . $file_prefix . $tab . '.php';
+				require_once TPA_PATH . $file_prefix . 'sidebar.php';
+				
+				?>
+			</div>
+			
+			<?php require_once TPA_PATH . $file_prefix . 'footer.php'; ?>
+		</div>
 		<?php
 	}
 }

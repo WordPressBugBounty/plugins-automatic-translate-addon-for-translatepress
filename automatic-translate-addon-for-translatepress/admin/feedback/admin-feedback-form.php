@@ -27,6 +27,13 @@ class tpa_feedback {
 	private $plugin_slug = 'automatic-translate-addon-for-translatepress';
 	/**
 	 *
+	 * Define plugin name.
+	 *
+	 * @var plugin_name
+	 */
+	private $plugin_name = 'AI Translation For TranslatePress';
+	/**
+	 *
 	 * Define text domain for translation.
 	 *
 	 * @var text_domain
@@ -123,7 +130,7 @@ class tpa_feedback {
 							<?php endif; ?>
 						</div>
 					<?php endforeach; ?>
-					<input class="cool-plugins-GDPR-data-notice" id="cool-plugins-GDPR-data-notice" type="checkbox"><label for="cool-plugins-GDPR-data-notice"><?php echo __( 'I consent to having Cool Plugins store my all submitted information via this form, they can also respond to my inquiry.', 'cool-plugins' ); ?></label>
+					<input class="cool-plugins-GDPR-data-notice" id="cool-plugins-GDPR-data-notice" type="checkbox"><label for="cool-plugins-GDPR-data-notice"><?php echo __( 'I agree to share anonymous usage data and basic site details (such as server, PHP, and WordPress versions) to support AI Translation Addon for TranslatePress improvement efforts. Additionally, I allow Cool Plugins to store all information provided through this form and to respond to my inquiry.', 'cool-plugins' ); ?></label>
 				</div>
 				<div class="cool-plugin-popup-button-wrapper">
 					<a class="cool-plugins-button button-deactivate" id="cool-plugin-submitNdeactivate">Submit and Deactivate</a>
@@ -135,6 +142,47 @@ class tpa_feedback {
 		</div>
 		<?php
 	}
+
+	function tpa_get_user_info() {
+		global $wpdb;
+		$server_info = [
+		'server_software'        => sanitize_text_field($_SERVER['SERVER_SOFTWARE'] ?? 'N/A'),
+		'mysql_version'          => sanitize_text_field($wpdb->get_var("SELECT VERSION()")),
+		'php_version'            => sanitize_text_field(phpversion()),
+		'wp_version'             => sanitize_text_field(get_bloginfo('version')),
+		'wp_debug'               => sanitize_text_field(defined('WP_DEBUG') && WP_DEBUG ? 'Enabled' : 'Disabled'),
+		'wp_memory_limit'        => sanitize_text_field(ini_get('memory_limit')),
+		'wp_max_upload_size'     => sanitize_text_field(ini_get('upload_max_filesize')),
+		'wp_permalink_structure' => sanitize_text_field(get_option('permalink_structure', 'Default')),
+		'wp_multisite'           => sanitize_text_field(is_multisite() ? 'Enabled' : 'Disabled'),
+		'wp_language'            => sanitize_text_field(get_option('WPLANG', get_locale()) ?: get_locale()),
+		'wp_prefix'              => sanitize_key($wpdb->prefix), // Sanitizing database prefix
+		];
+		$theme_data = [
+		'name'      => sanitize_text_field(wp_get_theme()->get('Name')),
+		'version'   => sanitize_text_field(wp_get_theme()->get('Version')),
+		'theme_uri' => esc_url(wp_get_theme()->get('ThemeURI')),
+		];
+		if (!function_exists('get_plugins')) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$plugin_data = array_map(function ($plugin) {
+		$plugin_info = get_plugin_data(WP_PLUGIN_DIR . '/' . sanitize_text_field($plugin));
+		return [
+			'name'       => sanitize_text_field($plugin_info['Name']),
+			'version'    => sanitize_text_field($plugin_info['Version']),
+			'plugin_uri' => esc_url($plugin_info['PluginURI']),
+		];
+		}, get_option('active_plugins', []));
+		return [
+			'server_info' => $server_info,
+			'extra_details' => [
+				'wp_theme' => $theme_data,
+				'active_plugins' => $plugin_data,
+			]
+		];
+	}
+
 	/**
 	 * Function to submit feedback rom user.
 	 */
@@ -170,22 +218,26 @@ class tpa_feedback {
 
 			$deativation_reason = array_key_exists( $reason, $deactivate_reasons ) ? $reason : 'other';
 
+			$plugin_initial =  get_option( 'tpa_initial_save_version' );
 			$sanitized_message = sanitize_text_field( $_POST['message'] ) == '' ? 'N/A' : sanitize_text_field( $_POST['message'] );
 			$admin_email       = sanitize_email( get_option( 'admin_email' ) );
 			$site_url          = esc_url( site_url() );
 			$response          = wp_remote_post(
 				$this->feedback_url,
 				array(
-					'timeout' => 30,
-					'body'    => array(
-						'plugin_version' => $this->plugin_version,
-						'plugin_name'    => $this->plugin_slug,
-						'reason'         => $deativation_reason,
-						'review'         => $sanitized_message,
-						'email'          => $admin_email,
-						'domain'         => $site_url,
-					),
-				)
+                    'timeout' => 30,
+                        'body'    => array(
+                        'server_info' => serialize($this->tpa_get_user_info()['server_info']),
+                        'extra_details' => serialize($this->tpa_get_user_info()['extra_details']),
+                        'plugin_version' => $this->plugin_version,
+                        'plugin_name'    => $this->plugin_name,
+						'plugin_initial'  => isset($plugin_initial) ? sanitize_text_field($plugin_initial) : 'N/A',
+                        'reason'         => $deativation_reason,
+                        'review'         => $sanitized_message,
+                        'email'          => $admin_email,
+                        'domain'         => $site_url,
+                    ),
+                )
 			);
 
 			die( json_encode( array( 'response' => $response ) ) );
