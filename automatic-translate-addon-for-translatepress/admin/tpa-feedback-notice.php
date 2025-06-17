@@ -61,8 +61,8 @@ if ( ! class_exists( 'TPAFeedbackNotice' ) ) {
 			$ajax_callback      = 'tpa_dismiss_notice';
 			$wrap_cls           = 'notice notice-info is-dismissible';
 			$img_path           = TPA_URL . 'assets/images/tpa-icon.png';
-			$p_name             = 'AI Translation For TranslatePress';
-			$like_it_text       = 'Rate Now! ★★★★★';
+			$p_name             = esc_html__('AI Translation For TranslatePress', 'TPA');
+			$like_it_text       = esc_html__('Rate Now! ★★★★★', 'TPA');
 			$already_rated_text = esc_html__( 'I already rated it', 'TPA' );
 			$not_interested     = esc_html__( 'Not Interested', 'TPA' );
 			$not_like_it_text   = esc_html__( 'No, not good enough, i do not like to rate it!', 'TPA' );

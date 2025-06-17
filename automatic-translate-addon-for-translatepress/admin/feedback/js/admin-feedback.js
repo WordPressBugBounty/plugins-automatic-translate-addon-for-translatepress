@@ -6,21 +6,21 @@
 
         var plugin_deactivate_link = $target.attr('href');
 
-        $($target).on('click', function(event){
+        $($target).on('click', function(event) {
             event.preventDefault();
-            $('#wpwrap').css('opacity','0.4');
-
-            $("#cool-plugins-deactivate-feedback-dialog-wrapper").animate({
-                opacity:1
-            },200,function(){
-                $("#cool-plugins-deactivate-feedback-dialog-wrapper").removeClass('hide-feedback-popup');
-                $("#cool-plugins-deactivate-feedback-dialog-wrapper").find('#cool-plugin-submitNdeactivate').addClass(text_domain);
-                $("#cool-plugins-deactivate-feedback-dialog-wrapper").find('#cool-plugin-skipNdeactivate').addClass(text_domain);
+            $('#wpwrap').css('opacity', '0.4');
+        
+            $("#cool-plugins-deactivate-feedback-dialog-wrapper[data-slug='" + plugin_slug + "']").animate({
+                opacity: 1
+            }, 200, function() {
+                $("#cool-plugins-deactivate-feedback-dialog-wrapper[data-slug='" + plugin_slug + "']").removeClass('hide-feedback-popup');
+                $("#cool-plugins-deactivate-feedback-dialog-wrapper[data-slug='" + plugin_slug + "']").find('#cool-plugin-submitNdeactivate').addClass(plugin_slug);
+                $("#cool-plugins-deactivate-feedback-dialog-wrapper[data-slug='" + plugin_slug + "']").find('#cool-plugin-skipNdeactivate').addClass(plugin_slug);
             });
         });
 
         $('.cool-plugins-deactivate-feedback-dialog-input').on('click',function(){
-            if($('#cool-plugins-GDPR-data-notice').is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){ 
+            if($(`#cool-plugins-GDPR-data-notice-${text_domain}`).is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){
                 $('#cool-plugin-submitNdeactivate').removeClass('button-deactivate');
             }
             else{
@@ -29,9 +29,9 @@
 
         });
 
-        $('#cool-plugins-GDPR-data-notice').on('click', function(){
+        $(`#cool-plugins-GDPR-data-notice-${text_domain}`).on('click', function(){
 
-            if($('#cool-plugins-GDPR-data-notice').is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){ 
+            if($(`#cool-plugins-GDPR-data-notice-${text_domain}`).is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){ 
                 $('#cool-plugin-submitNdeactivate').removeClass('button-deactivate');
             }
             else{
@@ -53,7 +53,7 @@
             }
         })
 
-        $(document).on('click','#cool-plugin-submitNdeactivate.'+text_domain+':not(".button-deactivate")', function(event){
+        $(document).on('click','#cool-plugin-submitNdeactivate.'+plugin_slug+':not(".button-deactivate")', function(event){
             let nonce = $('#_wpnonce').val();
             let reason = $('.cool-plugins-deactivate-feedback-dialog-input:checked').val();
             let message = '';
@@ -90,7 +90,7 @@
 
         });
 
-        $(document).on('click', '#cool-plugin-skipNdeactivate.'+text_domain+':not(".button-deactivate")', function(){
+        $(document).on('click', '#cool-plugin-skipNdeactivate.'+plugin_slug+':not(".button-deactivate")', function(){
             $('#cool-plugin-submitNdeactivate').remove();
             $('#cool-plugin-skipNdeactivate').addClass('button-deactivate');
             $('#cool-plugin-skipNdeactivate').attr('id','deactivating-plugin');

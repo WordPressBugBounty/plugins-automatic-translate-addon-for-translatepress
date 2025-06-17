@@ -175,7 +175,7 @@ Translatepress Addon Dashboard - Admin Panel Styles
 }
 
 .tpa-dashboard-welcome-text {
-    width: calc(100% - 45px);
+    width: 55%;
     flex-direction: column;
 }
 
@@ -193,7 +193,7 @@ Translatepress Addon Dashboard - Admin Panel Styles
 }
 
 .tpa-dashboard-welcome-video {
-    width: 300px;
+    width: 45%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -415,20 +415,21 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 
 .tpa-dashboard-free-vs-pro .header,
 .tpa-dashboard-ai-translations .header,
-.tpa-dashboard-license .header {
+.tpa-dashboard-license .header,
+.tpa-dashboard-settings .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
 }
 
-:where(.tpa-dashboard-free-vs-pro,.tpa-dashboard-ai-translations ,.tpa-dashboard-license) .tpa-dashboard-status {
+:where(.tpa-dashboard-free-vs-pro,.tpa-dashboard-ai-translations ,.tpa-dashboard-license, .tpa-dashboard-settings) .tpa-dashboard-status {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-:where(.tpa-dashboard-free-vs-pro,.tpa-dashboard-ai-translations ,.tpa-dashboard-license) .tpa-dashboard-status span{
+:where(.tpa-dashboard-free-vs-pro,.tpa-dashboard-ai-translations ,.tpa-dashboard-license, .tpa-dashboard-settings) .tpa-dashboard-status span{
     font-size: 15px;
     font-weight: 600;
 }
@@ -776,4 +777,114 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 	.tpa-dashboard-ai-translations .tpa-dashboard-translations {
     gap: 7px;
 }
+}
+
+/* ================================================
+   Feedback Container
+================================================ */
+.tpa-dashboard-feedback-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+}
+
+.tpa-dashboard-feedback-container .feedback-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tpa-dashboard-feedback-container input[type="checkbox"] {
+    margin-top: 3px;
+    margin-right: 0;
+}
+
+.tpa-dashboard-feedback-container p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-color);
+    flex: 1;
+}
+
+.tpa-dashboard-feedback-container .tpa-see-terms {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.tpa-dashboard-feedback-container .tpa-see-terms:hover {
+    text-decoration: underline;
+}
+
+.tpa-dashboard-feedback-container #termsBox {
+    margin-top: 10px;
+    padding-left: 20px;
+    font-size: 12px;
+    color: var(--text-color-light);
+}
+
+.tpa-dashboard-feedback-container #termsBox ul {
+    margin: 5px 0;
+    padding-left: 20px;
+}
+
+.tpa-dashboard-feedback-container #termsBox li {
+    margin-bottom: 5px;
+}
+
+.tpa-dashboard-feedback-container .tpa-dashboard-save-settings {
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.tpa-dashboard-feedback-container .save-settings-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 7px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.tpa-dashboard-feedback-container .save-settings-btn:hover {
+    background: var(--secondary-color);
+}
+
+.tpa-dashboard-feedback-container .save-settings-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(231, 114, 121, 0.2);
+}
+
+/* ================================================
+   Settings
+================================================ */
+.tpa-dashboard-settings {
+    width: 100%;
+    margin-top: 25px;
+    flex: 2;
+}
+
+.tpa-dashboard-settings-container {
+    background: white;
+    font-family: Arial, sans-serif;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 24px;
+    border-radius: 5px;
+}
+
+.tpa-dashboard-settings h1 {
+    font-weight: 600;
+    color: #000;
+    margin: 14px 0px 22px 0px;
+    font-size: 22px;
+}
+
+.tpa-dashboard-settings .tpa-dashboard-settings-container p {
+    font-size: 14px;
 }

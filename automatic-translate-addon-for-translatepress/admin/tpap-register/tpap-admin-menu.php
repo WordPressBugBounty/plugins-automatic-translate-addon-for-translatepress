@@ -34,6 +34,10 @@ class TranslatepressAutomaticTranslateAddonFree {
 		if(isset($_GET['page']) && $_GET['page'] == 'translatepress-tpap-dashboard') {
 			wp_enqueue_style( 'tpap-dashboard-style', TPA_URL . 'admin/tpa-dashboard/css/admin-styles.css',null, TPA_VERSION, 'all' );
 		}
+
+		if(isset($_GET['page']) && $_GET['page'] == 'translatepress-tpap-dashboard') {
+			wp_enqueue_script('tpa-dashboard-script',TPA_URL . 'admin/tpa-dashboard/js/tpa-data-share-setting.js',array('jquery'), TPA_VERSION ,true);
+		}
 	}
 
 	/**
@@ -41,8 +45,8 @@ class TranslatepressAutomaticTranslateAddonFree {
 	 */
 	public function tpa_free_active_admin_menu() {
 		add_options_page(
-			__( 'TranslatePress - Auto Translate Addon', 'TPA' ),
-			__( 'TranslatePress - Auto Translate Addon', 'TPA' ),
+			__( 'AI Translation [TranslatePress]', 'TPA' ),
+			__( 'AI Translation [TranslatePress]', 'TPA' ),
 			'manage_options',
 			$this->slug,
 			array(
@@ -62,6 +66,7 @@ class TranslatepressAutomaticTranslateAddonFree {
 		$valid_tabs = [
 			'dashboard'       => __('Dashboard', $text_domain),
 			'ai-translations' => __('AI Translations', $text_domain),
+			'settings'        => __('Settings', $text_domain),
 			'license'         => __('License', $text_domain),
 			'free-vs-pro'     => __('Free vs Pro', $text_domain)
 		];

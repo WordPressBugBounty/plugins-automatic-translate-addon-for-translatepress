@@ -13,7 +13,7 @@
                 <a class="tpa-dashboard-docs" href="<?php echo esc_url('https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard'); ?>" target="_blank"><img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/document.svg'); ?>" alt="document"> <?php echo esc_html__('Read Plugin Docs', $text_domain); ?></a>
             </div>
             <div class="tpa-dashboard-welcome-video">
-                <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/video-tutorial/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_video" target="_blank" class="tpa-dashboard-video-link">
+                <a href="https://docs.coolplugins.net/doc/ai-translation-translatepress-video-tutorials/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_video" target="_blank" class="tpa-dashboard-video-link">
                     <img decoding="async" src="<?php echo TPA_URL . 'admin/tpa-dashboard/images/video.svg'; ?>" class="play-icon" alt="play-icon">
                     <picture>
                         <source srcset="<?php echo TPA_URL . 'admin/tpa-dashboard/images/loco-addon-video.png'; ?>" type="image/avif">
