@@ -5,7 +5,7 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=dashboard
  * Plugin URI:
- * Version: 1.2.3
+ * Version: 1.2.4
  * License: GPL2
  * Text Domain:TPA
  * Domain Path: languages
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.2.3' );
+define( 'TPA_VERSION', '1.2.4' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -49,6 +49,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			add_action( 'wp_ajax_tpa_get_strings', array( $this, 'tpa_getstrings' ) );
 			add_action( 'wp_ajax_tpa_save_translations', array( $this, 'tpa_save_translations' ) );
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'tpa_settings_page_link' ) );
+			add_filter('plugin_row_meta', array( $this,'tpa_add_docs_link_to_plugin_meta'), 10, 2);
 			add_action('wp_ajax_tpa_update_translate_data', array($this, 'tpa_update_translate_data'));
 
 			// Initialize cron
@@ -97,6 +98,14 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			if (!get_option('tpa_initial_save_version')) {
 				add_option('tpa_initial_save_version', TPA_VERSION);
 			}
+		}
+
+		public function tpa_add_docs_link_to_plugin_meta($links, $file) {
+			if (plugin_basename(__FILE__) === $file) {
+				$docs_link = '<a href="https://docs.coolplugins.net/plugin/ai-translation-for-translatepress/" target="_blank">Docs</a>';
+				$links[] = $docs_link;
+			}
+			return $links;
 		}
 
 		/**
@@ -419,11 +428,12 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			wp_register_script( 'tpa-yandex-widget', TPA_URL . 'assets/js/widget.js?widgetId=ytWidget&pageLang=en&widgetTheme=light&autoMode=false', array(), TPA_VERSION, true );
 			wp_register_style( 'tpa-editor-styles', TPA_URL . 'assets/css/tpa-custom.css', null, TPA_VERSION, 'all' );
 			$extra_data['preloader_path'] = TPA_URL . '/assets/images/preloader.gif';
-			$extra_data['gt_preview']     = TPA_URL . '/assets/images/powered-by-google.png';
-			$extra_data['yt_preview']     = TPA_URL . '/assets/images/powered-by-yandex.png';
-			$extra_data['chrome_preview']     = TPA_URL . '/assets/images/powered-by-chrome-api.png';
+			$extra_data['gt_preview']     = TPA_URL . '/assets/images/google.png';
+			$extra_data['yt_preview']     = TPA_URL . '/assets/images/yandex.png';
+			$extra_data['chrome_preview']     = TPA_URL . '/assets/images/chrome.png';
 			$extra_data['document_preview']  = TPA_URL . '/assets/images/document.svg';
-        	$extra_data['information_preview'] = TPA_URL . '/assets/images/information.svg';
+        	$extra_data['error_preview'] = TPA_URL . '/assets/images/error-icon.svg';
+			$extra_data['dashboard_url'] = admin_url('admin.php?page=');
 			$extra_data['extra_class']= is_rtl() ? 'tpa-rtl' : '';
 			$extra_data['ajax_url']       = admin_url( 'admin-ajax.php' );
 			$extra_data['nonce']          = wp_create_nonce( 'auto-translate-press-nonces' );

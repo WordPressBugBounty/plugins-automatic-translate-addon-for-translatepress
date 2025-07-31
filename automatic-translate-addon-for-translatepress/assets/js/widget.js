@@ -286,6 +286,11 @@ var page_lang = localStorage.getItem("page_lang");
         }
         rightButton.onClick = function() {
             var defaultLang = localStorage.getItem("language_code");
+            switch (defaultLang) {
+                case 'ki':
+                    defaultLang = 'ky';
+                    break;
+              }
             select.setValue(defaultLang);
             if (self.hasState('active')) {
                 translator.undo();

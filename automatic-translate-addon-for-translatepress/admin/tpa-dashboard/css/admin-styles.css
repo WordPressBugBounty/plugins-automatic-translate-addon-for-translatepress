@@ -160,6 +160,7 @@ Translatepress Addon Dashboard - Admin Panel Styles
    Welcome Section
 ================================================ */
 .tpa-dashboard-welcome {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     padding: 20px;
@@ -167,7 +168,7 @@ Translatepress Addon Dashboard - Admin Panel Styles
     border-radius: 8px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow);
-	gap: 5px;
+	gap: 15px;
 }
 
 .tpa-dashboard-translation-providers{
@@ -175,7 +176,7 @@ Translatepress Addon Dashboard - Admin Panel Styles
 }
 
 .tpa-dashboard-welcome-text {
-    width: 55%;
+    width: 50%;
     flex-direction: column;
 }
 
@@ -193,7 +194,7 @@ Translatepress Addon Dashboard - Admin Panel Styles
 }
 
 .tpa-dashboard-welcome-video {
-    width: 45%;
+    width: 50%;
     display: flex;
     align-items: center;
     justify-content: center;

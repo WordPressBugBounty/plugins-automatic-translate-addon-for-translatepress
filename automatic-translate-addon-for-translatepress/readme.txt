@@ -4,9 +4,9 @@ Contributors: narinder-singh, satindersingh, coolplugins
 Donate link: https://paypal.me/CoolPlugins/10USD/  
 Tags: ai translation, translate, translatepress, multilingual, automatic translation  
 Requires at least: 5.0  
-Tested up to: 6.8.1  
+Tested up to: 6.8.2  
 Requires PHP: 5.6  
-Stable tag: 1.2.3  
+Stable tag: 1.2.4  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -128,6 +128,12 @@ Since this is a beta feature, detailed setup instructions are required. Please r
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities.[Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+<strong>Version 1.2.4 || 31/Jul/2025</strong>
+<pre>
+Improved: Updated the Translator Popup design and functionality.
+Added: Yandex Support language.
+Fixed: Minor changes.
+</pre>
 <strong>Version 1.2.3 || 17/Jun/2025</strong>
 <pre>
 Added: User opt-in option in plugin.

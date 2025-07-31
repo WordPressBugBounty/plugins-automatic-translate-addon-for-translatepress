@@ -221,7 +221,7 @@ const tpAutoTranslator = (function (window, $) {
     $(".ytstats").css("display", "none");
     var default_code = localStorage.getItem("language_code");
     var arr = [
-      "en","pl","af","jv","no","am","ar","az","ba","be","bg","bn","bs","ca","ceb","cs","cy","da","de","el","en","eo","es","et","eu","fa","fi","fr","ga","gd","gl","gu","he","hi","hr","ht","hu","hy","id","is","it","ja","jv","ka","kk","km","kn","ko","ky","la","lb","lo","lt","lv","mg","mhr","mi","mk","ml","mn","mr","mrj","ms","mt","my","ne","nl","no","pa","pap","pl","pt","ro","ru","si","sk","sl","sq","sr","su","sv","sw","ta","te","tg","th","tl","tr","tt","udm","uk","ur","uz","vi","xh","yi","zh",
+      "ki","en","pl","af","jv","no","am","ar","az","ba","be","bg","bn","bs","ca","ceb","cs","cy","da","de","el","en","eo","es","et","eu","fa","fi","fr","ga","gd","gl","gu","he","hi","hr","ht","hu","hy","id","is","it","ja","jv","ka","kk","km","kn","ko","ky","la","lb","lo","lt","lv","mg","mhr","mi","mk","ml","mn","mr","mrj","ms","mt","my","ne","nl","no","pa","pap","pl","pt","ro","ru","si","sk","sl","sq","sr","su","sv","sw","ta","te","tg","th","tl","tr","tt","udm","uk","ur","uz","vi","xh","yi","zh",
     ];
     if (arr.includes(default_code)) {
       $("#yandex_string_tbl").html(`<tr>                               
@@ -413,61 +413,81 @@ const tpAutoTranslator = (function (window, $) {
   }
 
   function settingsModel() {
-    let ytPreviewImg = extradata["yt_preview"];
-    let gtPreviewImg = extradata["gt_preview"];
-    let chromePreviewImg = extradata["chrome_preview"];
-    const documentPreviewImg = extradata['document_preview'];
-    const informationPreviewImg = extradata['information_preview'];
-    const getGTProLink =
-      "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_google";
-    const getChromeProLink =
-      "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_chrome";
-          
-      const modelHTML = `
-          <div id="tpa-dialog" title="Step 3 - Select Translation Provider" style="display:none;">
-              <div class="tpa-settings" style="opacity:1;">
-                  <div class="tpa-translator-row">
-                      <div class="tpa-translator tpa-yandex-translator">
-                          <div class="tpa-translator-icon">
-                              <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_yandex" target="_blank"><img src="${documentPreviewImg}" alt="Documentation"></a>
-                              <a href="https://translate.yandex.com/" target="_blank"><img src="${informationPreviewImg}" alt="Information"></a>
-                          </div>
-                          <strong class="tpa-heading">Translate Using Yandex Page Translate Widget</strong>
-                          <div class="inputGroup">
-                               <a href="https://translate.yandex.com/" target="_blank" title="View More"><img class="pro-features-img" src="${ytPreviewImg}" alt="powered by Yandex Translate Widget" title="View More"></a><br/>
-                              <button id="tpa_yandex_translate_btn" class="notranslate button button-primary">Yandex Translate</button>
-                          </div>
-                      </div>   
+    const icons = {
+        yandex: extradata['yt_preview'],
+        google: extradata['gt_preview'],
+        chrome: extradata['chrome_preview'],
+        docs: extradata['document_preview'],
+        error: extradata['error_preview']
+    };
 
-                      <div class="tpa-translator tpa-pro-translator"> 
-                          <div class="tpa-translator-icon">
-                              <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google" target="_blank"><img src="${documentPreviewImg}" alt="Documentation"></a>
-                              <a href="https://translate.google.com/" target="_blank"><img src="${informationPreviewImg}" alt="Information"></a>
-                          </div>
-                          <strong class="tpa-heading">Translate Using Google Page Translate Widget</strong>
-                          <div class="inputGroup">
-                               <a href="https://translate.google.com/" target="_blank"><img class="pro-features-img" src="${gtPreviewImg}" alt="powered by Google Translate Widget" title="View More"></a><br/>
-                              <button id="tpa_gtranslate_btn" class="notranslate button button-primary" disabled="disabled">Google Translate</button><span class="proonly-button"><a href="${getGTProLink}" target="_blank" title="Buy Pro">💎 Buy Pro</a></span>
-                          </div>
-                      </div>                         
-                      
-                      <div class="tpa-translator tpa-pro-translator">
-                          <div class="tpa-translator-icon">
-                              <a href="https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome" target="_blank"><img src="${documentPreviewImg}" alt="Documentation"></a>
-                              <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank"><img src="${informationPreviewImg}" alt="Information"></a>
-                          </div>
-                          <strong class="tpa-heading">Translate Using Chrome Built-in AI</strong>
-                          <div class="inputGroup">
-                              <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" title="View More"><img class="pro-features-img" src="${chromePreviewImg}" width="100" alt="powered by Chrome built-in API"></a><br/>
-                              <button id="tpa_chrometranslate_btn" class="button button-primary" disabled="disabled">Chrome AI Translator</button><span class="proonly-button"><a href="${getChromeProLink}" target="_blank" title="Buy Pro">💎 Buy Pro</a></span>
-                          </div>
-                      </div>
-                  </div>
-              </div> 
-          </div>
-      `;
+    const url = 'https://docs.coolplugins.net/docs/';
+    const getGTProLink = "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_google";
+    const getChromeProLink = "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_chrome";
+
+    const TPA_IMG = (key) => icons[key];
+    const DOC_ICON = `<img src="${TPA_IMG('docs')}" width="20" alt="Docs">`;
+
+    const rows = [
+        {
+            name: 'Yandex Translate',
+            icon: 'yandex',
+            info: 'https://translate.yandex.com/',
+            btn: `<button id="tpa_yandex_translate_btn" class="tpa-provider-btn translate">Translate</button>`,
+            doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_yandex`
+        },
+        {
+            name: 'Google Translate',
+            icon: 'google',
+            info: 'https://translate.google.com/',
+            btn: `<a href="${getGTProLink}" target="_blank">
+                    <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
+                        <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
+                    </button>
+                  </a>`,
+            doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google`
+        },
+        {
+            name: 'Chrome Built-in AI',
+            icon: 'chrome',
+            info: 'https://developer.chrome.com/docs/ai/translator-api',
+            btn: `<a href="${getChromeProLink}" target="_blank">
+                    <button id="tpa_chrome_ai_translate_btn" class="tpa-provider-btn error">
+                        <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
+                    </button>
+                  </a>`,
+            doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome`
+        }
+    ];
+
+    const rowHTML = rows.map(row => `
+        <tr>
+            <td class="tpa-provider-name">
+                <a href="${row.info}" target="_blank">
+                    <img src="${TPA_IMG(row.icon)}" class="tpa-provider-icon" alt="${row.name}">
+                </a>
+                ${row.name}
+            </td>
+            <td>${row.btn}</td>
+            <td>
+                <a href="${row.doc}" target="_blank" class="tpa-provider-docs-btn">${DOC_ICON}</a>
+            </td>
+        </tr>
+    `).join('');
+
+    const modelHTML = `
+        <div class="tpa-provider-modal" id="tpa-dialog" title="Step 3 - Select Translation Provider" style="display:none;">
+            <table class="tpa-provider-table">
+                <thead>
+                    <tr><th>Name</th><th>Translate</th><th>Docs</th></tr>
+                </thead>
+                <tbody>${rowHTML}</tbody>
+            </table>
+        </div>
+    `;
+
     $("body").append(modelHTML);
-  }
+}
 
   // modal to show strings
   function createStringsModal(widgetType) {

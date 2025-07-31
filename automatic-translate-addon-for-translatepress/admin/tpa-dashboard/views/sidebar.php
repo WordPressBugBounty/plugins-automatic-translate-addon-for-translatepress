@@ -42,11 +42,11 @@
         <div class="tpa-dashboard-addon first">
             <div class="tpa-dashboard-addon-l">
                 <strong><?php echo esc_html(tpa_get_plugin_display_name('automatic-translator-addon-for-loco-translate', $text_domain)); ?></strong>
-                <span class="addon-desc"><?php _e('Loco addon to translate plugins and themes.', $text_domain); ?></span>
+                <span class="addon-desc"><?php _e('LocoAI to translate plugins and themes.', $text_domain); ?></span>
                 <?php if (tpa_is_plugin_installed('automatic-translator-addon-for-loco-translate')): ?>
                     <span class="installed"><?php _e('Installed', $text_domain); ?></span>
                 <?php else: ?>
-                    <a href="<?php echo esc_url(admin_url('plugin-install.php?s=Automatic+translate+addon+for+loco+translate+by+coolplugins&tab=search&type=term')); ?>" class="tpa-dashboard-btn" target="_blank"><?php _e('Install', $text_domain); ?></a>
+                    <a href="<?php echo esc_url(admin_url('plugin-install.php?s=LocoAI+Auto+Translate+For+Loco+Translate+by+CoolPlugins&tab=search&type=term')); ?>" class="tpa-dashboard-btn" target="_blank"><?php _e('Install', $text_domain); ?></a>
                 <?php endif; ?>
             </div>
             <div class="tpa-dashboard-addon-r">
@@ -94,8 +94,8 @@ function tpa_get_plugin_display_name($plugin_slug, $text_domain) {
         'automatic-translator-addon-for-loco-translate' => [
             'free' => 'automatic-translator-addon-for-loco-translate/automatic-translator-addon-for-loco-translate.php',
             'pro'  => 'loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php',
-            'free_name' => __('Automatic Translate Addon For Loco Translate', $text_domain),
-            'pro_name'  => __('Loco Automatic Translate Addon PRO', $text_domain),
+            'free_name' => __('LocoAI – Auto Translate for Loco Translate', $text_domain),
+            'pro_name'  => __('LocoAI – Auto Translate for Loco Translate (Pro)', $text_domain),
         ],
     ];
 
