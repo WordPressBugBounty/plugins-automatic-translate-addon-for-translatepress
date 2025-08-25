@@ -1,7 +1,7 @@
 <!-- Right Sidebar -->
 <div class="tpa-dashboard-sidebar">
     <div class="tpa-dashboard-status">
-        <h3><?php _e('Auto Translation status', $text_domain); ?></h3>
+        <h3><?php esc_html_e('Auto Translation status', $text_domain); ?></h3>
         <div class="tpa-dashboard-sts-top">
             <?php
 
@@ -29,22 +29,22 @@
             $time_taken_str = tpa_format_time_taken($totals['time_taken'] ,$text_domain);
             ?>
             <span><?php echo esc_html(tpa_format_number($totals['string_count'], $text_domain)); ?></span>
-            <span><?php _e('Total Strings Translated!', $text_domain); ?></span>
+            <span><?php esc_html_e('Total Strings Translated!', $text_domain); ?></span>
         </div>
         <ul class="tpa-dashboard-sts-btm">
-            <li><span><?php _e('Total Characters', $text_domain); ?></span> <span><?php echo esc_html(tpa_format_number($totals['character_count'], $text_domain)); ?></span></li>
-            <li><span><?php _e('Total Pages / Posts', $text_domain); ?></span> <span><?php echo esc_html(count($totals['plugins_themes'])); ?></span></li>
-            <li><span><?php _e('Time Taken', $text_domain); ?></span> <span><?php echo esc_html($time_taken_str); ?></span></li>
+            <li><span><?php esc_html_e('Total Characters', $text_domain); ?></span> <span><?php echo esc_html(tpa_format_number($totals['character_count'], $text_domain)); ?></span></li>
+            <li><span><?php esc_html_e('Total Pages / Posts', $text_domain); ?></span> <span><?php echo esc_html(count($totals['plugins_themes'])); ?></span></li>
+            <li><span><?php esc_html_e('Time Taken', $text_domain); ?></span> <span><?php echo esc_html($time_taken_str); ?></span></li>
         </ul>
     </div>
     <div class="tpa-dashboard-translate-full">
-        <h3><?php _e('Automatically Translate Plugins & Themes', $text_domain); ?></h3>
+        <h3><?php esc_html_e('Automatically Translate Plugins & Themes', $text_domain); ?></h3>
         <div class="tpa-dashboard-addon first">
             <div class="tpa-dashboard-addon-l">
                 <strong><?php echo esc_html(tpa_get_plugin_display_name('automatic-translator-addon-for-loco-translate', $text_domain)); ?></strong>
-                <span class="addon-desc"><?php _e('LocoAI to translate plugins and themes.', $text_domain); ?></span>
+                <span class="addon-desc"><?php esc_html_e('LocoAI to translate plugins and themes.', $text_domain); ?></span>
                 <?php if (tpa_is_plugin_installed('automatic-translator-addon-for-loco-translate')): ?>
-                    <span class="installed"><?php _e('Installed', $text_domain); ?></span>
+                    <span class="installed"><?php esc_html_e('Installed', $text_domain); ?></span>
                 <?php else: ?>
                     <a href="<?php echo esc_url(admin_url('plugin-install.php?s=LocoAI+Auto+Translate+For+Loco+Translate+by+CoolPlugins&tab=search&type=term')); ?>" class="tpa-dashboard-btn" target="_blank"><?php _e('Install', $text_domain); ?></a>
                 <?php endif; ?>
@@ -55,25 +55,25 @@
         </div>
     </div>
     <div class="tpa-dashboard-rate-us">
-        <h3><?php _e('Rate Us ⭐⭐⭐⭐⭐', $text_domain); ?></h3>
-        <p><?php _e('We\'d love your feedback! Hope this addon made auto-translations easier for you.', $text_domain); ?></p>
-        <a href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post" class="review-link" target="_blank"><?php _e('Submit a Review →', $text_domain); ?></a>
+        <h3><?php esc_html_e('Rate Us ⭐⭐⭐⭐⭐', $text_domain); ?></h3>
+        <p><?php esc_html_e('We\'d love your feedback! Hope this addon made auto-translations easier for you.', $text_domain); ?></p>
+        <a href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post" class="review-link" target="_blank"><?php esc_html_e('Submit a Review →', $text_domain); ?></a>
     </div>
 </div>
 
 <?php
 
 function tpa_format_time_taken($time_taken, $text_domain) {
-    if ($time_taken === 0) return __('0', $text_domain);
-    if ($time_taken < 60) return sprintf(__('%d sec', $text_domain), $time_taken);
+    if ($time_taken === 0) return esc_html__('0', $text_domain);
+    if ($time_taken < 60) return sprintf(esc_html__('%d sec', $text_domain), $time_taken);
     if ($time_taken < 3600) {
         $min = floor($time_taken / 60);
         $sec = $time_taken % 60;
-        return sprintf(__('%d min %d sec', $text_domain), $min, $sec);
+        return sprintf(esc_html__('%d min %d sec', $text_domain), $min, $sec);
     }
     $hours = floor($time_taken / 3600);
     $min = floor(($time_taken % 3600) / 60);
-    return sprintf(__('%d hours %d min', $text_domain), $hours, $min);
+    return sprintf(esc_html__('%d hours %d min', $text_domain), $hours, $min);
 }
 
 function tpa_is_plugin_installed($plugin_slug) {
@@ -94,8 +94,8 @@ function tpa_get_plugin_display_name($plugin_slug, $text_domain) {
         'automatic-translator-addon-for-loco-translate' => [
             'free' => 'automatic-translator-addon-for-loco-translate/automatic-translator-addon-for-loco-translate.php',
             'pro'  => 'loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php',
-            'free_name' => __('LocoAI – Auto Translate for Loco Translate', $text_domain),
-            'pro_name'  => __('LocoAI – Auto Translate for Loco Translate (Pro)', $text_domain),
+            'free_name' => esc_html__('LocoAI – Auto Translate for Loco Translate', $text_domain),
+            'pro_name'  => esc_html__('LocoAI – Auto Translate for Loco Translate (Pro)', $text_domain),
         ],
     ];
 
@@ -119,11 +119,11 @@ function tpa_get_plugin_display_name($plugin_slug, $text_domain) {
 
 function tpa_format_number($number, $text_domain) {
     if ($number >= 1000000000) {
-        return round($number / 1000000000, 1) . __('B', $text_domain);
+        return round($number / 1000000000, 1) . esc_html__('B', $text_domain);
     } elseif ($number >= 1000000) {
-        return round($number / 1000000, 1) . __('M', $text_domain);
+        return round($number / 1000000, 1) . esc_html__('M', $text_domain);
     } elseif ($number >= 1000) {
-        return round($number / 1000, 1) . __('K', $text_domain);
+        return round($number / 1000, 1) . esc_html__('K', $text_domain);
     }
     return $number;
 }

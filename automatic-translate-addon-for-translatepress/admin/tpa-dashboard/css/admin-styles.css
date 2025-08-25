@@ -811,7 +811,7 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 .tpa-dashboard-feedback-container .tpa-see-terms {
     color: var(--primary-color);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     white-space: nowrap;
     margin-left: auto;
 }

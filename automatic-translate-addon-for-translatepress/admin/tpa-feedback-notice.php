@@ -16,14 +16,30 @@ if ( ! class_exists( 'TPAFeedbackNotice' ) ) {
 				add_action( 'wp_ajax_tpa_dismiss_notice', array( $this, 'tpa_dismiss_review_notice' ) );
 			}
 		}
-		/**
-		 *  Ajax callback for review notice.
-		 */
-		public function tpa_dismiss_review_notice() {
-			$rs = update_option( 'tpa-ratingDiv', 'yes' );
-			echo json_encode( array( 'success' => 'true' ) );
-			exit;
+			/**
+	 *  Ajax callback for review notice.
+	 */
+	public function tpa_dismiss_review_notice() {
+		// Verify nonce for security
+		if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'tpa_dismiss_notice_nonce')) {
+			wp_send_json_error(array('message' => __('Security verification failed.', 'TPA')));
+			wp_die();
 		}
+		
+		// Check user capabilities
+		if (!current_user_can('update_plugins')) {
+			wp_send_json_error(array('message' => __('Insufficient permissions.', 'TPA')));
+			wp_die();
+		}
+		
+		// Update option and send success response
+		$rs = update_option('tpa-ratingDiv', 'yes');
+		if ($rs) {
+			wp_send_json_success(array('message' => __('Notice dismissed successfully.', 'TPA')));
+		} else {
+			wp_send_json_error(array('message' => __('Failed to dismiss notice.', 'TPA')));
+		}
+	}
 		/**
 		 * Admin notice.
 		 */
@@ -50,7 +66,7 @@ if ( ! class_exists( 'TPAFeedbackNotice' ) ) {
 
 			// Check if installation days is greator then week.
 			if ( isset( $diff_days ) && $diff_days >= 3 ) {
-				echo $this->create_notice_content();
+				echo wp_kses_post($this->create_notice_content());
 			}
 		}
 		/**
@@ -71,7 +87,7 @@ if ( ! class_exists( 'TPAFeedbackNotice' ) ) {
 
 			$message = "Thanks for using <b>$p_name</b>. We hope it meets your expectations! <br/>Please give us a quick rating, it works as a boost for us to keep working on more <a href='https://coolplugins.net/?utm_source=plugin_dashboard&utm_medium=reviewbox' target='_blank'><strong>Cool Plugins</strong></a>!<br/>";
 
-			$html       = '<div data-ajax-url="%8$s"  data-ajax-callback="%9$s" class="tpa-feedback-notice-wrapper %1$s">
+			$html       = '<div data-ajax-url="%8$s"  data-ajax-callback="%9$s" data-nonce="%12$s" class="tpa-feedback-notice-wrapper %1$s">
         <div class="logo_container"><a href="%5$s"><img src="%2$s" alt="%3$s"></a></div>
         <div class="message_container">%4$s
         <div class="callto_action">
@@ -149,14 +165,20 @@ if ( ! class_exists( 'TPAFeedbackNotice' ) ) {
         .clrfix{
             clear:both;
         }</style>';
-			$inline_js  = "<script>jQuery(document).ready(function ($) {
+			$nonce = wp_create_nonce('tpa_dismiss_notice_nonce');
+		$inline_js  = "<script>jQuery(document).ready(function ($) {
             $('.tpa_dismiss_notice').on('click', function (event) {
                 var thisE = $(this);
                 var wrapper=thisE.parents('.tpa-feedback-notice-wrapper');
                 var ajaxURL=wrapper.data('ajax-url');
                 var ajaxCallback=wrapper.data('ajax-callback');
-                $.post(ajaxURL, { 'action':ajaxCallback }, function( data ) {
-                    wrapper.slideUp('fast');
+                var nonce=wrapper.data('nonce');
+                $.post(ajaxURL, { 'action':ajaxCallback, 'nonce':nonce }, function( data ) {
+                    if(data.success) {
+                        wrapper.slideUp('fast');
+                    } else {
+                        console.error('Failed to dismiss notice:', data.data.message);
+                    }
                   }, 'json');
             });
         });</script>";
@@ -172,7 +194,8 @@ if ( ! class_exists( 'TPAFeedbackNotice' ) ) {
 				$ajax_url, // 8
 				$ajax_callback, // 9
 				$pro_url, // 10
-				$not_interested
+				$not_interested, // 11
+				$nonce // 12
 			);
 			$output    .= $inline_css . ' ' . $inline_js;
 			return $output;

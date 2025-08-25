@@ -45,8 +45,8 @@ class TranslatepressAutomaticTranslateAddonFree {
 	 */
 	public function tpa_free_active_admin_menu() {
 		add_options_page(
-			__( 'AI Translation [TranslatePress]', 'TPA' ),
-			__( 'AI Translation [TranslatePress]', 'TPA' ),
+			esc_html__( 'AI Translation [TranslatePress]', 'TPA' ),
+			esc_html__( 'AI Translation [TranslatePress]', 'TPA' ),
 			'manage_options',
 			$this->slug,
 			array(
@@ -64,35 +64,37 @@ class TranslatepressAutomaticTranslateAddonFree {
 		$file_prefix = 'admin/tpa-dashboard/views/';
 		
 		$valid_tabs = [
-			'dashboard'       => __('Dashboard', $text_domain),
-			'ai-translations' => __('AI Translations', $text_domain),
-			'settings'        => __('Settings', $text_domain),
-			'license'         => __('License', $text_domain),
-			'free-vs-pro'     => __('Free vs Pro', $text_domain)
+			'dashboard'       => esc_html__('Dashboard', $text_domain),
+			'ai-translations' => esc_html__('AI Translations', $text_domain),
+			'settings'        => esc_html__('Settings', $text_domain),
+			'license'         => esc_html__('License', $text_domain),
+			'free-vs-pro'     => esc_html__('Free vs Pro', $text_domain)
 		];
 
 		// Get current tab with fallback
 
 		$tab 			= isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'dashboard';
-		$current_tab 	= array_key_exists($tab, $valid_tabs) ? $tab : 'dashboard';
+		// Make sure tab is on our whitelist of allowed values
+		$tab = array_key_exists($tab, $valid_tabs) ? $tab : 'dashboard';
+		$current_tab 	= $tab;
 		
 		// Action buttons configuration
 		$buttons = [
 			[
 				'url'  => 'https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=dashboard_header#pricing',
 				'img'  => 'upgrade-now.svg',
-				'alt'  => __('premium', $text_domain),
-				'text' => __('Unlock Pro Features', $text_domain)
+				'alt'  => esc_html__('premium', $text_domain),
+				'text' => esc_html__('Unlock Pro Features', $text_domain)
 			],
 			[
 				'url' => 'https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_header',
 				'img' => 'document.svg',
-				'alt' => __('document', $text_domain)
+				'alt' => esc_html__('document', $text_domain)
 			],
 			[
 				'url' => 'https://coolplugins.net/support/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=support&utm_content=dashboard_header',
 				'img' => 'contact.svg',
-				'alt' => __('contact', $text_domain)
+				'alt' => esc_html__('contact', $text_domain)
 			]
 		];
 
@@ -113,7 +115,7 @@ class TranslatepressAutomaticTranslateAddonFree {
 						<a href="<?php echo esc_url($button['url']); ?>" 
 						class="tpa-dashboard-btn" 
 						target="_blank"
-						aria-label="<?php echo isset($button['alt']) ? esc_attr($button['alt']) : ''; ?>">
+						aria-label="<?php echo esc_attr($button['alt']); ?>">
 							<img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/' . $button['img']); ?>" 
 								alt="<?php echo esc_attr($button['alt']); ?>">
 							<?php if (isset($button['text'])): ?>
@@ -135,7 +137,26 @@ class TranslatepressAutomaticTranslateAddonFree {
 			
 			<div class="tab-content">
 				<?php
-				require_once TPA_PATH . $file_prefix . $tab . '.php';
+				// Define whitelist of valid file names that can be included
+				$valid_files = array(
+					'dashboard', 'ai-translations', 'settings', 'license', 'free-vs-pro'
+				);
+				
+				// Validate tab against whitelist before including the file
+				if (in_array($tab, $valid_files, true)) {
+					$include_file = TPA_PATH . $file_prefix . $tab . '.php';
+					// Check if file exists as additional security measure
+					if (file_exists($include_file)) {
+						require_once $include_file;
+					} else {
+						// Fallback to dashboard if file doesn't exist
+						require_once TPA_PATH . $file_prefix . 'dashboard.php';
+					}
+				} else {
+					// If not in whitelist, load dashboard as default
+					require_once TPA_PATH . $file_prefix . 'dashboard.php';
+				}
+				
 				require_once TPA_PATH . $file_prefix . 'sidebar.php';
 				
 				?>

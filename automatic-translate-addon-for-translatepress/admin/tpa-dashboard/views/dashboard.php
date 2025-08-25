@@ -14,10 +14,10 @@
             </div>
             <div class="tpa-dashboard-welcome-video">
                 <a href="https://docs.coolplugins.net/doc/ai-translation-translatepress-video-tutorials/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_video" target="_blank" class="tpa-dashboard-video-link">
-                    <img decoding="async" src="<?php echo TPA_URL . 'admin/tpa-dashboard/images/video.svg'; ?>" class="play-icon" alt="play-icon">
+                    <img decoding="async" src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/video.svg'); ?>" class="play-icon" alt="play-icon">
                     <picture>
-                        <source srcset="<?php echo TPA_URL . 'admin/tpa-dashboard/images/loco-addon-video.png'; ?>" type="image/avif">
-                        <img src="<?php echo TPA_URL . 'admin/tpa-dashboard/images/loco-addon-video.jpg'; ?>" class="translatepress-addon-video" alt="translatepress addon preview">
+                        <source srcset="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/loco-addon-video.png'); ?>" type="image/avif">
+                        <img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/loco-addon-video.jpg'); ?>" class="translatepress-addon-video" alt="translatepress addon preview">
                     </picture>
                 </a>
             </div>
@@ -25,7 +25,7 @@
 
         <!-- Translation Providers -->  
         <div class="tpa-dashboard-translation-providers">
-            <h3><?php _e('Translation Providers', $text_domain); ?></h3>
+            <h3><?php esc_html_e('Translation Providers', $text_domain); ?></h3>
             <div class="tpa-dashboard-providers-grid">
                 
                 <?php
@@ -41,12 +41,12 @@
                     <div class="tpa-dashboard-provider-card">
                         <div class="tpa-dashboard-provider-header">
                             <a href="<?php echo esc_url($provider[4]); ?>" target="_blank"><img src="<?php echo esc_url(TPA_URL . 'assets/images/' . $provider[1]); ?>" alt="<?php echo esc_html($provider[0]); ?>"></a>
-                            <span class="tpa-dashboard-badge <?php echo strtolower($provider[2]); ?>"><?php echo $provider[2]; ?></span>
+                            <span class="tpa-dashboard-badge <?php echo strtolower($provider[2]); ?>"><?php echo esc_html($provider[2]); ?></span>
                         </div>
-                        <h4><?php echo $provider[0]; ?></h4>
+                        <h4><?php echo esc_html($provider[0]); ?></h4>
                         <ul>
                             <?php foreach ($provider[3] as $feature) { ?>
-                                <li>✅ <?php echo $feature; ?></li>
+                                <li>✅ <?php echo esc_html($feature); ?></li>
                             <?php } ?>
                         </ul>
                         <div class="tpa-dashboard-provider-buttons">

@@ -180,14 +180,14 @@ class tpa_feedback {
 
 			$deativation_reason = array_key_exists( $reason, $deactivate_reasons ) ? $reason : 'other';
 
-			$plugin_initial =  get_option( 'tpa_initial_save_version' );
+			$plugin_initial =  sanitize_text_field(get_option( 'tpa_initial_save_version' ));
 			$sanitized_message = sanitize_text_field( $_POST['message'] ) == '' ? 'N/A' : sanitize_text_field( $_POST['message'] );
 			$admin_email       = sanitize_email( get_option( 'admin_email' ) );
 			$site_url          = esc_url( site_url() );
 			$server_info 	   = \TranslatePressAddon::tpa_get_user_info()['server_info'];
 			$extra_details 	   = \TranslatePressAddon::tpa_get_user_info()['extra_details'];
-			   $site_url       = get_site_url();
-            $install_date   = get_option('tpa-install-date');
+			   $site_url       = esc_url(get_site_url());
+            $install_date   = sanitize_text_field(get_option('tpa-install-date'));
             $unique_key     = '17';  // Ensure this key is unique per plugin to prevent collisions when site URL and install date are the same across plugins
             $site_id        = $site_url . '-' . $install_date . '-' . $unique_key;
 			$response          = wp_remote_post(
