@@ -5,7 +5,7 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 1.2.5
+ * Version: 1.2.6
  * License: GPL2
  * Text Domain:TPA
  * Domain Path: languages
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.2.5' );
+define( 'TPA_VERSION', '1.2.6' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -123,10 +123,6 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function init_feedback_notice() {
 			if (is_admin()) {
 			
-			// 	require_once TPA_PATH . '/admin/cpfm-feedback/cron/tpa-cron.php';
-			// $cron = new TPA_cronjob();
-			// $cron->tpa_cron_init_hooks();
-
 				if(!class_exists('CPFM_Feedback_Notice')){
 					require_once TPA_PATH . '/admin/cpfm-feedback/cpfm-common-notice.php';
 					
@@ -305,8 +301,8 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				Tpa_Dashboard::review_notice(
 					'tpa', // Required
 					'AI Translation For TranslatePress', // Required
-					'https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post', // Required
-					TPA_URL . 'assets/images/tpa-icon.png'
+					'https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post' // Required
+					
 				);
 			}
 		}
@@ -369,7 +365,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 					}
 				}
 
-				add_action( 'admin_notices', [ $this, 'tpa_admin_notices' ], PHP_INT_MAX );
+				 add_action( 'admin_notices', [ $this, 'tpa_admin_notices' ], PHP_INT_MAX );
 			}
 
 			function tpa_admin_notices() {
@@ -384,7 +380,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 						'tpa', // Required
 						'AI Translation For TranslatePress', // Required
 						'https://wordpress.org/plugins/automatic-translate-addon-for-translatepress/reviews/#new-post', // Required
-						TPA_URL . 'assets/images/tpa-icon.png'
+						
 					);
 				}
 			}
@@ -416,9 +412,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				include_once TPA_PATH . 'admin/tpap-register/tpap-admin-menu.php';
 				/** Feedback form after deactivation */
 				require_once __DIR__ . '/admin/feedback/admin-feedback-form.php';
-				/*** Plugin review notice file */
-				require_once TPA_PATH . 'admin/tpa-feedback-notice.php';
-				new TPAFeedbackNotice();
+				
 			}
 		}
 		/**

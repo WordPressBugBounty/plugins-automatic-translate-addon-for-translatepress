@@ -232,7 +232,7 @@ if(!class_exists('Tpa_Dashboard')){
             return $number;
         }
 
-        public static function review_notice($prefix, $plugin_name, $url, $icon=''){
+        public static function review_notice($prefix, $plugin_name, $url){
             if(self::tpa_hide_review_notice_status($prefix)){
                 return;
             }
@@ -249,39 +249,33 @@ if(!class_exists('Tpa_Dashboard')){
 
             add_action('admin_enqueue_scripts', array(self::class, 'ctp_enqueue_assets'));
 
-            
-
-            $message = sprintf(
-                '🎉 %s! %s <strong>%s</strong> %s 🚀<br>%s %s 🌟<br>',
-                __('Thank You For Using', 'cp-notice').' '.$plugin_name,
+                    $message = sprintf(
+                '%s! %s <strong>%s</strong> %s <br>%s %s <br>',
+                __('Thanks for using', 'cp-notice') . ' <b>' . $plugin_name . '</b>',
                 __('You\'ve translated', 'cp-notice'),
-                esc_html__(esc_html($total_character_count).' characters', 'cp-notice'),
-                esc_html__('so far using our plugin!', 'cp-notice'),
-                __('If our plugin has saved your time and effort, please consider leaving a', 'cp-notice'),
-                __('review to support our work. Your feedback means the world to us!', 'cp-notice')
+                esc_html($total_character_count) . ' ' . __('characters', 'cp-notice'),
+                __('so far using our plugin!', 'cp-notice'),
+                __('If our plugin saves your time and effort, please support us with a review', 'cp-notice'),
+                __('your feedback means everything!', 'cp-notice')
             );
 
             $prefix = sanitize_key($prefix);
             $message = wp_kses_post($message);
             $url = esc_url($url);
-            $plugin_name = sanitize_text_field($plugin_name);
-            $icon = isset($icon) && !empty($icon) ? esc_url($icon) : '';
 
-            add_action('admin_notices', function() use ($message, $prefix, $url, $icon, $plugin_name){
-                $html= '<div class="notice notice-info cpt-review-notice">';
-                if($icon){
-                    $html .= '<img class="cpt-review-notice-icon" src="'.esc_url($icon).'" alt="'.esc_attr($plugin_name).'">';
-                }
-                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'cp-notice').'</button><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'cp-notice').'</button></div></div></div>';
+            add_action('admin_notices', function() use ($message, $prefix, $url){
+
+                $html= '<div class="notice notice-info is-dismissible cpt-review-notice">';
+                
+                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'cp-notice').'</button><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'cp-notice').'</button></div></div></div>';
                 
                 echo wp_kses_post($html);
             });
 
-            add_action('tpa_display_admin_notices', function() use ($message, $prefix, $url, $icon, $plugin_name){
-                $html= '<div class="notice notice-info cpt-review-notice">';
-                if($icon){
-                    $html .= '<img class="cpt-review-notice-icon" src="'.esc_url($icon).'" alt="'.esc_attr($plugin_name).'">';
-                }
+            add_action('tpa_display_admin_notices', function() use ($message, $prefix, $url){
+                
+                $html= '<div class="notice notice-info is-dismissible cpt-review-notice">';
+                
                 $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'cp-notice').'</button><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'cp-notice').'</button></div></div></div>';
                 
                 echo wp_kses_post($html);

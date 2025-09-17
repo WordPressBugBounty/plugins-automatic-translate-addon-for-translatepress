@@ -1,5 +1,22 @@
 (function($){
+
     $(document).ready(function(){
+
+         $('.tpa_dismiss_notice').on('click', function (event) {
+                var thisE = $(this);
+                var wrapper=thisE.parents('.tpa-feedback-notice-wrapper');
+                var ajaxURL=wrapper.data('ajax-url');
+                var ajaxCallback=wrapper.data('ajax-callback');
+                var nonce=wrapper.data('nonce');
+                $.post(ajaxURL, { 'action':ajaxCallback, 'nonce':nonce }, function( data ) {
+                    if(data.success) {
+                        wrapper.slideUp('fast');
+                    } else {
+                        console.error('Failed to dismiss notice:', data.data.message);
+                    }
+                  }, 'json');
+            });
+            
         let plugin_slug = 'automatic-translate-addon-for-translatepress';
 		let text_domain = 'TPA';
         $target = $('#the-list').find('[data-slug="'+plugin_slug+'"] span.deactivate a');

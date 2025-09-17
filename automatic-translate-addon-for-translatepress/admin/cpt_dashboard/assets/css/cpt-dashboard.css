@@ -4,6 +4,10 @@
   padding: 5px;
   display: flex;
   align-items: center;
+  border-radius: 5px;
+      max-width: 790px;
+    padding-left: 11px;
+    padding-bottom: 11px;
 }
 
 .cpt-review-notice .cpt-review-notice-icon{
@@ -24,12 +28,6 @@
   gap: 10px;
 }
 
-.cpt-review-notice .cpt-not-interested {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-}
-
 body.rtl .cpt-review-notice .cpt-not-interested {
   right: auto;
   left: 5px;
@@ -47,10 +45,6 @@ body.rtl .cpt-review-notice .cpt-not-interested {
 
 .cpt-dashboard {
   padding: 20px;
-}
-
-.cpt-review-notice .cpt-review-notice-content{
-  max-width: calc(100% - 240px);
 }
 
 .cpt-dashboard .cpt-dashboard-tabs {
