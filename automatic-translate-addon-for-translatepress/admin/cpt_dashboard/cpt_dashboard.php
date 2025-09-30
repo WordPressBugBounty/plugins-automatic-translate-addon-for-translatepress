@@ -223,15 +223,6 @@ if(!class_exists('Tpa_Dashboard')){
             }
         }
 
-        public static function format_number_count($number){
-            if ($number >= 1000000) {
-                return round($number / 1000000, 1) . 'M';
-            } elseif ($number >= 1000) {
-                return round($number / 1000, 1) . 'K';
-            }
-            return $number;
-        }
-
         public static function review_notice($prefix, $plugin_name, $url){
             if(self::tpa_hide_review_notice_status($prefix)){
                 return;
@@ -245,18 +236,13 @@ if(!class_exists('Tpa_Dashboard')){
                 return;
             }
 
-            $total_character_count = self::format_number_count($total_character_count);
-
             add_action('admin_enqueue_scripts', array(self::class, 'ctp_enqueue_assets'));
 
-                    $message = sprintf(
-                '%s! %s <strong>%s</strong> %s <br>%s %s <br>',
+            $message = sprintf(
+                '%s %s<br>%s<br>',
                 __('Thanks for using', 'cp-notice') . ' <b>' . $plugin_name . '</b>',
-                __('You\'ve translated', 'cp-notice'),
-                esc_html($total_character_count) . ' ' . __('characters', 'cp-notice'),
-                __('so far using our plugin!', 'cp-notice'),
-                __('If our plugin saves your time and effort, please support us with a review', 'cp-notice'),
-                __('your feedback means everything!', 'cp-notice')
+                __('- WordPress plugin. We hope you liked it!', 'cp-notice'),
+                __('Please give us a quick rating, it works as a boost for us to keep working on more <a style="text-decoration: none;" href="https://coolplugins.net/" target="_blank" rel="noopener noreferrer"><b>Cool Plugins</b></a>!', 'cp-notice')
             );
 
             $prefix = sanitize_key($prefix);

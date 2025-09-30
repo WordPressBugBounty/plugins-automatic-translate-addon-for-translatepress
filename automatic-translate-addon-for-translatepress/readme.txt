@@ -5,7 +5,7 @@ Tags: AI translation, translate, Translatepress, multilingual, automatic transla
 Requires at least: 5.0
 Tested up to: 6.8.2
 Requires PHP: 5.6
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv2 or later 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Auto-translate unlimited strings and characters using AI & Machine Translation tools without any external API Key!
@@ -110,6 +110,10 @@ Since this is a beta feature, detailed setup instructions are required. Please r
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage, and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+
+= Version 1.2.7 || 30/September/2025 = 
+- **Improved:** Review notice.
+- **Fixed:** Minor issue.
 
 = Version 1.2.6 || 17/September/2025 = 
 - **Removed:** Redundant rating div.

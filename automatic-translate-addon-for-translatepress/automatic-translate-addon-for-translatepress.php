@@ -5,10 +5,11 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 1.2.6
+ * Version: 1.2.7
  * License: GPL2
  * Text Domain:TPA
  * Domain Path: languages
+ * Requires Plugins: translatepress-multilingual
  *
  *  @package TPA
  */
@@ -19,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.2.6' );
+define( 'TPA_VERSION', '1.2.7' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -403,10 +404,6 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		}
 
 		public function tpa_check_required_plugin() {
-			if ( ! function_exists( 'trp_enable_translatepress' ) ) {
-				add_action( 'admin_notices', array( $this, 'tpa_plugin_required_admin_notice' ) );
-				add_action( 'tpa_display_admin_notices', array( $this, 'tpa_plugin_required_admin_notice' ) );
-			}
 
 			if ( is_admin() && !defined( 'TPAP_VERSION' ) ) {
 				include_once TPA_PATH . 'admin/tpap-register/tpap-admin-menu.php';
@@ -415,33 +412,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				
 			}
 		}
-		/**
-		 * Notice to 'Admin' if "TranslatePress - Multilingual" is not active
-		 */
-		public function tpa_plugin_required_admin_notice() {
-			if ( ! current_user_can( 'activate_plugins' ) ) {
-				return;
-			}
-		
-			add_thickbox();
-		
-			$url         = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=translatepress-multilingual&TB_iframe=true' );
-			$title       = 'TranslatePress - Multilingual';
-			$plugin_info = get_plugin_data( TPA_FILE, false, false );
-			$plugin_name = ! empty( $plugin_info['Name'] ) ? $plugin_info['Name'] : __( 'this plugin', 'tpa' );
-		
-			$message = sprintf(
-				__( 'In order to use <strong>%1$s</strong>, please install and activate the latest version of <a href="%2$s" class="thickbox" title="%3$s">%4$s</a>.', 'tpa' ),
-				esc_html( $plugin_name ),
-				esc_url( $url ),
-				esc_attr( $title ),
-				esc_html( $title )
-			);
-		
-			echo '<div class="notice notice-error"><p>' . wp_kses_post( $message ) . '</p></div>';
-		
-			deactivate_plugins( plugin_basename( TPA_FILE ) );
-		}
+
 		
 		/**
 		 *  Register Assets
