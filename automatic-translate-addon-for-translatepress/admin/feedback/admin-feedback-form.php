@@ -1,6 +1,8 @@
 <?php
 namespace TPA\feedback;
-
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Class for feedback from user before deactivate plugin.
  */
@@ -62,8 +64,8 @@ class tpa_feedback {
 	public function enqueue_feedback_scripts() {
 		$screen = get_current_screen();
 		if ( isset( $screen ) && $screen->id == 'plugins' ) {
-			wp_enqueue_script( __NAMESPACE__ . 'feedback-script', $this->plugin_url . '/js/admin-feedback.js', array( 'jquery' ), $this->plugin_version );
-			wp_enqueue_style( 'cool-plugins-feedback-style', $this->plugin_url . '/css/admin-feedback.css', null, $this->plugin_version );
+			wp_enqueue_script( __NAMESPACE__ . 'feedback-script', $this->plugin_url . '/js/admin-feedback.js', array( 'jquery' ), $this->plugin_version, true );
+			wp_enqueue_style( 'cool-plugins-feedback-style', $this->plugin_url . '/css/admin-feedback.css', null, $this->plugin_version, 'all');
 		}
 	}
 
@@ -77,24 +79,24 @@ class tpa_feedback {
 		}
 		$deactivate_reasons = array(
 			'didnt_work_as_expected'         => array(
-				'title'             => __( 'The plugin didn\'t work as expected', 'cool-plugins' ),
+				'title'             => __( 'The plugin didn\'t work as expected', 'automatic-translate-addon-for-translatepress' ),
 				'input_placeholder' => 'What did you expect?',
 			),
 			'found_a_better_plugin'          => array(
-				'title'             => __( 'I found a better plugin', 'cool-plugins' ),
-				'input_placeholder' => __( 'Please share which plugin', 'cool-plugins' ),
+				'title'             => __( 'I found a better plugin', 'automatic-translate-addon-for-translatepress' ),
+				'input_placeholder' => __( 'Please share which plugin', 'automatic-translate-addon-for-translatepress' ),
 			),
 			'couldnt_get_the_plugin_to_work' => array(
-				'title'             => __( 'The plugin is not working', 'cool-plugins' ),
+				'title'             => __( 'The plugin is not working', 'automatic-translate-addon-for-translatepress' ),
 				'input_placeholder' => 'Please share your issue. So we can fix that for other users.',
 			),
 			'temporary_deactivation'         => array(
-				'title'             => __( 'It\'s a temporary deactivation', 'cool-plugins' ),
+				'title'             => __( 'It\'s a temporary deactivation', 'automatic-translate-addon-for-translatepress' ),
 				'input_placeholder' => '',
 			),
 			'other'                          => array(
-				'title'             => __( 'Other', 'cool-plugins' ),
-				'input_placeholder' => __( 'Please share the reason', 'cool-plugins' ),
+				'title'             => __( 'Other', 'automatic-translate-addon-for-translatepress' ),
+				'input_placeholder' => __( 'Please share the reason', 'automatic-translate-addon-for-translatepress' ),
 			),
 		);
 
@@ -103,11 +105,11 @@ class tpa_feedback {
 						
 			<div class="cool-plugins-deactivation-response">
 			<div id="cool-plugins-deactivate-feedback-dialog-header">
-				<span id="cool-plugins-feedback-form-title"><?php echo __( 'Quick Feedback', 'cool-plugins' ); ?></span>
+				<span id="cool-plugins-feedback-form-title"><?php echo esc_html__( 'Quick Feedback', 'automatic-translate-addon-for-translatepress' ); ?></span>
 			</div>
 			<div id="cool-plugins-loader-wrapper">
 				<div class="cool-plugins-loader-container">
-					<img class="cool-plugins-preloader" src="<?php echo $this->plugin_url; ?>images/cool-plugins-preloader.gif">
+					<img class="cool-plugins-preloader" src="<?php echo esc_url( $this->plugin_url . 'images/cool-plugins-preloader.gif' ); ?>">
 				</div>
 			</div>
 			<div id="cool-plugins-form-wrapper" class="cool-plugins-form-wrapper-cls">
@@ -116,7 +118,7 @@ class tpa_feedback {
 				wp_nonce_field( '_cool-plugins_deactivate_feedback_nonce' );
 				?>
 				<input type="hidden" name="action" value="cool-plugins_deactivate_feedback" />
-				<div id="cool-plugins-deactivate-feedback-dialog-form-caption"><?php echo __( 'If you have a moment, please share why you are deactivating this plugin.', 'cool-plugins' ); ?></div>
+				<div id="cool-plugins-deactivate-feedback-dialog-form-caption"><?php echo esc_html__( 'If you have a moment, please share why you are deactivating this plugin.', 'automatic-translate-addon-for-translatepress' ); ?></div>
 				<div id="cool-plugins-deactivate-feedback-dialog-form-body">
 					<?php foreach ( $deactivate_reasons as $reason_key => $reason ) : ?>
 						<div class="cool-plugins-deactivate-feedback-dialog-input-wrapper">
@@ -130,7 +132,7 @@ class tpa_feedback {
 							<?php endif; ?>
 						</div>
 					<?php endforeach; ?>
-					<input class="cool-plugins-GDPR-data-notice" id="cool-plugins-GDPR-data-notice-<?php echo esc_attr($this->text_domain); ?>" type="checkbox"><label for="cool-plugins-GDPR-data-notice"><?php echo __( 'I agree to share anonymous usage data and basic site details (such as server, PHP, and WordPress versions) to support AI Translation Addon for TranslatePress improvement efforts. Additionally, I allow Cool Plugins to store all information provided through this form and to respond to my inquiry.', 'cool-plugins' ); ?></label>
+					<input class="cool-plugins-GDPR-data-notice" id="cool-plugins-GDPR-data-notice-<?php echo esc_attr($this->text_domain); ?>" type="checkbox"><label for="cool-plugins-GDPR-data-notice"><?php echo esc_html__( 'I agree to share anonymous usage data and basic site details (such as server, PHP, and WordPress versions) to support AI Translation Addon for TranslatePress improvement efforts. Additionally, I allow Cool Plugins to store all information provided through this form and to respond to my inquiry.', 'automatic-translate-addon-for-translatepress' ); ?></label>
 				</div>
 				<div class="cool-plugin-popup-button-wrapper">
 					<a class="cool-plugins-button button-deactivate" id="cool-plugin-submitNdeactivate">Submit and Deactivate</a>
@@ -150,38 +152,39 @@ class tpa_feedback {
 	 */
 
 	public function submit_deactivation_response() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], '_cool-plugins_deactivate_feedback_nonce' ) ) {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), '_cool-plugins_deactivate_feedback_nonce' ) ) {
 			wp_send_json_error();
 		} else {
-			$reason             = isset( $_POST['reason'] ) ? $_POST['reason'] : '';
+			$reason             = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : '';
 			$reason             = htmlspecialchars( $reason, ENT_QUOTES );
 			$deactivate_reasons = array(
 				'didnt_work_as_expected'         => array(
-					'title'             => __( 'The plugin didn\'t work as expected', 'cool-plugins' ),
+					'title'             => __( 'The plugin didn\'t work as expected', 'automatic-translate-addon-for-translatepress' ),
 					'input_placeholder' => 'What did you expect?',
 				),
 				'found_a_better_plugin'          => array(
-					'title'             => __( 'I found a better plugin', 'cool-plugins' ),
-					'input_placeholder' => __( 'Please share which plugin', 'cool-plugins' ),
+					'title'             => __( 'I found a better plugin', 'automatic-translate-addon-for-translatepress' ),
+					'input_placeholder' => __( 'Please share which plugin', 'automatic-translate-addon-for-translatepress' ),
 				),
 				'couldnt_get_the_plugin_to_work' => array(
-					'title'             => __( 'The plugin is not working', 'cool-plugins' ),
+					'title'             => __( 'The plugin is not working', 'automatic-translate-addon-for-translatepress' ),
 					'input_placeholder' => 'Please share your issue. So we can fix that for other users.',
 				),
 				'temporary_deactivation'         => array(
-					'title'             => __( 'It\'s a temporary deactivation', 'cool-plugins' ),
+					'title'             => __( 'It\'s a temporary deactivation', 'automatic-translate-addon-for-translatepress' ),
 					'input_placeholder' => '',
 				),
 				'other'                          => array(
-					'title'             => __( 'Other', 'cool-plugins' ),
-					'input_placeholder' => __( 'Please share the reason', 'cool-plugins' ),
+					'title'             => __( 'Other', 'automatic-translate-addon-for-translatepress' ),
+					'input_placeholder' => __( 'Please share the reason', 'automatic-translate-addon-for-translatepress' ),
 				),
 			);
 
 			$deativation_reason = array_key_exists( $reason, $deactivate_reasons ) ? $reason : 'other';
 
 			$plugin_initial =  sanitize_text_field(get_option( 'tpa_initial_save_version' ));
-			$sanitized_message = sanitize_text_field( $_POST['message'] ) == '' ? 'N/A' : sanitize_text_field( $_POST['message'] );
+			$message = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
+			$sanitized_message = $message == '' ? 'N/A' : $message;
 			$admin_email       = sanitize_email( get_option( 'admin_email' ) );
 			$site_url          = esc_url( site_url() );
 			$server_info 	   = \TranslatePressAddon::tpa_get_user_info()['server_info'];

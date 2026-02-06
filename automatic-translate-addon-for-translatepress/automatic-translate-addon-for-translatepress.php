@@ -5,10 +5,10 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 1.2.7
+ * Version: 2.0.1
  * License: GPL2
- * Text Domain:TPA
- * Domain Path: languages
+ * Text Domain:automatic-translate-addon-for-translatepress
+ * Domain Path: /languages
  * Requires Plugins: translatepress-multilingual
  *
  *  @package TPA
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '1.2.7' );
+define( 'TPA_VERSION', '2.0.1' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -52,6 +52,8 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'tpa_settings_page_link' ) );
 			add_filter('plugin_row_meta', array( $this,'tpa_add_docs_link_to_plugin_meta'), 10, 2);
 			add_action('wp_ajax_tpa_update_translate_data', array($this, 'tpa_update_translate_data'));
+			add_action( 'wp_ajax_tpa_install_plugin', array( $this, 'tpa_install_plugin' ) );
+			add_action( 'wp_ajax_tpa_save_provider_states', array( $this, 'tpa_save_provider_states' ) );
 
 			// Initialize cron
 			$this->init_cron();
@@ -59,10 +61,11 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			// Initialize feedback notice.
 			$this->init_feedback_notice();
 
-					// Add the action to hide unrelated notices
-		if(isset($_GET['page']) && sanitize_key($_GET['page']) == 'translatepress-tpap-dashboard'){
-			add_action('admin_print_scripts', array($this, 'tpa_hide_unrelated_notices'));
-		}
+			// Add the action to hide unrelated notices
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key()
+			if(isset($_GET['page']) && sanitize_key($_GET['page']) == 'translatepress-tpap-dashboard'){
+				add_action('admin_print_scripts', array($this, 'tpa_hide_unrelated_notices'));
+			}
 
 			if(!class_exists('Tpa_Dashboard')) {
 				require_once TPA_PATH . 'admin/cpt_dashboard/cpt_dashboard.php';
@@ -84,13 +87,14 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		 */
 
 		public function tpa_do_activation_redirect() {
-					if (get_option('tpa_do_activation_redirect', false)) {
-            update_option('tpa_do_activation_redirect', false);
-			if (!isset($_GET['activate-multi']) || empty(sanitize_key($_GET['activate-multi']))) {
-				wp_safe_redirect(admin_url('admin.php?page=translatepress-tpap-dashboard'));
-				exit;
+			if (get_option('tpa_do_activation_redirect', false)) {
+				update_option('tpa_do_activation_redirect', false);
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only activation redirect check, sanitized with sanitize_key()
+				if (!isset($_GET['activate-multi']) || empty(sanitize_key($_GET['activate-multi']))) {
+					wp_safe_redirect(admin_url('admin.php?page=translatepress-tpap-dashboard'));
+					exit;
+				}
 			}
-		}
 
 			if(!get_option('tpa-install-date')) {
 				add_option('tpa-install-date', gmdate('Y-m-d h:i:s'));
@@ -99,12 +103,219 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			if (!get_option('tpa_initial_save_version')) {
 				add_option('tpa_initial_save_version', TPA_VERSION);
 			}
+
+			if(!get_option('tpa_provider_yandex_enabled')) {
+				add_option('tpa_provider_yandex_enabled', '1');
+			}
+			
+			if(!get_option('tpa_provider_chrome_enabled')) {
+				add_option('tpa_provider_chrome_enabled', '1');
+			}
 		}
+
+        public function tpa_install_plugin()
+        {
+
+            if (! current_user_can('install_plugins')) {
+                wp_send_json_error([
+                    // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                    'errorMessage' => __('Sorry, you are not allowed to install plugins on this site.', 'automatic-translate-addon-for-translatepress'),
+                ]);
+            }
+
+            check_ajax_referer('tpa_install_nonce', '_wpnonce', true);
+
+            if (empty($_POST['slug'])) {
+                wp_send_json_error([
+                    'slug'         => '',
+                    'errorCode'    => 'no_plugin_specified',
+                    // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                    'errorMessage' => __('No plugin specified.', 'automatic-translate-addon-for-translatepress'),
+                ]);
+            }
+
+            $slug = sanitize_key(wp_unslash($_POST['slug']));
+
+            // Configuration for allowed plugins
+            // 'files': array of main plugin files to check/activate (prioritized)
+            // 'dependency': optional plugin that must be active
+            // 'dependency_msg': error message if dependency is missing
+            $plugins_config = [
+                'automatic-translator-addon-for-loco-translate' => [
+                    'files' => [
+                        'loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php',
+                        'automatic-translator-addon-for-loco-translate/automatic-translator-addon-for-loco-translate.php'
+                    ],
+                    'dependency'     => 'loco-translate/loco.php',
+                    'dependency_msg' => 'Please activate Loco Translate plugin first.'
+                ],
+                'translate-words' => [
+                    'files' => [
+                        'translate-words/translate-wp-words.php'
+                    ],
+                    'dependency'     => null,
+                    'dependency_msg' => ''
+                ]
+            ];
+
+            if (!isset($plugins_config[$slug])) {
+                wp_send_json_error([
+                    'errorMessage' => esc_html__('Invalid plugin slug.', 'automatic-translate-addon-for-translatepress'),
+                ]);
+            }
+
+            $config = $plugins_config[$slug];
+
+            if (! current_user_can('activate_plugins')) {
+                wp_send_json_error(['message' => 'Permission denied']);
+            }
+
+            // Get the action (install or activate)
+            $plugin_action = isset($_POST['plugin_action']) ? sanitize_text_field(wp_unslash($_POST['plugin_action'])) : 'install';
+
+            // 1. Check if any version is already installed
+            foreach ($config['files'] as $file) {
+                if (file_exists(WP_PLUGIN_DIR . '/' . $file)) {
+                    // Check dependency requirements before activation
+                    if ($plugin_action === 'activate') {
+                        if (!empty($config['dependency']) && !is_plugin_active($config['dependency'])) {
+                            wp_send_json_error(['message' => $config['dependency_msg']]);
+                        }
+                    }
+
+                    // Activate
+                    $network_wide = is_multisite();
+                    $result = activate_plugin($file, '', $network_wide, true);
+                    if (is_wp_error($result)) {
+                        wp_send_json_error(['message' => $result->get_error_message()]);
+                    }
+                    wp_send_json_success(['message' => 'Plugin activated successfully', 'activated' => true]);
+                    return;
+                }
+            }
+
+            // 2. Not installed, proceed to install from repository
+            $this->install_plugin_from_repo($slug, $config);
+        }
+
+        /**
+         * Helper to install plugin from WP Repository
+         *
+         * @param string $slug Plugin slug
+         * @param array $config Plugin configuration
+         */
+        private function install_plugin_from_repo($slug, $config)
+        {
+            require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+            $api = plugins_api('plugin_information', [
+                'slug'   => $slug,
+                'fields' => ['sections' => false],
+            ]);
+
+            if (is_wp_error($api)) {
+                wp_send_json_error(['message' => $api->get_error_message()]);
+            }
+
+            $skin     = new WP_Ajax_Upgrader_Skin();
+            $upgrader = new Plugin_Upgrader($skin);
+            $result   = $upgrader->install($api->download_link);
+
+            // Handle specific installation errors
+            if (is_wp_error($result)) {
+                wp_send_json_error(['message' => $result->get_error_message()]);
+            } elseif (is_wp_error($skin->result)) {
+                // Special handling for "Destination folder already exists"
+                if ($skin->result->get_error_message() === 'Destination folder already exists.') {
+                    $install_status = install_plugin_install_status($api);
+                    if (current_user_can('activate_plugin', $install_status['file'])) {
+                        // Check dependency
+                        if (!empty($config['dependency']) && !is_plugin_active($config['dependency'])) {
+                            wp_send_json_success(['message' => $config['dependency_msg'], 'activated' => false]);
+                            return;
+                        }
+
+                        $pagenow = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
+                        $network_wide = (is_multisite() && 'import' !== $pagenow);
+                        $activation_result = activate_plugin($install_status['file'], '', $network_wide, true);
+
+                        if (is_wp_error($activation_result)) {
+                            wp_send_json_error(['message' => $activation_result->get_error_message()]);
+                        } else {
+                            wp_send_json_success(['activated' => true, 'message' => 'Plugin activated successfully']);
+                        }
+                    } else {
+                        wp_send_json_error(['message' => $skin->result->get_error_message()]);
+                    }
+                } else {
+                    wp_send_json_error(['message' => $skin->result->get_error_message()]);
+                }
+            } elseif ($skin->get_errors()->has_errors()) {
+                wp_send_json_error(['message' => $skin->get_error_messages()]);
+            } elseif (is_null($result)) {
+                global $wp_filesystem;
+                // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                $error_msg = __('Unable to connect to the filesystem. Please confirm your credentials.', 'automatic-translate-addon-for-translatepress');
+                if ($wp_filesystem instanceof WP_Filesystem_Base && is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->has_errors()) {
+                    $error_msg = esc_html($wp_filesystem->errors->get_error_message());
+                }
+                wp_send_json_error(['message' => $error_msg]);
+            }
+
+            // Auto-activate after successful install
+            $install_status = install_plugin_install_status($api);
+            if (current_user_can('activate_plugin', $install_status['file'])) {
+                // Dependency check before auto-activate
+                if (!empty($config['dependency']) && !is_plugin_active($config['dependency'])) {
+                    // Installed but can't activate due to dependency
+                    wp_send_json_success(['message' => $config['dependency_msg'], 'activated' => false]);
+                    return;
+                }
+
+                $pagenow = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
+                $network_wide = (is_multisite() && 'import' !== $pagenow);
+                $activation_result = activate_plugin($install_status['file'], '', $network_wide, true);
+                if (is_wp_error($activation_result)) {
+                    wp_send_json_error(['message' => $activation_result->get_error_message()]);
+                }
+                wp_send_json_success(['message' => 'Plugin installed and activated successfully', 'activated' => true]);
+            } else {
+                wp_send_json_success(['message' => 'Plugin installed successfully', 'activated' => false]);
+            }
+        }
+
+        /**
+         * Save provider toggle states
+         */
+        public function tpa_save_provider_states() {
+            // Verify nonce
+            check_ajax_referer('tpa_provider_states_nonce', '_wpnonce', true);
+
+            // Check user capabilities
+            if (!current_user_can('manage_options')) {
+                wp_send_json_error(['message' => esc_html__('You do not have permission to modify settings.', 'automatic-translate-addon-for-translatepress')]);
+                wp_die();
+            }
+
+            // Get provider states from POST data
+            $yandex_enabled = isset($_POST['yandex_enabled']) ? sanitize_text_field(wp_unslash($_POST['yandex_enabled'])) : '1';
+            $chrome_enabled = isset($_POST['chrome_enabled']) ? sanitize_text_field(wp_unslash($_POST['chrome_enabled'])) : '1';
+
+            // Save to database
+            update_option('tpa_provider_yandex_enabled', $yandex_enabled === '1' ? '1' : '0');
+            update_option('tpa_provider_chrome_enabled', $chrome_enabled === '1' ? '1' : '0');
+
+            wp_send_json_success(['message' => esc_html__('Provider settings saved successfully.', 'automatic-translate-addon-for-translatepress')]);
+        }
 
 		public function tpa_add_docs_link_to_plugin_meta($links, $file) {
 			if (plugin_basename(__FILE__) === $file) {
 				$docs_link = '<a href="https://docs.coolplugins.net/plugin/ai-translation-for-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=plugins_list" target="_blank">Docs</a>';
+				$multilingual_link = '<a target="_blank" href="' . esc_url( admin_url( 'plugin-install.php?s=Linguator+AI+Auto+Translate+Create+Multilingual+Sites&tab=search&type=term' ) ) . '">Create Multilingual Site</a>';
 				$links[] = $docs_link;
+				$links[] = $multilingual_link;
 			}
 			return $links;
 		}
@@ -135,8 +346,8 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				}
 				
 				$notice = [
-					'title' => esc_html__('AI Translation For TranslatePress', 'TPA'),
-					'message' => esc_html__('Help us make this plugin more compatible with your site by sharing non-sensitive site data.', 'TPA'),
+					'title' => esc_html__('AI Translation For TranslatePress', 'automatic-translate-addon-for-translatepress'),
+					'message' => esc_html__('Help us make this plugin more compatible with your site by sharing non-sensitive site data.', 'automatic-translate-addon-for-translatepress'),
 					'pages' => ['translatepress-tpap-dashboard'],
 					'always_show_on' => ['translatepress-tpap-dashboard'], // This enables auto-show
 					'plugin_name'=>'tpa'
@@ -181,6 +392,13 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				add_option( 'tpa_initial_save_version', TPA_VERSION );
 			}
 
+			if(!get_option('tpa_provider_yandex_enabled')) {
+				add_option('tpa_provider_yandex_enabled', '1');
+			}
+			if(!get_option('tpa_provider_chrome_enabled')) {
+				add_option('tpa_provider_chrome_enabled', '1');
+			}
+
 			$get_opt_in = get_option('tpa_feedback_opt_in');
 			
 			if ($get_opt_in =='yes' && !wp_next_scheduled('tpa_extra_data_update')) {
@@ -199,20 +417,22 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			wp_clear_scheduled_hook('tpa_extra_data_update');
 			
 		}
-		/**
-		 * Change string groups
-		 */
-		public function tpa_string_groups() {
-			$string_groups = array(
-				'slugs'           => 'Slugs',
-				'metainformation' => 'Meta Information',
-				'stringlist'      => 'String List',
-				'gettextstrings'  => 'Gettext Strings',
-				'images'          => 'Images',
-				'dynamicstrings'  => 'Dynamically Added Strings',
-			);
-			return $string_groups;
-		}
+	/**
+	 * Change string groups
+	 */
+	public function tpa_string_groups() {
+		$string_groups = array(
+			'slugs'           => 'Slugs',
+			'metainformation' => 'Meta Information',
+			'stringlist'      => 'String List',
+			'gettextstrings'  => 'Gettext Strings',
+			'images'          => 'Images',
+			'videos'          => 'Videos',
+			'audios'          => 'Audios',
+			'dynamicstrings'  => 'Dynamically Added Strings',
+		);
+		return $string_groups;
+	}
 
 
 		/**
@@ -221,40 +441,43 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			public function tpa_update_translate_data() {
 		// Verify nonce
 		if ( ! check_ajax_referer( 'auto-translate-press-nonces', false ) ) {
-			wp_send_json_error( esc_html__( 'Invalid security token sent.', 'TPA' ) );
+			wp_send_json_error( esc_html__( 'Invalid security token sent.', 'automatic-translate-addon-for-translatepress' ) );
 			wp_die( '0', 400 );
 			exit();
 		}
 
 		// Check user capabilities
 		if (!current_user_can('manage_options')) {
-			wp_send_json_error(array('message' => esc_html__('You do not have permission to modify translation data.', 'TPA')));
+			wp_send_json_error(array('message' => esc_html__('You do not have permission to modify translation data.', 'automatic-translate-addon-for-translatepress')));
 			wp_die();
 		}
 		
 		// Validate and decode the JSON data
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON data will be decoded and sanitized after json_decode()
 		$raw_data = isset($_POST['data']) ? wp_unslash($_POST['data']) : '';
 		if (empty($raw_data)) {
-			wp_send_json_error(esc_html__('No data provided.', 'TPA'));
+			wp_send_json_error(esc_html__('No data provided.', 'automatic-translate-addon-for-translatepress'));
 			wp_die();
 		}
 		
 		// Validate JSON structure before processing
 		$data = json_decode($raw_data, true);
+		// Sanitize decoded data
+		$data = is_array($data) ? array_map('sanitize_text_field', $data) : array();
 		if (json_last_error() !== JSON_ERROR_NONE) {
-			wp_send_json_error(esc_html__('Invalid JSON data provided.', 'TPA'));
+			wp_send_json_error(esc_html__('Invalid JSON data provided.', 'automatic-translate-addon-for-translatepress'));
 			wp_die();
 		}
 		
 		// Additional validation for JSON structure
 		if (!is_array($data)) {
-			wp_send_json_error(esc_html__('JSON data must decode to an array.', 'TPA'));
+			wp_send_json_error(esc_html__('JSON data must decode to an array.', 'automatic-translate-addon-for-translatepress'));
 			wp_die();
 		}
 			$provider = isset($data['provider']) ? sanitize_text_field($data['provider']) : '';
 			$total_word_count = isset($data['totalWordCount']) ? absint($data['totalWordCount']) : 0;
 			$total_char_count = isset($data['totalCharacterCount']) ? absint($data['totalCharacterCount']) : 0;
-			$date = isset($data['date']) ? date('Y-m-d H:i:s', strtotime(sanitize_text_field($data['date']))) : '';
+			$date = isset($data['date']) ? gmdate('Y-m-d H:i:s', strtotime(sanitize_text_field($data['date']))) : '';
 			$source_lang = isset($data['default_lang']) ? sanitize_text_field($data['default_lang']) : '';
 			$target_lang = isset($data['language_code']) ? sanitize_text_field($data['language_code']) : '';
 			$time_taken = isset($data['timeTaken']) ? absint($data['timeTaken']) : 0;
@@ -282,12 +505,12 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				wp_send_json_success(
 					die()
 				// 	array(
-				// 	'message' => __('Translation data updated successfully', 'tpap')
+				// 	'message' => __('Translation data updated successfully', 'automatic-translate-addon-for-translatepress')
 				// )
 			);
 			} else {
 				wp_send_json_error(array(
-					'message' => esc_html__('Tpa_Dashboard class not found', 'tpap') 
+					'message' => esc_html__('Tpa_Dashboard class not found', 'automatic-translate-addon-for-translatepress') 
 				));
 			}
 			exit;
@@ -317,7 +540,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function tpa_hide_unrelated_notices()
 			{ // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded, Generic.Metrics.NestingLevel.MaxExceeded
 				$cfkef_pages = false;
-
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key()
 				if(isset($_GET['page']) && sanitize_key($_GET['page']) == 'translatepress-tpap-dashboard'){
 					$cfkef_pages = true;
 				}
@@ -392,7 +615,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		 */
 
 		public function tpa_load_plugin_text_domain(){
-			
+			// phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- Required for custom text domain loading
 			load_plugin_textdomain( 'TPA', false, basename( dirname( TPA_FILE ) ) . '/languages/' );
 			if(!get_option('tpa-install-date')) {
 				add_option('tpa-install-date', gmdate('Y-m-d h:i:s'));
@@ -419,8 +642,9 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		 * Hooked to trp_translation_manager_footer.
 		 */
 		public function tpa_register_assets() {
-			wp_register_script( 'tpscript', TPA_URL . 'assets/js/tpa-custom-script.js', array( 'jquery', 'jquery-ui-dialog' ), TPA_VERSION );
 			wp_register_script( 'tpa-yandex-widget', TPA_URL . 'assets/js/widget.js?widgetId=ytWidget&pageLang=en&widgetTheme=light&autoMode=false', array(), TPA_VERSION, true );
+			wp_register_script( 'tpa-chrome-ai-translation', TPA_URL . 'assets/js/chrome-ai-translation.js', array(), TPA_VERSION, true );
+			wp_register_script( 'tpscript', TPA_URL . 'assets/js/tpa-custom-script.js', array( 'jquery', 'jquery-ui-dialog', 'tpa-chrome-ai-translation' ), TPA_VERSION, true );
 			wp_register_style( 'tpa-editor-styles', TPA_URL . 'assets/css/tpa-custom.css', null, TPA_VERSION, 'all' );
 			$extra_data['preloader_path'] = TPA_URL . '/assets/images/preloader.gif';
 			$extra_data['gt_preview']     = TPA_URL . '/assets/images/google.png';
@@ -434,6 +658,12 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			$extra_data['nonce']          = wp_create_nonce( 'auto-translate-press-nonces' );
 			$extra_data['plugin_url']     = plugins_url();
 			$extra_data['post_id']        = get_the_ID();
+			$extra_data['provider_yandex_enabled'] = get_option('tpa_provider_yandex_enabled', '1');
+			$extra_data['provider_chrome_enabled'] = get_option('tpa_provider_chrome_enabled', '1');
+			$extra_data['chrome_ai_bypass_browser_check'] = get_option('tpa_chrome_ai_bypass_browser_check', '0');
+			$extra_data['chrome_ai_bypass_security_check'] = get_option('tpa_chrome_ai_bypass_security_check', '0');
+			$extra_data['chrome_ai_bypass_api_check'] = get_option('tpa_chrome_ai_bypass_api_check', '0');
+			wp_enqueue_script( 'tpa-chrome-ai-translation' );
 			wp_enqueue_script( 'tpscript' );
 			wp_localize_script( 'tpscript', 'extradata', $extra_data );
 			wp_enqueue_script( 'tpa-yandex-widget' );
@@ -446,13 +676,13 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function tpa_getstrings() {
 			// Verify nonce
 			if (!check_ajax_referer('auto-translate-press-nonces', false)) {
-				wp_send_json_error(array('message' => esc_html__('Security check failed.', 'TPA')));
+				wp_send_json_error(array('message' => esc_html__('Security check failed.', 'automatic-translate-addon-for-translatepress')));
 				wp_die();
 			}
 
 			// Check user capabilities
 			if (!current_user_can('manage_options')) {
-				wp_send_json_error(array('message' => esc_html__('You do not have permission to access translation strings.', 'TPA')));
+				wp_send_json_error(array('message' => esc_html__('You do not have permission to access translation strings.', 'automatic-translate-addon-for-translatepress')));
 				wp_die();
 			}
 
@@ -460,10 +690,10 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			global $wpdb;
 			$result           = array();
 			$data             = array();
-			$default_code     = isset( $_POST['data'] ) ? sanitize_text_field( $_POST['data'] ) : '';
-			$default_language = isset( $_POST['default_lang'] ) ? sanitize_text_field( $_POST['default_lang'] ) : '';
-			$current_page_id  = isset( $_POST['dictionary_id'] ) ? sanitize_text_field( $_POST['dictionary_id'] ) : '';
-			$gettxt_id        = isset( $_POST['gettxt_id'] ) ? sanitize_text_field( $_POST['gettxt_id'] ) : '';
+			$default_code     = isset( $_POST['data'] ) ? sanitize_text_field( wp_unslash( $_POST['data'] ) ) : '';
+			$default_language = isset( $_POST['default_lang'] ) ? sanitize_text_field( wp_unslash( $_POST['default_lang'] ) ) : '';
+			$current_page_id  = isset( $_POST['dictionary_id'] ) ? sanitize_text_field( wp_unslash( $_POST['dictionary_id'] ) ) : '';
+			$gettxt_id        = isset( $_POST['gettxt_id'] ) ? sanitize_text_field( wp_unslash( $_POST['gettxt_id'] ) ) : '';
 			$strings_ID       = explode( ',', $current_page_id );
 			$get_txt_ids      = explode( ',', $gettxt_id );
 			$in_str_arrs      = array_fill( 0, count( $get_txt_ids ), '%d' );
@@ -493,15 +723,20 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			$table1_name = esc_sql($table1);
 			$table2_name = esc_sql($table2);
 			
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are validated and escaped with esc_sql(), placeholders are properly prepared
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Querying TranslatePress plugin tables (not WordPress core), caching not applicable for dynamic translation data
 			$results_gettxt = $wpdb->get_results(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are validated and escaped with esc_sql(), placeholders are properly prepared
 					"SELECT id, original_id, original FROM {$table1_name} WHERE id IN ($in_str_placeholders) AND status != %s",
 					array_merge($sanitized_strings_ID, array('2'))
 				)
 			);
 			
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Querying TranslatePress plugin tables (not WordPress core), caching not applicable for dynamic translation data
 			$results = $wpdb->get_results(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are validated and escaped with esc_sql(), placeholders are properly prepared
 					"SELECT id, original FROM {$table2_name} WHERE id IN ($in_strs_placeholders) AND status != %s",
 					array_merge($sanitized_get_txt_ids, array('2'))
 				)
@@ -512,7 +747,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 					$original_id = isset( $row->original_id ) ? absint( $row->original_id ) : '';
 					$original    = isset( $row->original ) ? $row->original : '';
 					$string      = htmlspecialchars_decode( $original );
-					if ( $string != strip_tags( $string ) ) {
+					if ( $string != wp_strip_all_tags( $string ) ) {
 						continue;
 					} elseif ( preg_match( $reg_exUrl, $string ) ) {
 						continue;
@@ -538,19 +773,19 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function tpa_save_translations() {
 			// Verify nonce
 			if (!check_ajax_referer('auto-translate-press-nonces', false)) {
-				wp_send_json_error(array('message' => esc_html__('Security check failed.', 'TPA')));
+				wp_send_json_error(array('message' => esc_html__('Security check failed.', 'automatic-translate-addon-for-translatepress')));
 				wp_die();
 			}
 
 			// Check user capabilities
 			if (!current_user_can('manage_options')) {
-				wp_send_json_error(array('message' => esc_html__('You do not have permission to modify translations.', 'TPA')));
+				wp_send_json_error(array('message' => esc_html__('You do not have permission to modify translations.', 'automatic-translate-addon-for-translatepress')));
 				wp_die();
 			}
 
 			// Validate POST data
 			if (!isset($_POST['data']) || empty($_POST['data'])) {
-				wp_send_json_error(array('message' => esc_html__('No translation data provided.', 'TPA')));
+				wp_send_json_error(array('message' => esc_html__('No translation data provided.', 'automatic-translate-addon-for-translatepress')));
 				wp_die();
 			}
 
@@ -561,7 +796,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			$decoded_data = json_decode($raw_data, true);
 			
 			if (json_last_error() !== JSON_ERROR_NONE) {
-				wp_send_json_error(array('message' => esc_html__('Invalid JSON data provided.', 'TPA')));
+				wp_send_json_error(array('message' => esc_html__('Invalid JSON data provided.', 'automatic-translate-addon-for-translatepress')));
 				wp_die();
 			}
 			
@@ -649,9 +884,11 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			if ($update && isset($data[$primary_key])) {
 				// Use update if primary key exists
 				$where = array($primary_key => $data[$primary_key]);
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Using standard WordPress $wpdb->update() method for TranslatePress plugin tables
 				$result = $wpdb->update($table_name, $data, $where);
 			} else {
 				// Use insert for new rows
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Using standard WordPress $wpdb->insert() method for TranslatePress plugin tables
 				$result = $wpdb->insert($table_name, $data);
 			}
 			
@@ -666,7 +903,9 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 	public static function tpa_get_user_info() {
 		global $wpdb;
 		$server_info = [
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- $_SERVER variables don't require unslashing
 		'server_software'        => sanitize_text_field($_SERVER['SERVER_SOFTWARE'] ?? 'N/A'),
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- MySQL version query, caching not necessary as version rarely changes
 		'mysql_version'          => sanitize_text_field($wpdb->get_var("SELECT VERSION()")),
 		'php_version'            => sanitize_text_field(phpversion()),
 		'wp_version'             => sanitize_text_field(get_bloginfo('version')),

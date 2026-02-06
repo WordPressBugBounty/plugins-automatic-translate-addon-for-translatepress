@@ -35,7 +35,7 @@ if (!class_exists('TPA_cronjob')) {
 
                 $schedules['every_30_days'] = array(
                     'interval' => 30 * 24 * 60 * 60, // 2,592,000 seconds
-                    'display'  => __('Once every 30 days'),
+                    'display'  => __('Once every 30 days', 'automatic-translate-addon-for-translatepress'),
                 );
             }
 
@@ -105,7 +105,10 @@ if (!class_exists('TPA_cronjob')) {
             ));
 
             if (is_wp_error($response)) {
-                error_log('TPA Feedback Send Failed: ' . $response->get_error_message());
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Only logs in debug mode
+                    error_log('TPA Feedback Send Failed: ' . $response->get_error_message());
+                }
                 return;
             }
             

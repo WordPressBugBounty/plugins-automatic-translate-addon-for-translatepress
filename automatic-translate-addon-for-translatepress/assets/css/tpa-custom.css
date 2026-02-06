@@ -1,3 +1,14 @@
+.chrome-ai-translator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+button#tpa-auto-btn:disabled {
+    color: #555555;
+}
+
 span.proonly-button a {
     color: #fff;
     text-decoration: none;
@@ -12,7 +23,7 @@ span.proonly-button.alsofree img {
     -webkit-filter: brightness(10);
 }
 
-#tpa_strings_model {
+.tpa_custom_model {
     display: none;
     position: fixed;
     z-index: 99999;
@@ -23,15 +34,17 @@ span.proonly-button.alsofree img {
     background-color: rgba(0, 0, 0, 0.75);
 }
 
-#tpa_strings_model .translator-widget {
+.tpa_custom_model .translator-widget {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-#tpa_strings_model #ytWidget {
+.tpa_custom_model #ytWidget {
     margin: 20px 20px 10px 0px;
   }
 
-#tpa_strings_model .modal-content {
+.tpa_custom_model .modal-content {
     position: relative;
     background-color: #fefefe;
     width: 80%;
@@ -70,7 +83,7 @@ span.proonly-button.alsofree img {
     }
 }
 
-#tpa_strings_model .modal-header {
+.tpa_custom_model .modal-header {
     padding: 2px 16px;
     background: linear-gradient(to right, #e55860, #28aef6);
     color: white;
@@ -80,7 +93,7 @@ span.proonly-button.alsofree img {
     position: relative;
 }
 
-#tpa_strings_model .modal-header h2 {
+.tpa_custom_model .modal-header h2 {
     display: inline-block;
     font-size: 18px;
     color: white;
@@ -90,7 +103,7 @@ span.proonly-button.alsofree img {
 }
 
 /* The Close Button */
-#tpa_strings_model .modal-header .close {
+.tpa_custom_model .modal-header .close {
     color: white;
     font-size: 28px;
     font-weight: bold;
@@ -99,31 +112,31 @@ span.proonly-button.alsofree img {
     /* top: 20px; */
 }
 
-#tpa_strings_model.tpa-rtl .modal-header .close  {
+.tpa_custom_model.tpa-rtl .modal-header .close  {
     left: 10px !important;
     right: auto !important;
 }
 
-#tpa_strings_model .modal-header .close:hover,
-#tpa_strings_model .modal-header .close:focus {
+.tpa_custom_model .modal-header .close:hover,
+.tpa_custom_model .modal-header .close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
 }
 
-#tpa_strings_model .save_btn_cont {
+.tpa_custom_model .save_btn_cont {
     margin: 8px;
     position: absolute;
     top: 10px;
     right: 40px;
 }
 
-#tpa_strings_model.tpa-rtl .save_btn_cont {
+.tpa_custom_model.tpa-rtl .save_btn_cont {
     left: 40px !important;
     right: auto !important;
 }
 
-#tpa_strings_model .save_btn_cont button:not([disabled]):before {
+.tpa_custom_model .save_btn_cont button:not([disabled]):before {
     font-family: dashicons;
     content: "\f345";
     display: inline-block;
@@ -147,32 +160,31 @@ span.proonly-button.alsofree img {
     }
 }
 
-#tpa_strings_model .ytstats {
+.tpa_custom_model .tpa-stats {
     padding: 0;
     margin: 5px 5px 5px 0;
     width: calc(100% - 160px);
     font-size: 12px;
 }
 
-#tpa_strings_model .ytstats a {
+.tpa_custom_model .tpa-stats a {
     color: #fff936;
 }
 
-#tpa_strings_model .modal-footer .ytstats {
+.tpa_custom_model .modal-footer .tpa-stats {
     margin: 25px 5px 5px 0;
 }
 
-#tpa_strings_model .modal-body {
+.tpa_custom_model .modal-body {
     padding: 2px 16px;
     position: relative;
 }
 
-#tpa_strings_model .notice-dismiss {
+.tpa_custom_model .notice-dismiss {
     padding: 0;
 }
 
-#tpa_strings_model h3 {
-    width: 100%;
+.tpa_custom_model h3 {
     display: inline-block;
     font-size: 22px;
     padding: 0;
@@ -184,7 +196,7 @@ span.proonly-button.alsofree img {
     margin-bottom: 25px;
 }
 
-#tpa_strings_model .string_container {
+.tpa_custom_model .string_container {
     overflow-y: scroll;
     overflow-x: hidden;
     height: calc(100vh - 408px);
@@ -192,7 +204,7 @@ span.proonly-button.alsofree img {
     position: relative;
 }
 
-#tpa_strings_model table {
+.tpa_custom_model table {
     border-spacing: 0;
     border-collapse: collapse;
     width: 100%;
@@ -202,14 +214,14 @@ span.proonly-button.alsofree img {
     margin: 0;
 }
 
-#tpa_strings_model table td:first-child,
-#tpa_strings_model table th:first-child {
+.tpa_custom_model table td:first-child,
+.tpa_custom_model table th:first-child {
     width: 60px;
     text-align: center;
 }
 
-#tpa_strings_model table td,
-#tpa_strings_model table th {
+.tpa_custom_model table td,
+.tpa_custom_model table th {
     border: 1px solid #ddd;
     padding: 4px;
     height: 26px;
@@ -273,7 +285,7 @@ span.proonly-button.alsofree img {
   }
   
 
-#tpa_strings_model .my_translate_progress {
+.tpa_custom_model .my_translate_progress {
     position: absolute;
     display: none;
     top: 0;
@@ -292,7 +304,7 @@ span.proonly-button.alsofree img {
     padding-top: 30px;
 }
 
-#tpa_strings_model .modal-footer {
+.tpa_custom_model .modal-footer {
     padding: 2px 16px;
     background: linear-gradient(to right, #e55860, #28aef6);
 
@@ -348,7 +360,6 @@ span.proonly-button.alsofree img {
 .ui-dialog-titlebar-close:before {
     font: normal 20px/1 dashicons;
     vertical-align: top;
-    speak: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.8;
@@ -391,6 +402,7 @@ span.proonly-button.alsofree img {
     border-width: 1px;
     border-style: solid;
     -webkit-appearance: none;
+    appearance: none;
     border-radius: 3px;
     white-space: nowrap;
     box-sizing: border-box;
@@ -409,7 +421,7 @@ div#tpa-dialog {
     float: right;
 }
 
-ul li {
+ul li:not(.nested-list li) {
     list-style: none;
 }
 
@@ -418,6 +430,31 @@ strong.tpa-heading {
     color: #000000;
     font-size: 15px;
     line-height: 1.4em;
+}
+
+button.tpa-error-reload-btn{
+    background: #0073aa;
+    color: #fff !important;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px;
+    cursor: pointer;
+  }
+  
+  button.tpa-error-reload-btn:hover{
+    background: #005682;
+  }
+
+
+.chrome_ai_translator_btn {
+    padding: .4rem;
+    border: 1px solid #2271b1;
+    background: #2271b1;
+    color: white;
+    font-size: .9rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all .3s ease;
 }
 
 #tpa-dialog .tpa-translator-icon{
@@ -486,6 +523,7 @@ div.ui-dialog[aria-describedby="tpa-dialog"] span.ui-dialog-title{
     border-width: 1px;
     border-style: solid;
     -webkit-appearance: none;
+    appearance: none;
     border-radius: 3px;
     white-space: nowrap;
     box-sizing: border-box;
@@ -590,7 +628,6 @@ div.updated {
     content: "\f153";
     display: block;
     font: normal 16px/20px dashicons;
-    speak: none;
     height: 20px;
     text-align: center;
     width: 20px;
@@ -628,6 +665,7 @@ ul.tpa-feature {
 }
 
 button.notranslate.save_it.button.button-primary {
+    display: none;
     cursor: pointer;
     line-height: 26px;
     min-height: 30px !important;
@@ -1000,6 +1038,7 @@ div.ui-dialog[aria-describedby="tpa-dialog"] {
     border-width: 1px;
     border-style: solid;
     -webkit-appearance: none;
+    appearance: none;
     border-radius: 3px;
     box-sizing: border-box;
     font-family: inherit;
@@ -1045,6 +1084,14 @@ div.ui-dialog[aria-describedby="tpa-dialog"] {
     border-color: #c72a20;
     color: #fff;
   }
+
+  div.ui-dialog[aria-describedby="tpa-dialog"] .tpa-provider-btn.error.error-disabled {
+    background: #cfd5d1;
+    border-color: #cfd5d1;
+    color: #7f7f7f;
+    cursor: not-allowed;
+    border-radius: 5px;
+  }
   
   div.ui-dialog[aria-describedby="tpa-dialog"] .tpa-provider-btn.api-key {
     background: #3db63d;
@@ -1075,4 +1122,9 @@ button#tpa_chromeai_translator_btn:disabled {
     color: #fff;
     cursor: not-allowed;
     border-radius: 5px;
+}
+
+/* Skeleton Loading CSS */
+.tpa-preloader-wrap {
+    padding: 20px;
 }

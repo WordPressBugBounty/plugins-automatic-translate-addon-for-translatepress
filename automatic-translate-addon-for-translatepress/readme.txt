@@ -1,11 +1,11 @@
-﻿=== AI Translation for TranslatePress ===
+﻿=== AI Translation For TranslatePress ===
 Contributors: narinder-singh, satindersingh, coolplugins
 Donate link: https://paypal.me/CoolPlugins/10USD/
 Tags: AI translation, translate, Translatepress, multilingual, automatic translation
 Requires at least: 5.0
-Tested up to: 6.8.2
+Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 1.2.7
+Stable tag: 2.0.1
 License: GPLv2 or later 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Auto-translate unlimited strings and characters using AI & Machine Translation tools without any external API Key!
@@ -14,7 +14,7 @@ Auto-translate unlimited strings and characters using AI & Machine Translation t
 
 https://youtu.be/kgu4hWn7bms
 
-**[AI Translation for TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=top_description)** is a powerful TranslatePress extension that enhances the functionality of the TranslatePress plugin. This addon uses advanced translation services, like Google Translate, Yandex, and Chrome AI translator, to provide accurate and instant translations for your web pages automatically.
+**[AI Translation For TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=top_description)** is a powerful TranslatePress extension that enhances the functionality of the TranslatePress plugin. This addon uses advanced translation services, like Google Translate, Yandex, and Chrome AI translator, to provide accurate and instant translations for your web pages automatically.
 
 Powered by advanced AI translator resources, it delivers accurate and fast translations, helping you reach a global audience with ease.
 
@@ -41,14 +41,13 @@ https://youtu.be/OyTHWn5CyKw
 **Free Version:**
 
 ✅ Supports the Yandex Translate widget for automatic translations
+✅ Supports the Chrome Built-in AI for automatic translations
 ✅ Unlimited translations (via Yandex)
 ❌ No Google Translate widget
-❌ No Chrome Built-in AI
 ❌ No Premium Support
 
 **Pro Version:**
 
-✅ Chrome Built-in AI for high-quality AI translations
 ✅ Google Translate widget for accurate translations
 ✅ Unlimited translations without API keys
 ✅ Premium Support (24-48 hour response time)
@@ -61,7 +60,7 @@ https://youtu.be/OyTHWn5CyKw
 
 * **[LocoAI – Auto Translate for Loco Translate](https://locoaddon.com/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=atlt_check_out)** is an addon that enhances the functionality of the Loco Translate plugin by enabling the automatic translation of WordPress themes and plugins. This addon connects with sources like Google, Yandex, DeepL, or AI-powered sources like ChatGPT, Gemini AI and Chrome AI to provide instant and automated translations.
 * **[AutoPoly - AI Translation For Polylang](https://coolplugins.net/product/automatic-translations-for-polylang/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=atfp_check_out)** duplicates your page or post titles, content, images, galleries, or meta fields, and automatically translates them into the selected language. Whether you're using Elementor or Gutenberg, this addon makes the translation process easier.
-
+* **[Linguator AI – Auto Translate & Create Multilingual Sites](https://go.coolplugins.net/ai-multilingual)** is a powerful multilingual plugin that helps you create and manage multilingual content on your WordPress website. Easily translate your **posts, pages, menus,** and **categories** into different languages using AI and connect with visitors worldwide.
 ### Special THANKS!
 Special thanks to [TranslatePress – Translate Multilingual sites](https://wordpress.org/plugins/translatepress-multilingual/) plugin author, cozmoslabs, Razvan Mocanu, for creating an awesome plugin for translations and also thanks to Yandex for providing a translate widget for websites.
 
@@ -78,7 +77,7 @@ Special thanks to [TranslatePress – Translate Multilingual sites](https://word
 * Install **AI Translation for TranslatePress** from the **WordPress.org repository** or upload the plugin-zip unzipped folder to the **/wp-content/plugins directory**.
 * Activate the plugin through **Plugins >> Installed Plugin** menu in WordPress.
 * Now you can translate any page content within a single click.
-* If you want to use Google Translate Widget and Chrome built-in AI for automatic translation, then you need to purchase [premium plugin](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=installation).
+* If you want to use Google Translate Widget for automatic translation, then you need to purchase [premium plugin](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=installation).
 
 == Frequently Asked Questions ==
 
@@ -104,12 +103,23 @@ Yes, you need to install and activate the free version of "TranslatePress – Tr
 The pro version offers additional features like using the Google Translate widget and Chrome's built-in AI for automatic translation.
 
 = How do I set up Chrome's built-in AI translation? =
-Since this is a beta feature, detailed setup instructions are required. Please refer to the Chrome AI Translator API documentation for a step-by-step guide: [Chrome AI Translator API documentation](https://developer.chrome.com/docs/ai/translator-api)
+For Chrome's built-in AI translation, detailed setup instructions are required. Please refer to the Chrome AI Translator API documentation for a step-by-step guide: [Chrome AI Translator API documentation](https://developer.chrome.com/docs/ai/translator-api)
 
 = How can I report security bugs? =
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage, and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+= Version 2.0.1 || 02/Feburary/2026 = 
+- **Improved:** Code improvement.
+
+= Version 2.0.0 || 27/January/2026 = 
+- **Fixed:** Issues reported by “Plugin Check” plugin.
+- **Added:** Google Chrome AI Translation Support.
+- **Improvements:** Reduce number of clicks while translation.
+
+= Version 1.2.8 || 03/November/2025 = 
+- **Fixed:** Minor changes.
+- **Added:** Added other plugin recommendations to create multilingual site.
 
 = Version 1.2.7 || 30/September/2025 = 
 - **Improved:** Review notice.

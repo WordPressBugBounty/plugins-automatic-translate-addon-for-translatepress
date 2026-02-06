@@ -260,16 +260,100 @@ a.tpa-dashboard-docs:hover {
     height: 25px;
 }
 
-.tpa-dashboard-badge {
-    background: #131413;
-    color: #fff;
-    padding: 2px 8px;
-    font-size: 12px;
-    border-radius: 12px;
+/* Provider Toggle Switch */
+.tpa-provider-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    margin: 0;
 }
 
-.tpa-dashboard-badge.free {
-    background: var(--primary-color);
+.tpa-provider-switch .tpa-provider-toggle {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.tpa-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.tpa-switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.tpa-provider-toggle:checked + .tpa-switch-slider {
+    background-color: var(--primary-color);
+}
+
+.tpa-provider-toggle:checked + .tpa-switch-slider:before {
+    transform: translateX(20px);
+}
+
+.tpa-provider-toggle:disabled + .tpa-switch-slider {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.tpa-provider-toggle:disabled:checked + .tpa-switch-slider {
+    background-color: #e0e0e0;
+}
+
+.tpa-provider-toggle:focus + .tpa-switch-slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+/* Pro Tag on Hover */
+.tpa-pro-provider {
+    position: relative;
+}
+
+.tpa-pro-provider:hover::after {
+    content: "Pro";
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e45860; /* Match secondary color */
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+
+.tpa-pro-provider:hover::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #e45860;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .tpa-dashboard-provider-buttons {
@@ -888,4 +972,53 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 
 .tpa-dashboard-settings .tpa-dashboard-settings-container p {
     font-size: 14px;
+}
+
+/* ================================================
+   Tooltip & Clipboard
+================================================ */
+
+/* Tooltip container */
+.tapa-tooltip-element {
+    position: relative;
+    display: inline-block;
+}
+
+/* Tooltip text */
+.tapa-tooltip {
+    visibility: hidden;
+    width: 120px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+/* Tooltip arrow */
+.tapa-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+/* Show the tooltip when active */
+.tapa-tooltip.tapa-tooltip-active {
+    visibility: visible;
+    opacity: 1;
 }

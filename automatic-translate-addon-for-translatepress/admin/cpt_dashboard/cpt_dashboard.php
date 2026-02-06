@@ -223,6 +223,15 @@ if(!class_exists('Tpa_Dashboard')){
             }
         }
 
+        public static function format_number_count($number){
+            if ($number >= 1000000) {
+                return round($number / 1000000, 1) . 'M';
+            } elseif ($number >= 1000) {
+                return round($number / 1000, 1) . 'K';
+            }
+            return $number;
+        }
+
         public static function review_notice($prefix, $plugin_name, $url){
             if(self::tpa_hide_review_notice_status($prefix)){
                 return;
@@ -236,13 +245,17 @@ if(!class_exists('Tpa_Dashboard')){
                 return;
             }
 
+            $total_character_count = self::format_number_count($total_character_count);
+
             add_action('admin_enqueue_scripts', array(self::class, 'ctp_enqueue_assets'));
 
+            $cool_plugins_url = esc_url('https://coolplugins.net/');
             $message = sprintf(
-                '%s %s<br>%s<br>',
-                __('Thanks for using', 'cp-notice') . ' <b>' . $plugin_name . '</b>',
-                __('- WordPress plugin. We hope you liked it!', 'cp-notice'),
-                __('Please give us a quick rating, it works as a boost for us to keep working on more <a style="text-decoration: none;" href="https://coolplugins.net/" target="_blank" rel="noopener noreferrer"><b>Cool Plugins</b></a>!', 'cp-notice')
+                // translators: %1$s: Plugin name, %2$s: Number of characters translated, %3$s: Cool Plugins URL
+                __('Thanks for using <b>%1$s</b>! You have translated <b>%2$s</b> characters so far using our plugin!<br>Please give us a quick rating, it works as a boost for us to keep working on more <a style="text-decoration: none;" href="%3$s" target="_blank" rel="noopener noreferrer"><b>Cool Plugins</b></a>!', 'automatic-translate-addon-for-translatepress'),
+                $plugin_name,
+                $total_character_count,
+                $cool_plugins_url
             );
 
             $prefix = sanitize_key($prefix);
@@ -253,7 +266,7 @@ if(!class_exists('Tpa_Dashboard')){
 
                 $html= '<div class="notice notice-info is-dismissible cpt-review-notice">';
                 
-                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'cp-notice').'</button><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'cp-notice').'</button></div></div></div>';
+                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'automatic-translate-addon-for-translatepress').'</button><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'automatic-translate-addon-for-translatepress').'</button></div></div></div>';
                 
                 echo wp_kses_post($html);
             });
@@ -262,7 +275,7 @@ if(!class_exists('Tpa_Dashboard')){
                 
                 $html= '<div class="notice notice-info is-dismissible cpt-review-notice">';
                 
-                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'cp-notice').'</button><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'cp-notice').'</button></div></div></div>';
+                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'automatic-translate-addon-for-translatepress').'</button><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'automatic-translate-addon-for-translatepress').'</button></div></div></div>';
                 
                 echo wp_kses_post($html);
             });
@@ -277,12 +290,12 @@ if(!class_exists('Tpa_Dashboard')){
 
             // Check user capabilities first - restrict to administrators only
             if ( ! current_user_can( 'manage_options' ) ) {
-                wp_send_json_error( esc_html__( 'Insufficient permissions to dismiss notices. Administrator access required.', 'tpap' ) );
+                wp_send_json_error( esc_html__( 'Insufficient permissions to dismiss notices. Administrator access required.', 'automatic-translate-addon-for-translatepress' ) );
                 return;
             }
 
-            if(wp_verify_nonce($_POST['nonce'], 'tpa_hide_review_notice')){
-                $prefix = sanitize_key($_POST['prefix']);
+            if(isset($_POST['nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'tpa_hide_review_notice')){
+                $prefix = isset($_POST['prefix']) ? sanitize_key(wp_unslash($_POST['prefix'])) : 'tpa';
                 $review_notice_dismissed = get_option('cpt_review_notice_dismissed', array());
                 $review_notice_dismissed[$prefix] = true;
                 update_option('cpt_review_notice_dismissed', $review_notice_dismissed);
@@ -293,3 +306,4 @@ if(!class_exists('Tpa_Dashboard')){
         }
     }
 }
+     

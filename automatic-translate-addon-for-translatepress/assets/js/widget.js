@@ -155,7 +155,7 @@ var page_lang = localStorage.getItem("page_lang");
             pageLang = options.pageLang,
             userLang = options.userLang,
             translator = options.translator,
-            //leftButton = options.leftButton,
+            leftButton = options.leftButton,
             rightButton = options.rightButton,
             closeButton = options.closeButton,
             defaultLang;
@@ -179,8 +179,9 @@ var page_lang = localStorage.getItem("page_lang");
             updatePopupSettings();
         };
         select.onChange = function(lang) {
-            // storage.setValue('lang', lang);
-            // rightButton.setText(lang);
+            localStorage.setItem("lang", lang);
+            storage.setValue('lang', lang);
+            rightButton.setText(lang);
             self.setState('invalid', lang === pageLang);
         };
         select.onHiddenChange = function(hidden) {
@@ -231,9 +232,11 @@ var page_lang = localStorage.getItem("page_lang");
         });
         // custom code
         function updatePopupSettings() {
-            var container = $("#tpa_strings_model");
+            var container = $(".tpa_custom_model:visible");
             container.find(".string_container").scrollTop(0);
-            var scrollHeight = container.find('.string_container').get(0).scrollHeight;
+            var scrollContainer = container.find('.string_container').get(0);
+            if (!scrollContainer) return;
+            var scrollHeight = scrollContainer.scrollHeight;
             var scrollSpeed = 800;
             if (scrollHeight > scrollSpeed) {
                 scrollSpeed = scrollHeight;
@@ -262,7 +265,7 @@ var page_lang = localStorage.getItem("page_lang");
                         localStorage.setItem("total_translation_time", (endTime - startTime) / 1000);
                         setTimeout(() => {
                             container.find(".save_it").prop("disabled", false);
-                            container.find(".ytstats").fadeIn("slow");
+                            container.find(".tpa-stats").fadeIn("slow");
                             container.find(".my_translate_progress").fadeOut("slow");
                             container.find(".string_container").stop();
                             $('body').css('top', '0');
@@ -274,7 +277,7 @@ var page_lang = localStorage.getItem("page_lang");
                     localStorage.setItem("total_translation_time", (endTime - startTime) / 1000);
                     setTimeout(() => {
                         container.find(".save_it").prop("disabled", false);
-                        container.find(".ytstats").fadeIn("slow");
+                        container.find(".tpa-stats").fadeIn("slow");
                         container.find(".my_translate_progress").fadeOut("slow");
                         container.find(".string_container").stop();
                         $('body').css('top', '0');
@@ -284,14 +287,24 @@ var page_lang = localStorage.getItem("page_lang");
                 setTimeout(() => {}, 2000);
             }
         }
+        if (leftButton) {
+            leftButton.onClick = function() {
+                var defaultLang = localStorage.getItem("language_code");
+                if (defaultLang) {
+                    switch (defaultLang) {
+                        case 'ki':
+                            defaultLang = 'ky';
+                            break;
+                    }
+                    select.setValue(defaultLang);
+                    select.onSelect(defaultLang);
+                } else {
+                    select.onSelect(select.getValue());
+                }
+            };
+        }
+
         rightButton.onClick = function() {
-            var defaultLang = localStorage.getItem("language_code");
-            switch (defaultLang) {
-                case 'ki':
-                    defaultLang = 'ky';
-                    break;
-              }
-            select.setValue(defaultLang);
             if (self.hasState('active')) {
                 translator.undo();
                 self.setState('busy', false)
@@ -305,10 +318,28 @@ var page_lang = localStorage.getItem("page_lang");
         closeButton.onClick = function() {
             select.setHidden(true);
         };
-        active = storage.getValue('active');
-        if (active || (autoMode && active === undefined)) {
-            // this.translate(defaultLang);
-        }
+        var refreshPrefill = function() {
+            var autoSelectLang = localStorage.getItem("language_code");
+            if (autoSelectLang) {
+                switch (autoSelectLang) {
+                    case 'ki':
+                        autoSelectLang = 'ky';
+                        break;
+                }
+                select.setValue(autoSelectLang);
+                
+                storage.setValue('lang', autoSelectLang);
+                storage.setValue('active', false);
+            }
+        };
+
+        // Run on initial load
+        setTimeout(refreshPrefill, 800);
+
+        // Run every time the modal is opened
+        $(document).on('tpa_yandex_modal_open', function() {
+            refreshPrefill();
+        });
     };
     Widget.prototype.hasState = function(name) {
         return util.hasStyleName(this._element, 'yt-state_' + name);
@@ -372,7 +403,7 @@ var page_lang = localStorage.getItem("page_lang");
                     $('.yandex-widget-container').on('click', '.yt-button__icon.yt-button__icon_type_right', function() {
                         const $container = $(this).closest('.yandex-widget-container');
                         $container.find(".save_btn_cont > .save_it").prop("disabled", true);
-                        $container.find(".ytstats").hide();
+                        $container.find(".tpa-stats").hide();
                     });
 
                     new Widget({
@@ -390,7 +421,7 @@ var page_lang = localStorage.getItem("page_lang");
                             autoSync: true,
                             maxPortionLength: 600
                         }),
-                        //leftButton: new Button(element.querySelector('.yt-button_type_left')),
+                        leftButton: new Button(element.querySelector('.yt-button_type_left')),
                         rightButton: new Button(
                             element.querySelector('.yt-button_type_right'),
                             element.querySelector('.yt-button_type_right > .yt-button__text')

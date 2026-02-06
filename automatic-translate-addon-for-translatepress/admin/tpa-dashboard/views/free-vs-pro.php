@@ -1,24 +1,29 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
 <div class="tpa-dashboard-free-vs-pro">
     <div class="tpa-dashboard-free-vs-pro-container">
     <div class="header">
-        <h1><?php esc_html_e('Free VS Pro', $text_domain); ?></h1>
+        <h1><?php esc_html_e('Free VS Pro', 'automatic-translate-addon-for-translatepress'); ?></h1>
         <div class="tpa-dashboard-status">
-            <span class="status"><?php esc_html_e('Inactive', $text_domain); ?></span>
+            <span class="status"><?php esc_html_e('Inactive', 'automatic-translate-addon-for-translatepress'); ?></span>
             <a href="<?php echo esc_url('https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=freevspro#pricing'); ?>" class='tpa-dashboard-btn' target="_blank">
-              <img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/upgrade-now.svg'); ?>" alt="<?php echo esc_attr(esc_html__('Upgrade Now', $text_domain)); ?>">
-                <?php echo esc_html(esc_html__('Upgrade Now', $text_domain)); ?>
+              <img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/upgrade-now.svg'); ?>" alt="<?php echo esc_attr(esc_html__('Upgrade Now', 'automatic-translate-addon-for-translatepress')); ?>">
+                <?php echo esc_html(esc_html__('Upgrade Now', 'automatic-translate-addon-for-translatepress')); ?>
             </a>
         </div>
     </div>
     
-    <p><?php echo esc_html(esc_html__('Compare the Free and Pro versions to choose the best option for your translation needs.', $text_domain)); ?></p>
+    <p><?php echo esc_html(esc_html__('Compare the Free and Pro versions to choose the best option for your translation needs.', 'automatic-translate-addon-for-translatepress')); ?></p>
 
     <table>
         <thead>
             <tr>
-                <th><?php echo esc_html__('Dynamic Content', $text_domain); ?></th>
-                <th><?php echo esc_html__('Free', $text_domain); ?></th>
-                <th><?php echo esc_html__('Pro', $text_domain); ?></th>
+                <th><?php echo esc_html__('Dynamic Content', 'automatic-translate-addon-for-translatepress'); ?></th>
+                <th><?php echo esc_html__('Free', 'automatic-translate-addon-for-translatepress'); ?></th>
+                <th><?php echo esc_html__('Pro', 'automatic-translate-addon-for-translatepress'); ?></th>
             </tr>
         </thead>
         <tbody>
@@ -28,7 +33,7 @@
                     'No API Key Required' => [true, true],
                     'Unlimited Translations' => [true, true],
                     'Google Translate Widget Support' => [false, true],
-                    'Chrome Built-in AI Support' => [false, true],
+                    'Chrome Built-in AI Support' => [true, true],
                     'Premium Support' => [false, true],
                 ];
              foreach ($features as $feature => $availability): ?>
