@@ -5,10 +5,9 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 2.0.1
+ * Version: 2.0.2
  * License: GPL2
  * Text Domain:automatic-translate-addon-for-translatepress
- * Domain Path: /languages
  * Requires Plugins: translatepress-multilingual
  *
  *  @package TPA
@@ -20,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '2.0.1' );
+define( 'TPA_VERSION', '2.0.2' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -237,7 +236,8 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
                             return;
                         }
 
-                        $pagenow = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
+                        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce already verified in tpa_install_plugin()
+                        $pagenow = isset($_POST['pagenow']) ? sanitize_key(wp_unslash($_POST['pagenow'])) : '';
                         $network_wide = (is_multisite() && 'import' !== $pagenow);
                         $activation_result = activate_plugin($install_status['file'], '', $network_wide, true);
 
@@ -274,7 +274,8 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
                     return;
                 }
 
-                $pagenow = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce already verified in tpa_install_plugin()
+                $pagenow = isset($_POST['pagenow']) ? sanitize_key(wp_unslash($_POST['pagenow'])) : '';
                 $network_wide = (is_multisite() && 'import' !== $pagenow);
                 $activation_result = activate_plugin($install_status['file'], '', $network_wide, true);
                 if (is_wp_error($activation_result)) {

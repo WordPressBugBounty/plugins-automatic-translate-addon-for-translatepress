@@ -5,7 +5,7 @@ Tags: AI translation, translate, Translatepress, multilingual, automatic transla
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Auto-translate unlimited strings and characters using AI & Machine Translation tools without any external API Key!
@@ -68,6 +68,8 @@ Special thanks to [TranslatePress – Translate Multilingual sites](https://word
 [Yandex Translate Terms](https://yandex.com/legal/translate_termsofuse/)
 [Yandex Privacy Policy](https://yandex.com/legal/confidential/)
 
+**Use of 3rd Party Services:** This plugin connects to the Cool Plugins feedback server only for optional usage data sharing and voluntary feedback submission (for example, during plugin deactivation). Data is transmitted solely after explicit user consent. No hidden tracking is performed, and no frontend visitor or site user data is collected.  For more details, please review our [Data Usage Policy](https://my.coolplugins.net/terms/usage-tracking/), [TOS](https://my.coolplugins.net/terms/), and [Privacy Policy](https://my.coolplugins.net/terms/privacy-policy/).
+
 == Screenshots ==
 
 1. Automatic translation content preview with Yandex Widget.
@@ -109,6 +111,9 @@ For Chrome's built-in AI translation, detailed setup instructions are required. 
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage, and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+= Version 2.0.2 || 20/Feburary/2026 = 
+- **Fixed:** Issues reported by “Plugin Check” plugin.
+
 = Version 2.0.1 || 02/Feburary/2026 = 
 - **Improved:** Code improvement.
 
@@ -211,12 +216,5 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 
 == Upgrade Notice ==
-= Version 1.2.0 || 21/Feb/2025 =
-- **Added:** Progress bar in yandex & google translator.
-- **Added:** Integrated new Popup.
-- **Added:** Stored translated strings information.
-- **Fixed:** Minor Issues.
-- **Improved:** User experience on translation provider popup.
-- **Improved:** Minor textual changes.
-- **Tested upto:** Wordpress 6.7.2.
-- **Tested upto:** TranslatePress version 2.9.5.
+= Version 2.0.2 || 20/Feburary/2026 = 
+- **Fixed:** Issues reported by “Plugin Check” plugin.
