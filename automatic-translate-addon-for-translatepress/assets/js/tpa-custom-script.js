@@ -366,21 +366,144 @@ const tpAutoTranslator = (function (window, $) {
 
   // create auto translate popup
   function createPopup() {
-    var style = $("#tpa-dialog")
-      .dialog({
-        resizable: false,
-        height: "auto",
-        width: 400,
-        modal: true,
-        draggable: false,
-        dialogClass: rtlClass,
-        buttons: {
-          Cancel: function () {
-            $(this).dialog("close");
-          },
-        },
-      })
-      .css("background-color", "#E4D4D4");
+    openProviderModal();
+  }
+
+  function isProviderModalOpen(){
+    return $("#tpa-provider-overlay").is(":visible");
+  }
+
+  function openProviderModal(){
+    const $overlay = $("#tpa-provider-overlay");
+    if(!$overlay.length) return;
+
+    $("body").addClass("tpa-provider-modal-open");
+    $overlay.css("display", "flex").hide().fadeIn(120);
+
+    const $selected = $overlay.find(".tpa-provider-card.is-selected").first();
+    if ($selected.length === 0) {
+      const $firstSelectableTranslate = $overlay.find(".tpa-provider-card").filter(function(){
+        const $card = $(this);
+        if(!isProviderCardSelectable($card)) return false;
+        const $action = $card.find('[data-provider-action-slot]').first();
+        return $action.find('#tpa_yandex_translate_btn, #tpa_chrome_ai_translate_btn').filter(':not(:disabled)').length > 0;
+      }).first();
+      const $fallbackSelectable = $overlay.find(".tpa-provider-card").filter(function(){
+        return isProviderCardSelectable($(this));
+      }).first();
+      selectProviderCard($firstSelectableTranslate.length ? $firstSelectableTranslate : $fallbackSelectable);
+    } else {
+      refreshProviderStartButtonState();
+    }
+  }
+
+  function closeProviderModal(){
+    const $overlay = $("#tpa-provider-overlay");
+    if(!$overlay.length) return;
+    $overlay.fadeOut(120);
+    $("body").removeClass("tpa-provider-modal-open");
+  }
+
+  function isProviderCardSelectable($card){
+    if(!$card || !$card.length) return false;
+    const attr = $card.attr('data-provider-selectable');
+    if (attr === undefined || attr === null || attr === '') return true;
+    return attr === '1' || attr === 'true';
+  }
+
+  function setProviderCardSelectable($card, selectable){
+    if(!$card || !$card.length) return;
+    $card.attr('data-provider-selectable', selectable ? '1' : '0');
+    $card.toggleClass('is-disabled', !selectable);
+    $card.attr('aria-disabled', selectable ? 'false' : 'true');
+    $card.attr('tabindex', selectable ? '0' : '-1');
+    if(!selectable){
+      $card.removeClass('is-selected').attr('aria-pressed','false');
+    }
+  }
+
+  function selectProviderCard($card){
+    if(!$card || !$card.length) return;
+    if(!isProviderCardSelectable($card)) return;
+    const $root = $("#tpa-dialog");
+    $root.find(".tpa-provider-card").removeClass("is-selected").attr("aria-pressed", "false");
+    $card.addClass("is-selected").attr("aria-pressed", "true");
+    refreshProviderStartButtonState();
+  }
+
+  function getProviderStartTarget($card){
+    if(!$card || !$card.length) return null;
+    const $action = $card.find('[data-provider-action-slot]').first();
+    if(!$action.length) return null;
+
+    const $translateBtn = $action.find('#tpa_yandex_translate_btn, #tpa_chrome_ai_translate_btn').filter(':not(:disabled)').first();
+    if($translateBtn.length) return { type: 'click', $el: $translateBtn };
+
+    const $configureBtn = $action.find('.tpa-chromeai-disabled-message:not(:disabled)').first();
+    if($configureBtn.length) return { type: 'click', $el: $configureBtn };
+
+    const $link = $action.find('a[href]').first();
+    if($link.length) return { type: 'href', href: $link.attr('href') };
+
+    return null;
+  }
+
+  function refreshProviderStartButtonState(){
+    const $start = $("#tpa-provider-start");
+    if(!$start.length) return;
+    const $selected = $("#tpa-dialog").find(".tpa-provider-card.is-selected").first();
+    if ($selected.length && !isProviderCardSelectable($selected)) {
+      $start.prop("disabled", true);
+      return;
+    }
+    const target = getProviderStartTarget($selected);
+    $start.prop("disabled", !target);
+  }
+
+  function startSelectedProvider(){
+    const $selected = $("#tpa-dialog").find(".tpa-provider-card.is-selected").first();
+    const target = getProviderStartTarget($selected);
+    if(!target) return;
+    if(target.type === 'click') {
+      target.$el.trigger('click');
+      return;
+    }
+    if(target.type === 'href' && target.href) {
+      window.open(target.href, '_blank');
+    }
+  }
+
+  function bindProviderModalEvents(){
+    $(document).off('click.tpaProviderModal').on('click.tpaProviderModal', '.tpa-provider-card', function(e){
+      const $interactiveTarget = $(e.target).closest('a, button, input, select, textarea');
+      if ($interactiveTarget.length && !$interactiveTarget.is(this)) {
+        return;
+      }
+      e.preventDefault();
+      selectProviderCard($(this));
+    });
+    $(document).off('keydown.tpaProviderModal').on('keydown.tpaProviderModal', '.tpa-provider-card', function(e){
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectProviderCard($(this));
+      }
+    });
+    $(document).off('click.tpaProviderModalStart').on('click.tpaProviderModalStart', '#tpa-provider-start', function(){
+      startSelectedProvider();
+    });
+    $(document).off('click.tpaProviderModalOverlay').on('click.tpaProviderModalOverlay', '#tpa-provider-overlay', function(e){
+      if (e.target && e.target.id === 'tpa-provider-overlay') {
+        closeProviderModal();
+      }
+    });
+    $(document).off('click.tpaProviderModalClose').on('click.tpaProviderModalClose', '.tpa-provider-close', function(){
+      closeProviderModal();
+    });
+    $(document).off('keydown.tpaProviderModalEsc').on('keydown.tpaProviderModalEsc', function(e){
+      if (e.key === 'Escape' && isProviderModalOpen()) {
+        closeProviderModal();
+      }
+    });
   }
 
   //load strings in popup table
@@ -441,11 +564,22 @@ const tpAutoTranslator = (function (window, $) {
       location.reload();
   });
 
+  $(document).on("click", ".tpa_custom_model .tpa-modern-close", function () {
+      $(this).closest(".tpa_custom_model").fadeOut("slow");
+      location.reload();
+  });
+
   // When the user clicks Yandex button, open the modal
 
   function onYandexTranslateClick() {
     var tr_type = "yandex";
-    $(".yandex-widget-container").find(".tpa-preloader-wrap").show();
+    $(".tpa-preloader-wrap").show();
+    $("#tpa-notice-check").hide();
+    $(".modal-body").hide();
+    $(".yandex-widget-container").find(".my_translate_progress").hide();
+    $(".yandex-widget-container").find(".progress-wrapper").hide();
+    $(".yandex-widget-container").find("#myProgressBar").css("width", "0%");
+    $(".yandex-widget-container").find("#progressText").text("0%");
     $(".yandex-widget-container").find(".translator-widget, .string_container, .notice-container, .notice-info, .is-dismissible").hide();
     
     //Add translate attribute with html tag
@@ -469,15 +603,21 @@ const tpAutoTranslator = (function (window, $) {
     //show yandex pop-up
     var style1 = {};
     $("#tpa_yandex_translate_btn").css(style1);
-    $("#tpa-dialog").dialog("close");
-    $(".yandex-widget-container").fadeIn("slow", function() {
+    closeProviderModal();
+    $(".yandex-widget-container").css("display", "flex").hide().fadeIn("slow", function() {
         $(document).trigger('tpa_yandex_modal_open');
     });
   }
   
   function onChromeTranslateClick(){
     var tr_type = $('#tpa_chrome_ai_translate_btn').attr("data-translate-engen");
-    $(".chrome-ai-translator-container").find(".tpa-preloader-wrap").show();
+    $(".tpa-preloader-wrap").show();
+    $("#tpa-notice-check").hide();
+    $(".modal-body").hide();
+    $(".chrome-ai-translator-container").find(".my_translate_progress").hide();
+    $(".chrome-ai-translator-container").find(".progress-wrapper").hide();
+    $(".chrome-ai-translator-container").find("#myProgressBar").css("width", "0%");
+    $(".chrome-ai-translator-container").find("#progressText").text("0%");
     $(".chrome-ai-translator-container").find(".translator-widget, .string_container, .notice-container, .notice-info, .is-dismissible").hide();
 
     $(".save_it").prop("disabled", true);
@@ -493,8 +633,8 @@ const tpAutoTranslator = (function (window, $) {
         .show()
         .html("Chrome Translator Does not support this language.");
     }
-    $("#tpa-dialog").dialog("close");
-    $(".chrome-ai-translator-container").fadeIn("slow");
+    closeProviderModal();
+    $(".chrome-ai-translator-container").css("display", "flex").hide().fadeIn("slow");
   }
 
   function addStringsInModal(tr_type, default_code){
@@ -530,8 +670,14 @@ const tpAutoTranslator = (function (window, $) {
         if (plainStrArr.length > 0) {
           const $modal = $(`#tpa_${tr_type}_model`);
           $modal.find(".tpa-preloader-wrap").hide();
-          $modal.find(".modal-body > *:not(.tpa-preloader-wrap):not(.my_translate_progress)").show();
+          $modal.find("#tpa-notice-check").show();
+          $modal.find(".modal-body").show();
           $modal.find(".notice-info").show();
+          $modal.find(".translator-widget, .choose-lang, .string_container").show();
+          $modal.find(".my_translate_progress").hide();
+          $modal.find(".progress-wrapper").hide();
+          $modal.find("#myProgressBar").css("width", "0%");
+          $modal.find("#progressText").text("0%");
           if (tr_type == "yandex") {
             $("html").attr("translate", "no");
           }
@@ -665,14 +811,33 @@ const tpAutoTranslator = (function (window, $) {
 
     const allRows = [
         {
+            key: 'yandex',
             name: 'Yandex Translate',
             icon: 'yandex',
             info: 'https://translate.yandex.com/',
             btn: `<button id="tpa_yandex_translate_btn" class="tpa-provider-btn translate">Translate</button>`,
             doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_yandex`,
-            enabled: isYandexEnabled
+            enabled: isYandexEnabled,
+            selectable: true,
+            cta: ''
         },
         {
+          key: 'google',
+          name: 'Google Translate',
+          icon: 'google',
+          info: 'https://translate.google.com/',
+          btn: `<a href="${getGTProLink}" target="_blank">
+                  <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
+                      <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
+                  </button>
+                </a>`,
+          doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google`,
+          enabled: true, // Google Translate is always shown (Pro feature)
+          selectable: false,
+          cta: `<a href="${getGTProLink}" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--warning">Buy Pro</a>`
+        },
+        {
+            key: 'chrome',
             name: 'Chrome Built-in AI',
             icon: 'chrome',
             info: 'https://developer.chrome.com/docs/ai/translator-api',
@@ -698,52 +863,67 @@ const tpAutoTranslator = (function (window, $) {
                                     </button>
                                 `)),
             doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome`,
-            enabled: isChromeEnabled
-        },
-        {
-            name: 'Google Translate',
-            icon: 'google',
-            info: 'https://translate.google.com/',
-            btn: `<a href="${getGTProLink}" target="_blank">
-                    <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
-                        <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
-                    </button>
-                  </a>`,
-            doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google`,
-            enabled: true // Google Translate is always shown (Pro feature)
+            enabled: isChromeEnabled,
+            selectable: chromeAIStatus === true,
+            cta: chromeAIStatus === true
+              ? ''
+              : (hasChromeConfigurationError()
+                ? '<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--danger">Configure</button>'
+                : (isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"))
+                  ? '<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" disabled>Not Supported</button>'
+                  : '<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" disabled>Loading…</button>'
+                )
+              )
         }
     ];
 
     // Filter rows based on saved provider states - only show enabled providers
     const rows = allRows.filter(row => row.enabled);
 
-    const rowHTML = rows.map(row => `
-        <tr>
-            <td class="tpa-provider-name">
-                <a href="${row.info}" target="_blank">
-                    <img src="${TPA_IMG(row.icon)}" class="tpa-provider-icon" alt="${row.name}">
-                </a>
-                ${row.name}
-            </td>
-            <td>${row.btn}</td>
-            <td>
-                <a href="${row.doc}" target="_blank" class="tpa-provider-docs-btn">${DOC_ICON}</a>
-            </td>
-        </tr>
+    const DOC_ICON_IMG = `<img src="${TPA_IMG('docs')}" width="10" alt="Docs">`;
+
+    const cardsHTML = rows.map(row => `
+      <div class="tpa-provider-card ${row.selectable === false ? 'is-disabled' : ''}" data-provider-key="${row.key}" tabindex="${row.selectable === false ? '-1' : '0'}" role="button" aria-pressed="false" aria-disabled="${row.selectable === false ? 'true' : 'false'}" data-provider-selectable="${row.selectable === false ? '0' : '1'}">
+        <span class="tpa-provider-card-top">
+          <span class="tpa-provider-card-logo">
+            <a href="${row.info}" target="_blank" class="tpa-provider-card-info" aria-label="${row.name} info">
+              <img src="${TPA_IMG(row.icon)}" class="tpa-provider-card-icon" alt="${row.name}">
+            </a>
+            <span class="tpa-provider-card-title">${row.name}</span>
+          </span>
+          <span class="tpa-provider-card-check" aria-hidden="true"></span>
+        </span>
+        <span class="tpa-provider-card-footer">
+          <a href="${row.doc}" target="_blank" class="tpa-provider-card-docs">${DOC_ICON_IMG} Docs</a>
+          <span class="tpa-provider-card-cta" data-provider-cta-slot>${row.cta || ''}</span>
+          <span class="tpa-provider-card-action" data-provider-action-slot>${row.btn}</span>
+        </span>
+      </div>
     `).join('');
 
-    const modelHTML = `
-        <div class="tpa-provider-modal" id="tpa-dialog" title="Step 3 - Select Translation Provider" style="display:none;">
-            <table class="tpa-provider-table">
-                <thead>
-                    <tr><th>Name</th><th>Translate</th><th>Docs</th></tr>
-                </thead>
-                <tbody>${rowHTML}</tbody>
-            </table>
+    const overlayHTML = `
+      <div class="tpa-provider-overlay ${rtlClass || ''}" id="tpa-provider-overlay" style="display:none;">
+        <div class="tpa-provider-modal" id="tpa-dialog" role="dialog" aria-modal="true" aria-label="Select Translation Engine">
+          <button type="button" class="tpa-provider-close" aria-label="Close"></button>
+          <div class="tpa-provider-header">
+            <div class="tpa-provider-step">STEP 3 OF 4</div>
+            <h2 class="tpa-provider-title">Select Translation Engine</h2>
+            <p class="tpa-provider-subtitle">Choose the translation provider you want to use for this translation batch.</p>
+          </div>
+          <div class="tpa-provider-grid">
+            ${cardsHTML}
+          </div>
+          <div class="tpa-provider-footer">
+            <button type="button" class="tpa-provider-footer-btn tpa-provider-start" id="tpa-provider-start" disabled>Start Translation</button>
+          </div>
         </div>
+      </div>
     `;
 
-    $("body").append(modelHTML);
+    $("#tpa-provider-overlay").remove();
+    $("#tpa-dialog").remove();
+    $("body").append(overlayHTML);
+    bindProviderModalEvents();
     
     // After modal is created, check language pack status and update Chrome button if needed
     if (chromeAIStatus !== true && !hasChromeConfigurationError() && !isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"))) {
@@ -752,12 +932,10 @@ const tpAutoTranslator = (function (window, $) {
             const targetLanguage = localStorage.getItem("language_code");
             const packRequired = await isLanguagePackRequired(sourceLanguage, targetLanguage);
             const settingsUrl = getChromeSettingsPageUrl();
-            const $chromeRow = $('#tpa-dialog').find('tr').filter(function() {
-                return $(this).text().indexOf('Chrome Built-in AI') !== -1;
-            });
+            const $chromeCard = $('#tpa-dialog').find('.tpa-provider-card[data-provider-key="chrome"]').first();
             
-            if ($chromeRow.length > 0) {
-                const $buttonCell = $chromeRow.find('td').eq(1);
+            if ($chromeCard.length > 0) {
+                const $actionSlot = $chromeCard.find('[data-provider-action-slot]').first();
                 const icons = {
                     error: extradata['error_preview']
                 };
@@ -765,20 +943,23 @@ const tpAutoTranslator = (function (window, $) {
                 
                 if (packRequired) {
                     // Language pack required → "Configure"
-                    $buttonCell.html(`
+                    $actionSlot.html(`
                         <button class="tpa-chromeai-disabled-message tpa-provider-btn error" onclick="window.open('${settingsUrl}', '_blank'); return false;">
                             <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
                             Configure
                         </button>
                     `);
+                    setProviderCardSelectable($chromeCard, false);
                 } else {
                     // Unsupported language - show disabled "Not Supported" button
-                    $buttonCell.html(`
+                    $actionSlot.html(`
                         <button class="tpa-chromeai-disabled-message tpa-provider-btn error error-disabled" disabled>
                             Not Supported
                         </button>
                     `);
+                    setProviderCardSelectable($chromeCard, false);
                 }
+                refreshProviderStartButtonState();
             }
         })();
     }
@@ -834,67 +1015,60 @@ const tpAutoTranslator = (function (window, $) {
 
   function modelHeaderHTML(widgetType, headerCls) {
     const HTML = `
-        <div class="modal-header  ${headerCls}">
-                        <span class="close">&times;</span>
-                        <h2 class="notranslate">Step 4 - Start Automatic Translation Process</h2>
-                        <div class="save_btn_cont">
-                <button class="notranslate save_it button button-primary" disabled="true">Merge Translation</button>
-                </div>
-                <div style="display:none" class="tpa-stats hidden">
-                Wahooo! You have saved your valauble time via auto translating 
-                 <strong class="totalChars"> </strong> characters  using 
-                  <strong> 
-                  <a href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post" target="_new">
-                  AI Translation For TranslatePress</a>
-                </strong>     
-              </div>
-                    </div>
-                    <div class="notice inline notice-info is-dismissible">
-                    <div class="tpa_notice_container">
-                    Machine translations are not 100% correct. Please verify strings before using on production website.
-                    <br/>Also Google Translate provides better machine translations. <a href="https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup" target="_blank">Pro version</a> provides unlimited translations via Google Page Translate Widget.
-                    </div>
-                    <button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>
-                    </div>`;
+    <div class="tpa-modern-header modal-header ${headerCls}">
+      <div class="tpa-modern-header-top">
+        <div class="tpa-modern-step">STEP 4 OF 4</div>
+        <button type="button" class="tpa-modern-close" aria-label="Close"></button>
+      </div>
+      <h2 class="notranslate tpa-modern-title">Start Automatic Translation Process</h2>
+    </div>
+
+    <div class="tpa-modern-alert tpa-modern-alert--warning notice inline notice-info is-dismissible" id="tpa-notice-check" style="display:none">
+      <div class="tpa-modern-alert-body">
+        ⚠️ Machine translations are not 100% correct. Please verify strings before using on production website.
+      </div>
+      <button type="button" class="tpa-modern-alert-close notice-dismiss" aria-label="Dismiss"></button>
+    </div>
+
+    <div class="tpa-preloader-wrap">
+      <div class="ph-item">
+        <div class="ph-col-12">
+          <div class="ph-row">
+            <div class="ph-col-6 big"></div>
+            <div class="ph-col-4 big"></div>
+            <div class="ph-col-2 big"></div>
+            <div class="ph-col-4"></div>
+            <div class="ph-col-8"></div>
+            <div class="ph-col-6"></div>
+            <div class="ph-col-6"></div>
+            <div class="ph-col-12"></div>
+            <div class="ph-col-4"></div>
+            <div class="ph-col-8"></div>
+            <div class="ph-col-6"></div>
+            <div class="ph-col-6"></div>
+            <div class="ph-col-12"></div>
+            <div class="ph-col-4"></div>
+            <div class="ph-col-8"></div>
+            <div class="ph-col-6"></div>
+            <div class="ph-col-6"></div>
+            <div class="ph-col-12"></div>
+            <div class="ph-col-6 big"></div>
+            <div class="ph-col-4 big"></div>
+            <div class="ph-col-2 big"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
     return HTML;
   }
 
   function modelBodyHTML(widgetType, bodyCls) {
     const HTML = `
         <div class="modal-body  ${bodyCls}">
-          <div class="tpa-preloader-wrap">
-            <div class="ph-item">
-                <div class="ph-col-12">
-                    <div class="ph-row">
-                        <div class="ph-col-6 big"></div>
-                        <div class="ph-col-4 big"></div>
-                        <div class="ph-col-2 big"></div>
-                        <div class="ph-col-4"></div>
-                        <div class="ph-col-8"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-12"></div>
-                        <div class="ph-col-4"></div>
-                        <div class="ph-col-8"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-12"></div>
-                        <div class="ph-col-4"></div>
-                        <div class="ph-col-8"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-6"></div>
-                        <div class="ph-col-12"></div>
-                        <div class="ph-col-6 big"></div>
-                        <div class="ph-col-4 big"></div>
-                        <div class="ph-col-2 big"></div>
-                    </div>
-                </div>
-            </div>
-          </div>
-          <div class="my_translate_progress" style="display:none;">
+          <div class="my_translate_progress">
+            <div class="my_translate_progress_content">
             Automatic translation is in progress....<br/>
             It will take a few minutes, enjoy ☕ coffee in this time!<br/><br/>
-            Please do not leave this window or browser tab while the translation is in progress...
               <div class="progress-wrapper">
                 <div class="progress-container">
                   <div class="progress-bar" id="myProgressBar">
@@ -902,10 +1076,11 @@ const tpAutoTranslator = (function (window, $) {
                 </div>
               </div>
             </div>
+            </div>
           </div>
             ${translatorWidget(widgetType)}
             <div class="string_container">
-                <table class="scrolldown" id="stringTemplate" data-widget = "${widgetType}">
+                <table class="scrolldown tpa-stringTemplate" id="stringTemplate" data-widget = "${widgetType}">
                     <thead>
                         <th class="notranslate">S.No</th>
                         <th class="notranslate">Source Text</th>
@@ -921,18 +1096,25 @@ const tpAutoTranslator = (function (window, $) {
   }
 
   function modelFooterHTML(widgetType, footerCls) {
-    const HTML = ` <div class="modal-footer ${footerCls}">
+    const HTML = `
+    <div class="modal-footer ${footerCls}">
+      <div class="tpa-modern-footer">
+        <div class="tpa-modern-alert tpa-modern-alert--info tpa-stats" style="display:none">
+          <div class="tpa-modern-alert-icon" aria-hidden="true">i</div>
+          <div class="tpa-modern-alert-body">
+            <strong>Wahooo!</strong> You have saved your valuable time via auto translating
+            <strong class="totalChars"></strong> characters using
+            <a href="https://wordpress.org/plugins/automatic-translate-addon-for-translatepress/#reviews" target="_new">
+              AI Translation For TranslatePress
+            </a>.
+          </div>
+        </div>
         <div class="save_btn_cont">
-                <button class="notranslate save_it button button-primary" disabled="true">Merge Translation</button>
-                </div>
-                <div style="display:none" class="tpa-stats">
-                Wahooo! You have saved your valauble time via auto translating 
-                   <strong class="totalChars"></strong> characters  using 
-                    <strong> 
-                    <a href="https://wordpress.org/support/plugin/automatic-translate-addon-for-translatepress/reviews/#new-post" target="_new">
-                    AI Translation For TranslatePress</a>
-                  </strong>     
-                </div>
+            <button class="notranslate save_it button button-primary tpa-modern-primary" disabled="true">
+                Merge Translation
+            </button>
+        </div>
+      </div>
     </div>`;
     return HTML;
   }

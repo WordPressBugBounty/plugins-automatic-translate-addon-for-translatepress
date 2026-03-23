@@ -34,20 +34,88 @@ if ( ! defined( 'ABSPATH' ) ) {
                 
                 <?php
                 // Get saved provider states from database (default to enabled for Free providers)
-                $yandex_enabled = get_option('tpa_provider_yandex_enabled', '1');
-                $chrome_enabled = get_option('tpa_provider_chrome_enabled', '1');
+                $yandex_enabled = get_option( 'tpa_provider_yandex_enabled', '1' );
+                $chrome_enabled = get_option( 'tpa_provider_chrome_enabled', '1' );
 
+                // Note: the 3rd item is a "Free/Pro" flag used by the UI to disable Pro toggles.
                 $providers = [
-                    ["Chrome Built-in AI", "powered-by-chrome-api.png", "Free", ["Fast AI Translations in Browser", "Unlimited Free Translations", "Use Translation Modals"], esc_url('https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_chrome'), $chrome_enabled],
-                    ["Google Translate", "powered-by-google.png", "Pro", ["Unlimited Free Translations", "Fast & No API Key Required"], esc_url('https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_google'), '1'],
-                    ["Yandex Translate", "powered-by-yandex.png", "Free", ["Unlimited Free Translations", "No API & No Extra Cost"], esc_url('https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_yandex'), $yandex_enabled],
+                    [
+                        "Chrome Built-in AI",
+                        "powered-by-chrome-api.png",
+                        "Free",
+                        [
+                            esc_html__( "Fast AI Translations in Browser", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Unlimited Free Translations", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Bulk Translation", 'automatic-translate-addon-for-translatepress' ),
+                        ],
+                        esc_url( 'https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_chrome' ),
+                        $chrome_enabled,
+                    ],
+                    [
+                        "Google Translate",
+                        "powered-by-google.png",
+                        "Pro",
+                        [
+                            esc_html__( "Unlimited Free Translations", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Fast & No API Key Required", 'automatic-translate-addon-for-translatepress' ),
+                        ],
+                        esc_url( 'https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_google' ),
+                        '1',
+                    ],
+                    [
+                        "Yandex Translate",
+                        "powered-by-yandex.png",
+                        "Free",
+                        [
+                            esc_html__( "Unlimited Free Translations", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "No API & No Extra Cost", 'automatic-translate-addon-for-translatepress' ),
+                        ],
+                        esc_url( 'https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_yandex' ),
+                        $yandex_enabled,
+                    ],
+                    [
+                        "Anthropic Claude",
+                        "powered-by-anthropic.png",
+                        "Pro",
+                        [
+                            esc_html__( "Unlimited Free Translations", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Use Translation Modals", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Bulk Translation", 'automatic-translate-addon-for-translatepress' ),
+                        ],
+                        esc_url( 'https://docs.coolplugins.net/doc/generate-anthropic-ai-api-key-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_anthropic' ),
+                        '1',
+                    ],
+                    [
+                        "Gemini",
+                        "powered-by-google-gemini.png",
+                        "Pro",
+                        [
+                            esc_html__( "Unlimited Free Translations", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Use Translation Modals", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Bulk Translation", 'automatic-translate-addon-for-translatepress' ),
+                        ],
+                        esc_url( 'https://docs.coolplugins.net/doc/generate-google-gemini-ai-api-key-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_gemini' ),
+                        '1',
+                    ],
+                    [
+                        "OpenAI",
+                        "powered-by-openai.png",
+                        "Pro",
+                        [
+                            esc_html__( "Unlimited Free Translations", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Use Translation Modals", 'automatic-translate-addon-for-translatepress' ),
+                            esc_html__( "Bulk Translation", 'automatic-translate-addon-for-translatepress' ),
+                        ],
+                        esc_url( 'https://docs.coolplugins.net/doc/generate-open-ai-api-key-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_openai' ),
+                        '1',
+                    ],
                 ];
 
                 foreach ($providers as $index => $provider) {
                     $provider_slug = strtolower(str_replace(' ', '-', $provider[0]));
-                    $is_enabled = isset($provider[5]) ? $provider[5] : '1';
-                    // Google Translate should always be checked (Pro feature)
-                    $is_checked = ($provider[0] === 'Google Translate') ? '' : (($is_enabled === '1') ? 'checked' : '');
+                    $is_enabled = isset( $provider[5] ) ? $provider[5] : '1';
+                    // Pro providers are disabled in Free; Free providers keep saved state.
+                    $is_checked = ( $provider[2] === 'Pro' ) ? '' : ( ( $is_enabled === '1' ) ? 'checked' : '' );
                     ?>
                     <div class="tpa-dashboard-provider-card">
                         <div class="tpa-dashboard-provider-header">

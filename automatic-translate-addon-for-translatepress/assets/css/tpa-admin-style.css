@@ -1,101 +1,57 @@
-h3.tpa-license-title {
-    background: linear-gradient(to right, #e55860, #28aef6);
-    padding: 20px 10px;
-    margin: 0;
-    display: inline-block;
-    width: 100%;
-    color: #fff;
-    font-size: 22px;
-    line-height: 22px;
-    margin-top: 25px;
-}
-.tpa-license-form {
-    padding-right: 40px;
-}
-.tpa-license-content {
-    padding: 25px;
-    width: 100%;
-    display: inline-block;
-}
-.tpa-license-field label {
-    display: block;
-    margin-bottom: 5px;
-}
-.tpa-license-form, .tpa-license-textbox {
-    display: inline-block;
-    width: calc(50% - 5px);
-    vertical-align: top;
-}
-input.regular-text.code {
-    font-size: 150%;
-    padding: 8px 10px 10px;
-    width: 100%;
-}
-span.tpa-license-valid {
-    padding: 0px 5px 2px;
-    color: #fff;
-    background-color: #e55860;
-    border-radius: 3px;
-}
-span.tpa-license-key {
-    font-weight: 700;
-    opacity: 0.8;
-}
-span.tpa-license-info-title:after {
-    content: ':';
-    position: absolute;
-    right: 2px;
-}
-li {
-    list-style: none;
-    padding: 0;
-}
-span.tpa-license-info-title {
-    width: 150px;
-    display: inline-block;
+.button.tpa-bulk-translate-btn {
     position: relative;
-    padding-right: 5px;
-}
-.tpa-license-textbox ol {
-    border: 3px solid #e55860;
-    padding: 5px 20px;
-    margin-left: 0;
-}
-.tpa-license-container *{
-    box-sizing: border-box;
-}
-.tpa-pluginby {
-    width: 100%;
-    display: block;
-    text-align: right;
-    font-style: italic;
-}
-.tpa-license-container {
-    margin: 5px 15px;
-    display: block;
-}
-table.tp-addon-license {
-    table-layout: fixed !IMPORTANT;
-    width: 100%;
-}
-table.tp-addon-license tr th, table.tp-addon-license tr td {
-    border: 1px solid #bbb;
-    padding: 12px;
-    text-align: center;
-    width: 33%;
-}
-table.tp-addon-license img {
-    height: 21px !important;
-    width: auto !important;
-}
-.tpa-license-form a.button-primary:hover {
-    background: #e77279;
-    border-color: #e45860;
+    border-color: var(--wp-admin-theme-color, #2271b1) !important;
+    color: #fff !important;
+    background: var(--wp-admin-theme-color, #2271b1) !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+    border-radius: 4px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 8px 0 0 !important;
+    min-height: 32px !important;
+    line-height: 2.30769231 !important;
+    padding: 0 12px !important;
 }
 
-@media only screen and (max-width: 600px) {
-    .tpa-license-form, .tpa-license-textbox {
-        width: 100%;
-        padding: 0;
-    }
+.button.tpa-bulk-translate-btn:hover {
+    background: var(--wp-admin-theme-color-darker-10, #135e96) !important;
+    border-color: var(--wp-admin-theme-color-darker-10, #135e96) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    margin: 0 8px 0 0 !important;
+    min-height: 32px !important;
+    line-height: 2.30769231 !important;
+    padding: 0 12px !important;
+}
+
+.tpa-bulk-translate-btn:hover::after {
+    content: "Pro";
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000000;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    pointer-events: none;
+}
+
+.tpa-bulk-translate-btn:hover::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #000000;
+    z-index: 10;
+    pointer-events: none;
 }

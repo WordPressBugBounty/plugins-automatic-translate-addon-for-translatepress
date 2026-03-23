@@ -60,44 +60,82 @@
                 </a>
             </div>
         </div>
-        
-        <p><?php esc_html_e('Configure your AI translation settings to customize how your content is translated.', 'automatic-translate-addon-for-translatepress'); ?></p>
+
+        <?php
+        // Check if TranslatePress has at least one translation language (for Chrome AI test section).
+        $tpa_trp_settings          = get_option( 'trp_settings', array() );
+        $tpa_default_lang          = isset( $tpa_trp_settings['default-language'] ) ? $tpa_trp_settings['default-language'] : '';
+        $tpa_publish_languages     = isset( $tpa_trp_settings['publish-languages'] ) && is_array( $tpa_trp_settings['publish-languages'] ) ? $tpa_trp_settings['publish-languages'] : array();
+        $tpa_has_translation_langs = ! empty( $tpa_publish_languages ) && count( array_diff( $tpa_publish_languages, array( $tpa_default_lang ) ) ) > 0;
+        ?>
 
         <?php if(get_option('tpa_provider_chrome_enabled') == '1') : ?>
+            <h2 class="tpa-section-title tpa-section-title-with-icon">
+                <span class="tpa-section-icon tpa-icon-sparkle" aria-hidden="true">
+                    <img
+                        src="<?php echo esc_url( TPA_URL . 'assets/images/single-page-chrome-translation.svg' ); ?>"
+                        alt=""
+                        width="20"
+                        height="20"
+                        loading="lazy"
+                        decoding="async"
+                    />
+                </span>
+                <?php esc_html_e('Chrome AI Configuration', 'automatic-translate-addon-for-translatepress'); ?>
+            </h2>
+            <p class="tpa-section-description">
+                <?php esc_html_e('Use Chrome’s built-in AI to translate strings. Configure and test it here.', 'automatic-translate-addon-for-translatepress'); ?>
+            </p>
             <div class="tpa-dashboard-chrome-ai-settings">
                 <!-- Chrome Local AI Notice -->
-                <div id="tpa-chrome-local-ai-notice" style="display: none; border: 1px solid #e5e7eb; background: #fff5f5; padding: 24px; border-radius: 8px; margin: 20px 0;">
-                    <div style="color: #dc2626; font-size: 14px; line-height: 1.5;">
-                        <h3 id="tpa-chrome-notice-heading" style="font-weight: 600; margin: 0 0 12px 0; font-size: 16px;"></h3>
-                        <div id="tpa-chrome-notice-message"></div>
-                    </div>
+                <div id="tpa-chrome-local-ai-notice" class="tpa-chrome-local-ai-notice">
+                    <?php if ( ! $tpa_has_translation_langs ) : ?>
+                        <span class="tpa-chrome-no-languages-content"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg><?php
+                            printf(
+                                wp_kses_post(
+                                    // translators: %s is a link to the TranslatePress settings page.
+                                    __( 'Add at least %s to use the Chrome AI translation test', 'automatic-translate-addon-for-translatepress' )
+                                ),
+                                '<a href="' . esc_url( admin_url( 'options-general.php?page=translate-press' ) ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'one language in TranslatePress', 'automatic-translate-addon-for-translatepress' ) . '</a>'
+                            );
+                        ?></span>
+                    <?php else : ?>
+                        <div class="tpa-chrome-local-ai-notice-content">
+                            <h3 id="tpa-chrome-notice-heading" class="tpa-chrome-notice-heading"></h3>
+                            <div id="tpa-chrome-notice-message" class="tpa-chrome-notice-message"></div>
+                        </div>
+
+                        <!-- Test Translation Section -->
+                        <div id="tpa-chrome-test-translation" class="tpa-chrome-test-translation">
+                            <h3 class="tpa-chrome-test-translation-heading"><?php esc_html_e('Chrome AI Translation Test', 'automatic-translate-addon-for-translatepress'); ?></h3>
+                            <p class="tpa-chrome-test-translation-description"><?php esc_html_e('Check whether Chrome AI Translation is properly configured by translating a sample text.', 'automatic-translate-addon-for-translatepress'); ?></p>
+
+                            <div class="tpa-chrome-test-translation-language-pair">
+                                <label class="tpa-chrome-test-translation-label"><?php esc_html_e('Language Pair:', 'automatic-translate-addon-for-translatepress'); ?></label>
+                                <select id="tpa-test-translation-source" class="tpa-chrome-test-translation-source"></select>
+                                <span class="tpa-chrome-test-translation-arrow">→</span>
+                                <select id="tpa-test-translation-target" class="tpa-chrome-test-translation-target"></select>
+                            </div>
+
+                            <button id="tpa-test-translation-btn" class="tpa-dashboard-btn primary tpa-chrome-test-translation-btn">
+                                <?php esc_html_e('Test Translation', 'automatic-translate-addon-for-translatepress'); ?>
+                            </button>
+
+                            <div id="tpa-test-translation-result" class="tpa-chrome-test-translation-result"></div>
+                            <div id="tpa-test-translation-error" class="tpa-chrome-test-translation-error"></div>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 
-                <!-- Test Translation Section -->
-                <div id="tpa-chrome-test-translation" style="display: none; border: 1px solid #e5e7eb; background: #ffffff; padding: 24px; border-radius: 8px; margin: 20px 0;">
-                    <h3 style="font-weight: 600; margin: 0 0 16px 0; font-size: 16px;"><?php esc_html_e('Chrome AI Translation Test', 'automatic-translate-addon-for-translatepress'); ?></h3>
-                    <p style="margin-bottom: 16px; color: #666; font-size: 14px;"><?php esc_html_e('Check whether Chrome AI Translation is properly configured by translating a sample text.', 'automatic-translate-addon-for-translatepress'); ?></p>
-                    
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;"><?php esc_html_e('Language Pair:', 'automatic-translate-addon-for-translatepress'); ?></label>
-                        <select id="tpa-test-translation-source" style="padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; margin-right: 8px; width: 10rem;"></select>
-                        <span style="margin: 0 8px;">→</span>
-                        <select id="tpa-test-translation-target" style="padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; width: 10rem;"></select>
-                    </div>
-                    
-                    <button id="tpa-test-translation-btn" class="tpa-dashboard-btn primary" style="margin-bottom: 16px;">
-                        <?php esc_html_e('Test Translation', 'automatic-translate-addon-for-translatepress'); ?>
-                    </button>
-                    
-                    <div id="tpa-test-translation-result" style="display: none; margin-top: 16px; padding: 12px; border-radius: 4px; font-size: 14px;"></div>
-                    <div id="tpa-test-translation-error" style="display: none; margin-top: 16px; padding: 12px; background: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c33; font-size: 14px;"></div>
-                </div>
             </div>
         <?php endif; ?>
         <form method="post">
             <?php wp_nonce_field('tpa_save_optin_settings', 'tpa_optin_nonce'); ?>
             <?php if (get_option('cpfm_opt_in_choice_cool_translations')) : ?>
                 <div class="tpa-dashboard-feedback-container">
+                    <h3 class="tpa-section-title">
+                        <?php esc_html_e( 'Usage Data Sharing', 'automatic-translate-addon-pro-for-translatepress' ); ?>
+                    </h3>
                     <div class="feedback-row">
                         <input type="checkbox" 
                             id="tpa-dashboard-feedback-checkbox" 

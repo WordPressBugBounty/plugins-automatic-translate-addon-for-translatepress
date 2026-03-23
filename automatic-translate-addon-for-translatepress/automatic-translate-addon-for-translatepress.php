@@ -5,7 +5,7 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 2.0.2
+ * Version: 2.0.3
  * License: GPL2
  * Text Domain:automatic-translate-addon-for-translatepress
  * Requires Plugins: translatepress-multilingual
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '2.0.2' );
+define( 'TPA_VERSION', '2.0.3' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -53,12 +53,15 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			add_action('wp_ajax_tpa_update_translate_data', array($this, 'tpa_update_translate_data'));
 			add_action( 'wp_ajax_tpa_install_plugin', array( $this, 'tpa_install_plugin' ) );
 			add_action( 'wp_ajax_tpa_save_provider_states', array( $this, 'tpa_save_provider_states' ) );
-
+			add_action( 'manage_posts_extra_tablenav', array( $this, 'tpa_render_bulk_translate_button' ), 20, 1 );
 			// Initialize cron
 			$this->init_cron();
 
 			// Initialize feedback notice.
 			$this->init_feedback_notice();
+
+			// Load admin styles/scripts only on the login and admin screens.
+			add_action( 'admin_enqueue_scripts', array( $this, 'tpa_enqueue_admin_assets' ) );
 
 			// Add the action to hide unrelated notices
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key()
@@ -70,6 +73,20 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				require_once TPA_PATH . 'admin/cpt_dashboard/cpt_dashboard.php';
 				new Tpa_Dashboard();
 			}
+		}
+
+		/**
+		 * Enqueue plugin admin assets only on login.
+		 *
+		 * @param string $hook_suffix Current admin page hook suffix.
+		 * @return void
+		 */
+		public function tpa_enqueue_admin_assets( $hook_suffix ) {
+			if ( ! is_user_logged_in() ) {
+				return;
+			}
+
+			wp_enqueue_style( 'tpa_admin_styles', TPA_URL . 'assets/css/tpa-admin-style.css', null, TPA_VERSION, 'all' );
 		}
 
 		/**
@@ -901,6 +918,31 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		
 		return $success;
 	}
+
+	/**
+	 * Output the Bulk Translate button in the posts list table.
+	 *
+	 * Hooked into `manage_posts_extra_tablenav`.
+	 *
+	 * @param string $which 'top' or 'bottom' tablenav.
+	 * @return void
+	 */
+	public function tpa_render_bulk_translate_button( $which ) {
+		// Only show in the top toolbar.
+		if ( 'top' !== $which ) {
+			return;
+		}
+
+		// Don't show on Trash views.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only: used only to decide button visibility, value sanitized.
+		$current_status = isset( $_GET['post_status'] ) ? sanitize_key( wp_unslash( $_GET['post_status'] ) ) : '';
+		if ( 'trash' === $current_status ) {
+			return;
+		}
+
+		echo '<a type="button" class="button tpa-bulk-translate-btn" href="https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=plugins_list#pricing" target="_blank">' . esc_html__( 'AI Translate', 'automatic-translate-addon-for-translatepress' ) . '</a>';
+	}
+
 	public static function tpa_get_user_info() {
 		global $wpdb;
 		$server_info = [

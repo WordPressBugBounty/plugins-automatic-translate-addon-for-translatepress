@@ -43,10 +43,10 @@ if ( ! defined( 'ABSPATH' ) ) {
         </ul>
     </div>
     <div class="tpa-dashboard-translate-full">
-        <h3><?php esc_html_e('Automatically Translate Plugins, Themes & Webpages', 'automatic-translate-addon-for-translatepress'); ?></h3>
+        <h3><?php esc_html_e('Automatically Translate Plugins & Themes', 'automatic-translate-addon-for-translatepress'); ?></h3>
         <div class="tpa-dashboard-addon first">
             <div class="tpa-dashboard-addon-l">
-                <strong><?php echo esc_html(tpa_get_plugin_display_name('automatic-translator-addon-for-loco-translate')); ?></strong>
+                <strong><?php echo esc_html( tpa_get_plugin_display_name( 'automatic-translator-addon-for-loco-translate' ) ); ?></strong>
                 <span class="addon-desc"><?php esc_html_e('LocoAI to translate plugins and themes.', 'automatic-translate-addon-for-translatepress'); ?></span>
                 <?php
                     if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -64,7 +64,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <?php if ( $tw_installed && $tw_active ): ?>
                     <span class="installed"><?php esc_html_e('Activated', 'automatic-translate-addon-for-translatepress'); ?></span>
                 <?php else: ?>
-                   <button
+                    <button
                         type="button"
                         class="tpa-dashboard-btn tpa-install-plugin"
                         data-slug="automatic-translator-addon-for-loco-translate"
@@ -76,37 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <?php endif; ?>
             </div>
             <div class="tpa-dashboard-addon-r">
-                <img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/atlt-logo.png'); ?>" alt="<?php esc_attr_e('TranslatePress Addon', 'automatic-translate-addon-for-translatepress'); ?>">
-            </div>
-        </div>
-        <div class="tpa-dashboard-addon">
-            <div class="tpa-dashboard-addon-l">
-                <strong><?php echo esc_html(tpa_get_plugin_display_name('translate-words')); ?></strong>
-                <span class="addon-desc"><?php esc_html_e('Create a Multilingual WordPress Website 10X Faster – Powered by AI.', 'automatic-translate-addon-for-translatepress'); ?></span>
-                <?php
-                    if ( ! function_exists( 'is_plugin_active' ) ) {
-                        require_once ABSPATH . 'wp-admin/includes/plugin.php';
-                    }
-                    $tw_plugin_file = 'translate-words/translate-wp-words.php';
-                    $tw_installed   = tpa_is_plugin_installed( 'translate-words' );
-                    $tw_active      = function_exists( 'is_plugin_active' ) ? is_plugin_active( $tw_plugin_file ) : false;
-                ?>
-                <?php if ( $tw_installed && $tw_active ): ?>
-                    <span class="installed"><?php esc_html_e('Activated', 'automatic-translate-addon-for-translatepress'); ?></span>
-                <?php else: ?>
-                    <button
-                        type="button"
-                        class="tpa-dashboard-btn tpa-install-plugin"
-                        data-slug="translate-words"
-                        data-nonce="<?php echo esc_attr( wp_create_nonce( 'tpa_install_nonce' ) ); ?>"
-                    >
-                        <?php echo esc_html( $tw_installed ? __( 'Activate', 'automatic-translate-addon-for-translatepress' ) : __( 'Install', 'automatic-translate-addon-for-translatepress' ) ); ?>
-                    </button>
-                    <div class="tpa-install-message" aria-live="polite" style="margin-top:8px;"></div>
-                <?php endif; ?>
-            </div>
-            <div class="tpa-dashboard-addon-r">
-                <img src="<?php echo esc_url(TPA_URL . 'admin/tpa-dashboard/images/linguator-multilingual-ai-translation.png'); ?>" alt="<?php esc_attr_e('TranslatePress Addon', 'automatic-translate-addon-for-translatepress'); ?>">
+                <img src="<?php echo esc_url( TPA_URL . 'admin/tpa-dashboard/images/atlt-logo.png' ); ?>" alt="<?php esc_attr_e('TranslatePress Addon', 'automatic-translate-addon-for-translatepress'); ?>">
             </div>
         </div>
     </div>
@@ -145,8 +115,6 @@ function tpa_is_plugin_installed($plugin_slug) {
     // Check if the plugin is installed
     if ($plugin_slug === 'automatic-translator-addon-for-loco-translate') {
         return isset($plugins['automatic-translator-addon-for-loco-translate/automatic-translator-addon-for-loco-translate.php']) || isset($plugins['loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php']);
-    } elseif ($plugin_slug === 'translate-words') {
-        return isset($plugins['translate-words/translate-wp-words.php']);
     }
     return false; // Return false if no match found
 }
@@ -165,11 +133,7 @@ function tpa_get_plugin_display_name($plugin_slug) {
             'pro'  => 'loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php',
             'free_name' => esc_html__('LocoAI – Auto Translate for Loco Translate', 'automatic-translate-addon-for-translatepress'),
             'pro_name'  => esc_html__('LocoAI – Auto Translate for Loco Translate (Pro)', 'automatic-translate-addon-for-translatepress'),
-        ],
-        'translate-words' => [
-            'free' => 'translate-words/translate-wp-words.php',
-            'free_name' => esc_html__('Linguator AI – Auto Translate & Create Multilingual Sites', 'automatic-translate-addon-for-translatepress'),
-        ],
+        ]
     ];
 
     // Check if the provided plugin slug exists

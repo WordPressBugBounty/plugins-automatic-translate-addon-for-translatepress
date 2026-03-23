@@ -58,44 +58,45 @@ jQuery(function($) {
         }
         
         if (!showBrowserNotice && !showSecureNotice && !showApiNotice && !showLanguageNotice) {
-            $notice.hide();
+            // Hide only notice content; keep container visible for test translation section
+            $notice.find('.tpa-chrome-local-ai-notice-content').hide();
+            $notice.show();
             return; // no notice needed
         }
         
         // Notice messages
         const notices = {
             browserHeading: '⚠️ Important Notice: Browser Compatibility',
-            browserMessage: '<ul style="list-style-type: disc; margin-left: 20px; margin-top: 8px;"><li>' +
+            browserMessage: '<ul><li>' +
                 'The <strong>Translator API</strong>, which uses Chrome Local AI Models, is designed exclusively for use with the <strong>Chrome browser</strong>.' +
                 '</li><li>' +
                 'If you are using a different browser (such as Edge, Firefox, or Safari), the API may not function correctly.' +
                 '</li><li>' +
-                'Learn more in the <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" rel="noreferrer" style="text-decoration: none; color: #2563eb;">official documentation</a>.' +
+                'Learn more in the <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" rel="noreferrer">official documentation</a>.' +
                 '</li></ul>',
             secureHeading: '⚠️ Important Notice: Secure Connection Required',
-            secureMessage: '<ul style="list-style-type: disc; margin-left: 20px; margin-top: 8px;">' +
-                '<li>' +
+            secureMessage: '<ul><li>' +
                 'The <strong>Translator API</strong> requires a secure (HTTPS) connection to function properly.' +
                 '</li><li>' +
                 'If you are on an insecure connection (HTTP), the API will not work.' +
                 '</li></ul>' +
-                '<p style="margin-top: 8px;"><strong>👉 How to Fix This:</strong></p>' +
-                '<ol style="list-style-type: decimal; margin-left: 20px; margin-top: 8px;">' +
+                '<p><strong>👉 How to Fix This:</strong></p>' +
+                '<ol>' +
                 '<li>Switch to a secure connection by using <strong><code>https://</code></strong>.</li>' +
                 '<li>' +
                 'Alternatively, add this URL to Chrome\'s list of insecure origins treated as secure: ' + createCopyableLink('chrome://flags/#unsafely-treat-insecure-origin-as-secure') + 
                 '<br />Copy the URL and then open a new window and paste this URL to access the settings.' +
                 '</li></ol>',
             apiHeading: '⚠️ Important Notice: API Availability',
-            apiMessage: '<ol style="list-style-type: decimal; margin-left: 20px; margin-top: 8px;">' +
+            apiMessage: '<ol>' +
                 '<li>Open this URL in a new Chrome tab: ' + createCopyableLink('chrome://flags/#translation-api') + '. Copy this URL and then open a new window and paste this URL to access the settings.</li>' +
                 '<li>Ensure that the <strong>Experimental translation API</strong> option is set to <strong>Enabled</strong>.</li>' +
                 '<li>After change the setting, Click on the <strong>Relaunch</strong> button to apply the changes.</li>' +
                 '<li>The Translator AI modal should now be enabled and ready for use.</li>' +
                 '</ol>' +
-                '<p>For more information, please refer to the <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" style="text-decoration: none; color: #2563eb;">documentation</a>.</p>' +
+                '<p>For more information, please refer to the <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank">documentation</a>.</p>' +
                 '<p>If the issue persists, please ensure that your browser is up to date and restart your browser.</p>' +
-                '<p>If you continue to experience issues after following the above steps, please <a href="https://my.coolplugins.net/account/support-tickets/" target="_blank" rel="noopener" style="text-decoration: none; color: #2563eb;">open a support ticket</a> with our team. We are here to help you resolve any problems and ensure a smooth translation experience.</p>'
+                '<p>If you continue to experience issues after following the above steps, please <a href="https://my.coolplugins.net/account/support-tickets/" target="_blank" rel="noopener">open a support ticket</a> with our team. We are here to help you resolve any problems and ensure a smooth translation experience.</p>'
         };
         
         let heading = '';
@@ -119,40 +120,17 @@ jQuery(function($) {
         $message.html(message);
         
         // Check if this is a combined notice (has both unsupported and language pack issues)
-        // Combined notice uses yellow border, all others use red border
+        // Combined notice toggles a class (styling handled in CSS)
         const isCombinedNotice = showLanguageNotice && languageNoticeData && 
                                  languageNoticeData.isCombined === true;
         
         if (isCombinedNotice) {
-            // Combined notice: yellow border, no background color, no text color
-            $notice.css({
-                'border': '1px solid rgba(254, 243, 199)',
-                'background': 'transparent',
-                'padding': '24px',
-                'border-radius': '8px',
-                'margin': '20px 0'
-            });
-            $notice.find('> div').css({
-                'color': '',
-                'font-size': '14px',
-                'line-height': '1.5'
-            });
+            $notice.addClass('tpa-chrome-notice-combined');
         } else {
-            // All other notices: red border and background
-            $notice.css({
-                'border': '1px solid #e5e7eb',
-                'background': '#fff5f5',
-                'padding': '24px',
-                'border-radius': '8px',
-                'margin': '20px 0'
-            });
-            $notice.find('> div').css({
-                'color': '#dc2626',
-                'font-size': '14px',
-                'line-height': '1.5'
-            });
+            $notice.removeClass('tpa-chrome-notice-combined');
         }
-        
+
+        $notice.find('.tpa-chrome-local-ai-notice-content').show();
         $notice.show();
         
         // Initialize clipboards for any new copyable links
@@ -165,8 +143,8 @@ jQuery(function($) {
     * Helper to create copyable link HTML using user's preferred structure
     */
     function createCopyableLink(url) {
-        return '<span class="chrome-url-link chrome-ai-translator-flags tapa-tooltip-element" data-clipboard-text="' + url + '" style="cursor: pointer; position: relative; display: inline-block;">' +
-        '<a href="' + url + '" onclick="return false;" style="color: #2563eb; text-decoration: none;">' + url + '</a> ' + 
+        return '<span class="chrome-url-link chrome-ai-translator-flags tapa-tooltip-element" data-clipboard-text="' + url + '">' +
+        '<a href="' + url + '" onclick="return false;">' + url + '</a> ' + 
         (typeof ChromeAiTranslator !== 'undefined' ? ChromeAiTranslator.svgIcons('copy') : '') +
         '</span>';
     }
@@ -250,7 +228,7 @@ jQuery(function($) {
             }
         }
         
-        // Build unsupported languages notice (simplified)
+        // Build unsupported languages notice (Pro-style markup)
         let unsupportedNotice = null;
         if (unsupportedLanguages.length > 0) {
             let unsupportedList = '';
@@ -261,10 +239,10 @@ jQuery(function($) {
             unsupportedList = unsupportedList.replace(/, $/, '');
 
             unsupportedNotice = {
-                heading: '<span style="display: inline-flex; align-items: center; gap: 6px; color: rgb(159 18 57)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error" style="fill: rgb(159 18 57); vertical-align: middle;"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg>Unsupported Languages</span> ',
-                message: '<div style="margin-top: 12px; background-color: #fff5f5; padding: 12px; border-radius: 8px; border: 1px solid rgb(255 228 230);">' +
-                    '<p style="margin-bottom: 12px; color: rgba(190 18 60);">The following languages are not supported by the current AI engine: </br><span style="color: rgb(159 18 57);">' + unsupportedList + '</span></p>' +
-                    '<p style="margin-bottom: 12px;">To view supported languages: '+ createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
+                heading: '<span class="tpa-chrome-unsupported-heading"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg>Unsupported Languages</span> ',
+                message: '<div class="tpa-chrome-unsupported-box">' +
+                    '<p>The following languages are not supported by the current AI engine: </br><span class="tpa-unsupported-list">' + unsupportedList + '</span></p>' +
+                    '<p>To see the full list of supported translation languages, visit: '+ createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
                     '</div>',
                 isCombined: true
             };
@@ -332,7 +310,7 @@ jQuery(function($) {
             }
         }
         
-        // Build language pack notice from all collected issues
+        // Build language pack notice from all collected issues (Pro-style markup)
         let languagePackNotice = null;
         if (languagePackIssues.length > 0) {
             // Group issues by status type
@@ -350,15 +328,15 @@ jQuery(function($) {
                 
                 languagePackNotice = {
                     heading: '⏳ Language Packs Downloading',
-                    message: '<div style="margin-top: 12px;">' +
-                        '<p style="margin-bottom: 12px;">Language packs are being downloaded: ' + downloadingList + '</p>' +
-                        '<p style="margin-bottom: 12px;">Please wait for the download to complete. Translation will be available automatically once finished.</p>' +
-                        '<p style="margin-bottom: 12px;">Check download progress: ' + createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
+                    message: '<div class="tpa-chrome-language-pack-box">' +
+                        '<p>Language packs are being downloaded: ' + downloadingList + '</p>' +
+                        '<p>Please wait for the download to complete. Translation will be available automatically once finished.</p>' +
+                        '<p>Check download progress: ' + createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
                         '</div>',
                     isCombined: true
                 };
             } else if (requiredIssues.length > 0) {
-                // Show required language packs notice (simplified)
+                // Show required language packs notice
                 let requiredList = '';
                 const uniqueTargetLangs = [];
                 requiredIssues.forEach(function(issue) {
@@ -373,21 +351,18 @@ jQuery(function($) {
                 
                 const sourceLang = requiredIssues[0].sourceLang;
                 languagePackNotice = {
-                    heading: '<span style="color: rgb(217 119 6); display: inline-flex; align-items: center; gap: 6px;"><svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="15" viewBox="0 0 24 24" width="15" style="fill: rgb(217 119 6); vertical-align: middle;"><g><rect fill="none"/></g><g><path d="M20,2H4C3,2,2,2.9,2,4v3.01C2,7.73,2.43,8.35,3,8.7V20c0,1.1,1.1,2,2,2h14c0.9,0,2-0.9,2-2V8.7c0.57-0.35,1-0.97,1-1.69V4 C22,2.9,21,2,20,2z M15,14H9v-2h6V14z M20,7H4V4h16V7z"/></g></svg>Language Pack Required</span> ',
-                    message: '<div style="margin-top: 12px;">' +
-                        '<p style="margin-bottom: 12px; color: rgba(71 85 105);">Chrome needs language packs installed for translation to work. This is a one-time setup.</p>' +
-                        '<div style="margin-bottom: 12px; background-color: rgb(255 251 235); padding: 12px; border-radius: 8px; border: 1px solid rgb(254 243 199);">' +
-                        '<p style="margin-bottom: 12px;"><strong style="color: rgb(161 98 7);">Required Languages:</strong><br>' + sourceLang.label + ' (Source), <span style="color: rgb(225 29 72);">' + requiredList + '</span></p>' +
-                        '<p style="margin-bottom: 12px;"><strong>Quick Setup:</strong></p>' +
-                        '<ol class="tpa-chrome-steps-list" style="margin: 0 0 12px 0; padding-left: 0; list-style: none;">' +
-                        '<li style="margin-bottom: 8px; position: relative; padding-left: 35px;">' +
-                        '<span style="position: absolute; left: 0; top: 0; width: 20px; height: 20px; border: 1px solid rgb(254 243 199); background-color:rgb(255, 255, 255); color: #111827; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; line-height: 1;">1</span>Open <strong>Chrome Settings → Languages</strong>: ' + createCopyableLink('chrome://settings/languages') + '</li>' +
-                        '<li style="margin-bottom: 8px; position: relative; padding-left: 35px;">' +
-                        '<span style="position: absolute; left: 0; top: 0; width: 20px; height: 20px; border: 1px solid rgb(254 243 199); background-color:rgb(255, 255, 255); color: #111827; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; line-height: 1;">2</span>Click <strong style="color: rgb(225 29 72);">Add languages</strong> and add the languages listed above</li>' +
-                        '<li style="margin-bottom: 8px; position: relative; padding-left: 35px;">' +
-                        '<span style="position: absolute; left: 0; top: 0; width: 20px; height: 20px; border: 1px solid rgb(254 243 199); background-color:rgb(255, 255, 255); color: #111827; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; line-height: 1;">3</span>Reload this page to verify configuration.</li>' +
-                        '</ol><hr style="margin: 12px 0; border: 1px solid rgba(254, 243, 199);">' +
-                        '<p style="margin-bottom: 12px;">Verify language packs: '+ createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
+                    heading: '<span class="tpa-chrome-language-pack-heading"><svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="15" viewBox="0 0 24 24" width="15"><g><rect fill="none"/></g><g><path d="M20,2H4C3,2,2,2.9,2,4v3.01C2,7.73,2.43,8.35,3,8.7V20c0,1.1,1.1,2,2,2h14c0.9,0,2-0.9,2-2V8.7c0.57-0.35,1-0.97,1-1.69V4 C22,2.9,21,2,20,2z M15,14H9v-2h6V14z M20,7H4V4h16V7z"/></g></svg>Language Pack Required</span> ',
+                    message: '<div class="tpa-chrome-language-pack-box">' +
+                        '<p>Chrome needs language packs installed for translation to work. This is a one-time setup.</p>' +
+                        '<div class="tpa-chrome-language-pack-inner">' +
+                        '<p><strong class="tpa-required-label">Required Languages:</strong><br>' + sourceLang.label + ' (Source), <span class="tpa-required-lang">' + requiredList + '</span></p>' +
+                        '<p><strong>Quick Setup:</strong></p>' +
+                        '<ol class="tpa-chrome-steps-list">' +
+                        '<li><span class="tpa-chrome-step-number">1</span>Open <strong>Chrome Settings → Languages</strong>: ' + createCopyableLink('chrome://settings/languages') + '</li>' +
+                        '<li><span class="tpa-chrome-step-number">2</span>Click <strong class="tpa-required-lang">Add languages</strong> and add the languages listed above</li>' +
+                        '<li><span class="tpa-chrome-step-number">3</span>Reload this page to verify configuration.</li>' +
+                        '</ol>' +
+                        '<p>Verify language packs: '+ createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
                         '</div>' +
                         '</div>',
                     isCombined: true
@@ -395,16 +370,16 @@ jQuery(function($) {
             }
         }
         
-        // Combine notices if both exist (simplified layout)
+        // Combine notices if both exist (Pro-style layout)
         if (unsupportedNotice && languagePackNotice) {
             return {
                 heading: '⚠️ Language Configuration Issues',
-                message: '<div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">' + 
-                    '<h4 style="font-weight: 600; margin-bottom: 12px;">' + unsupportedNotice.heading + '</h4>' +
+                message: '<div class="tpa-chrome-combined-section">' + 
+                    '<h4 class="tpa-chrome-combined-heading">' + unsupportedNotice.heading + '</h4>' +
                     unsupportedNotice.message +
                     '</div>' +
-                    '<div>' +
-                    '<h4 style="font-weight: 600; margin-bottom: 12px;">' + languagePackNotice.heading + '</h4>' +
+                    '<div class="tpa-chrome-combined-section">' +
+                    '<h4 class="tpa-chrome-combined-heading">' + languagePackNotice.heading + '</h4>' +
                     languagePackNotice.message +
                     '</div>',
                 isCombined: true

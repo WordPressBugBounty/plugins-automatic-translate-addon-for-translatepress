@@ -186,9 +186,9 @@ class TranslatepressAutomaticTranslateAddonFree {
 		
 		$valid_tabs = [
 			'dashboard'       => esc_html__('Dashboard', 'automatic-translate-addon-for-translatepress'),
-			'ai-translations' => esc_html__('AI Translations', 'automatic-translate-addon-for-translatepress'),
 			'settings'        => esc_html__('Settings', 'automatic-translate-addon-for-translatepress'),
 			'license'         => esc_html__('License', 'automatic-translate-addon-for-translatepress'),
+			'ai-translations' => esc_html__('Documentation', 'automatic-translate-addon-for-translatepress'),
 			'free-vs-pro'     => esc_html__('Free vs Pro', 'automatic-translate-addon-for-translatepress')
 		];
 

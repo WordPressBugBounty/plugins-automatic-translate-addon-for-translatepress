@@ -273,7 +273,11 @@ class ChromeAiTranslator {
         this.completedCharacterCount = 0; // Count of characters translated
         this.translateBtnEvents(); // Set up button events
         if (this.progressBarSelector) {
-            this.addProgressBar(); // Add progress bar to the UI
+            // Use shared modal progress bar when it already exists (Google/Yandex/Chrome)
+            this.useSharedProgressBar = jQuery(this.progressBarSelector).find(".progress-wrapper").length > 0;
+            if (!this.useSharedProgressBar) {
+                this.addProgressBar(); // Add progress bar only when no shared one exists
+            }
         }
     };
 
@@ -387,7 +391,9 @@ class ChromeAiTranslator {
         if (index === this.translateStringEle.length - 1) {
             this.translateBtn.prop("disabled", true); // Disable the button
             this.onComplete({ characterCount: this.completedCharacterCount }); // Call the complete callback
-            jQuery(this.progressBarSelector).find(".chrome-ai-translator-strings-count").show().find(".totalChars").text(this.formatCharacterCount(this.completedCharacterCount));
+            if (!this.useSharedProgressBar) {
+                jQuery(this.progressBarSelector).find(".chrome-ai-translator-strings-count").show().find(".totalChars").text(this.formatCharacterCount(this.completedCharacterCount));
+            }
         }
     };
 
@@ -430,7 +436,12 @@ class ChromeAiTranslator {
         let decimalValue = progress.toString().split('.')[1] || ''; // Get decimal part of the progress
         decimalValue = decimalValue.length > 0 && decimalValue[0] !== '0' ? decimalValue[0] : ''; // Format decimal value
         const formattedProgress = parseInt(progress) + `${decimalValue !== '' ? '.' + decimalValue : ''}`; // Format progress for display
-        jQuery(".chrome-ai-translator_progress").css({ "width": `${formattedProgress}%` }).text(`${formattedProgress}%`); // Update progress bar width and text
+        if (this.useSharedProgressBar) {
+            const progressBar = jQuery(this.progressBarSelector).find(".progress-wrapper .progress-bar");
+            progressBar.css("width", `${formattedProgress}%`).find("#progressText").text(`${formattedProgress}%`);
+        } else {
+            jQuery(".chrome-ai-translator_progress").css({ "width": `${formattedProgress}%` }).text(`${formattedProgress}%`); // Update progress bar width and text
+        }
     };
 
     // Method to stop the translation process
@@ -503,7 +514,9 @@ var tpaChromeAiInit=async ()=>{
     const startTransaltion = () => {
         localStorage.setItem("translationStartTime", new Date().getTime());
         const stringContainer = jQuery(".chrome-ai-translator-modal .modal-content .string_container");
-        if (stringContainer[0].scrollHeight > 100) {
+        if (stringContainer[0] && stringContainer[0].scrollHeight > 100) {
+            jQuery(".chrome-ai-translator-modal .progress-wrapper").show();
+            jQuery(".chrome-ai-translator-modal .progress-wrapper .progress-bar").css("width", "0%").find("#progressText").text("0%");
             jQuery(".chrome-ai-translator-modal .my_translate_progress").fadeIn("slow");
         }
     }
@@ -549,7 +562,7 @@ var tpaChromeAiInit=async ()=>{
                 btnClass: "chrome_ai_translator_btn", 
                 btnText: (translatedLanguageName !== undefined) ? `Translate To ${translatedLanguageName}` : `Translate`,
                 stringSelector: ".chrome-ai-translator-body table tbody tr td.target.translate",
-                progressBarSelector: ".my_translate_progress",
+                progressBarSelector: ".chrome-ai-translator-modal .my_translate_progress",
                 sourceLanguage: localStorage.page_lang,
                 targetLanguage: localStorage.language_code,
                 onStartTranslationProcess: startTransaltion,

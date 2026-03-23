@@ -2,6 +2,12 @@ var page_lang = localStorage.getItem("page_lang");
 (function($, win, doc, nav, params, namespace, undefined) {
     'use strict';
 
+    // Prevent duplicate Yandex widget bootstraps on the same page.
+    if (win.__tpaYandexWidgetBooted) {
+        return;
+    }
+    win.__tpaYandexWidgetBooted = true;
+
     var util = {
         keycode: {
             ESCAPE: 27
@@ -386,56 +392,88 @@ var page_lang = localStorage.getItem("page_lang");
     if (!wrapper || !util.isSupportedBrowser()) {
         return;
     }
-    var initWidget = function() {
-        util.loadScript('https://yastatic.net/s3/translate/v20.7.4/js/tr_page.js', wrapper, function() {
-            util.loadResource('https://translate.yandex.net/website-widget/v1/widget.html',
-                function(responseText) {
-                    var element;
-                    if (!responseText) {
-                        return;
-                    }
-                    wrapper.innerHTML = responseText;
-                    element = wrapper.querySelector('.yt-widget');
-                    if (params.widgetTheme) {
-                        element.setAttribute('data-theme', params.widgetTheme);
-                    }
+    var widgetInitialized = false;
+    var yandexLoaded = !!(namespace && namespace.PageTranslator);
+    var yandexScriptLoading = false;
 
-                    $('.yandex-widget-container').on('click', '.yt-button__icon.yt-button__icon_type_right', function() {
-                        const $container = $(this).closest('.yandex-widget-container');
-                        $container.find(".save_btn_cont > .save_it").prop("disabled", true);
-                        $container.find(".tpa-stats").hide();
-                    });
-
-                    new Widget({
-                        select: new Select(element.querySelector('.yt-listbox'), 'yt-lang'),
-                        element: element,
-                        storage: new Storage('yt-widget'),
-                        autoMode: params.autoMode === 'true',
-                        pageLang: params.pageLang,
-                        userLang: (nav.language || nav.userLanguage || '').split('-')[0],
-                        translator: new namespace.PageTranslator({
-                            srv: 'tr-url-widget',
-                            // sid: '198c575a.607a6686.dcfb3b2d.74722d75726c2d776964676574',
-                            //    sid: '5eba4470.5f1ec29a.43208802.74722d75726c2d776964676574',
-                            url: 'https://translate.yandex.net/api/v1/tr.json/translate',
-                            autoSync: true,
-                            maxPortionLength: 600
-                        }),
-                        leftButton: new Button(element.querySelector('.yt-button_type_left')),
-                        rightButton: new Button(
-                            element.querySelector('.yt-button_type_right'),
-                            element.querySelector('.yt-button_type_right > .yt-button__text')
-                        ),
-                        closeButton: new Button(element.querySelector('.yt-button_type_close'))
-                    });
+    var bootstrapWidget = function() {
+        if (widgetInitialized) {
+            return;
+        }
+        util.loadResource('https://translate.yandex.net/website-widget/v1/widget.html',
+            function(responseText) {
+                var element;
+                if (!responseText || widgetInitialized) {
+                    return;
                 }
-            );
-        });
+                wrapper.innerHTML = responseText;
+                element = wrapper.querySelector('.yt-widget');
+                if (!element) {
+                    return;
+                }
+                if (params.widgetTheme) {
+                    element.setAttribute('data-theme', params.widgetTheme);
+                }
+
+                $('.yandex-widget-container').off('click.tpaYandexWidgetIcon').on('click.tpaYandexWidgetIcon', '.yt-button__icon.yt-button__icon_type_right', function() {
+                    const $container = $(this).closest('.yandex-widget-container');
+                    $container.find(".save_btn_cont > .save_it").prop("disabled", true);
+                    $container.find(".tpa-stats").hide();
+                });
+
+                new Widget({
+                    select: new Select(element.querySelector('.yt-listbox'), 'yt-lang'),
+                    element: element,
+                    storage: new Storage('yt-widget'),
+                    autoMode: params.autoMode === 'true',
+                    pageLang: params.pageLang,
+                    userLang: (nav.language || nav.userLanguage || '').split('-')[0],
+                    translator: new namespace.PageTranslator({
+                        srv: 'tr-url-widget',
+                        url: 'https://translate.yandex.net/api/v1/tr.json/translate',
+                        autoSync: true,
+                        maxPortionLength: 600
+                    }),
+                    leftButton: new Button(element.querySelector('.yt-button_type_left')),
+                    rightButton: new Button(
+                        element.querySelector('.yt-button_type_right'),
+                        element.querySelector('.yt-button_type_right > .yt-button__text')
+                    ),
+                    closeButton: new Button(element.querySelector('.yt-button_type_close'))
+                });
+
+                widgetInitialized = true;
+            }
+        );
     };
-    if (doc.readyState === 'complete' || doc.readyState === 'interactive') {
-        initWidget();
-    } else {
-        doc.addEventListener('DOMContentLoaded', initWidget, false);
+
+    function loadYandex() {
+        if (widgetInitialized) {
+            return;
+        }
+        if (yandexLoaded) {
+            bootstrapWidget();
+            return;
+        }
+        if (yandexScriptLoading) {
+            return;
+        }
+
+        yandexScriptLoading = true;
+        util.loadScript('https://yastatic.net/s3/translate/v20.7.4/js/tr_page.js', wrapper, function() {
+            yandexLoaded = true;
+            yandexScriptLoading = false;
+            console.log('Yandex loaded once');
+            bootstrapWidget();
+        });
     }
+
+    // Trigger only on explicit user action.
+    $(document).off('click.tpaYandexLoad').on('click.tpaYandexLoad', '#lang-switch, #tpa_yandex_translate_btn', function() {
+        loadYandex();
+    });
+    $(document).off('tpa_yandex_modal_open.tpaYandexLoad').on('tpa_yandex_modal_open.tpaYandexLoad', function() {
+        loadYandex();
+    });
     var page_lang = localStorage.getItem("page_lang");
 })(jQuery, this, this.document, this.navigator, { "widgetId": "ytWidget", "pageLang": page_lang, "widgetTheme": "light", "autoMode": "false" }, this.yt = this.yt || {});

@@ -420,10 +420,18 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 
 
 /* Full Website Translate */
+.tpa-dashboard-translate-full {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 20px 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    flex-direction: column;
+}
+
 .tpa-dashboard-translate-full .tpa-dashboard-addon {
-    border-bottom: 1px solid #c3c4c7;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
     display: flex;
     gap: 15px;
     justify-content: space-between;
@@ -515,7 +523,7 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 }
 
 :where(.tpa-dashboard-free-vs-pro,.tpa-dashboard-ai-translations ,.tpa-dashboard-license, .tpa-dashboard-settings) .tpa-dashboard-status span{
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
 }
 
@@ -604,8 +612,8 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 }
 
 .tpa-dashboard-ai-translations .tpa-dashboard-translations {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 20px;
 }
 
@@ -617,8 +625,6 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     border-radius: 14px;
     padding: 13px 15px 15px 15px;
     text-align: start;
-    flex: 1;
-    max-width: 223px;
 }
 
 .tpa-dashboard-ai-translations .tpa-dashboard-translation-card h3{
@@ -669,6 +675,293 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     border-radius: 50%;
     cursor: pointer;
     font-size: 18px;
+}
+
+/* ================================================
+   Chrome AI Configuration (Settings)
+================================================ */
+.tpa-dashboard-chrome-ai-settings{
+    margin-bottom:28px;
+}
+
+.tpa-section-title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.tpa-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.tpa-section-icon svg,
+.tpa-section-icon img {
+    display: block;
+}
+
+.tpa-section-description {
+    font-size: 14px;
+    color: var(--text-color-light);
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}
+
+/* Chrome Local AI Notice */
+#tpa-chrome-local-ai-notice {
+    display: none;
+    background: var(--tpa-ald-bg, #f8f9fa);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 12px;
+}
+
+.tpa-chrome-local-ai-notice-content {
+    color: #dc2626;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.tpa-chrome-notice-heading {
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    font-size: 16px;
+}
+
+/* Test translation section (inside notice) - spacing when notice content is above */
+#tpa-chrome-test-translation {
+    margin-top: 20px;
+}
+
+.tpa-chrome-test-translation-heading {
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    font-size: 16px;
+}
+
+.tpa-chrome-test-translation-description {
+    margin-bottom: 16px;
+    color: #666;
+    font-size: 14px;
+}
+
+.tpa-chrome-test-translation-language-pair {
+    margin-bottom: 16px;
+}
+
+.tpa-chrome-test-translation-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.tpa-chrome-test-translation-source,
+.tpa-chrome-test-translation-target {
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.tpa-chrome-test-translation-source {
+    margin-right: 8px;
+    width: 10rem;
+}
+
+.tpa-chrome-test-translation-target {
+    width: 10rem;
+}
+
+.tpa-chrome-test-translation-btn {
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+.tpa-chrome-test-translation-result {
+    display: none;
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.tpa-chrome-test-translation-error {
+    display: none;
+    margin-top: 16px;
+    padding: 12px;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    color: #c33;
+    font-size: 14px;
+}
+
+/* Chrome AI notice - success result state */
+.tpa-chrome-test-translation-result.tpa-success {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0c4a6e;
+}
+
+#tpa-chrome-local-ai-notice.tpa-chrome-notice-combined .tpa-chrome-local-ai-notice-content {
+    color: inherit;
+}
+
+#tpa-chrome-local-ai-notice .tpa-chrome-no-languages-content {
+    color: rgb(159 18 57);
+    font-size: 14px;
+    line-height: 1.5;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#tpa-chrome-local-ai-notice .tpa-chrome-no-languages-content svg {
+    fill: rgb(159 18 57);
+    vertical-align: middle;
+}
+
+/* Chrome notice message content - lists, paragraphs, links */
+.tpa-chrome-notice-message ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-top: 8px;
+}
+
+.tpa-chrome-notice-message ol {
+    list-style-type: none;
+}
+
+.tpa-chrome-notice-message p {
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.tpa-chrome-notice-message p:last-child {
+    margin-bottom: 0;
+}
+
+.tpa-chrome-notice-message a {
+    text-decoration: none;
+    color: #2563eb;
+}
+
+/* Chrome copyable URL link */
+.chrome-url-link.chrome-ai-translator-flags {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+}
+
+.chrome-url-link.chrome-ai-translator-flags a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+/* Unsupported languages notice */
+.tpa-chrome-unsupported-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgb(159 18 57);
+}
+
+.tpa-chrome-unsupported-heading svg {
+    fill: rgb(159 18 57);
+    vertical-align: middle;
+}
+
+.tpa-chrome-unsupported-box p {
+    margin-bottom: 12px;
+    color: rgba(190 18 60);
+}
+
+.tpa-chrome-unsupported-box .tpa-unsupported-list {
+    color: rgb(159 18 57);
+}
+
+/* Language pack notice */
+.tpa-chrome-language-pack-heading {
+    color: rgb(217 119 6);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tpa-chrome-language-pack-heading svg {
+    fill: rgb(217 119 6);
+    vertical-align: middle;
+}
+
+.tpa-chrome-language-pack-box {
+    margin-top: 12px;
+}
+
+.tpa-chrome-language-pack-box p {
+    margin-bottom: 12px;
+    color: rgba(71 85 105);
+}
+
+.tpa-chrome-language-pack-inner .tpa-required-lang {
+    color: rgb(225 29 72);
+}
+
+.tpa-chrome-language-pack-inner strong.tpa-required-label {
+    color: rgb(161 98 7);
+}
+
+/* Chrome steps list (numbered circles) */
+.tpa-chrome-steps-list {
+    margin: 0 0 12px 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.tpa-chrome-steps-list li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 35px;
+    color: #DC2626;
+}
+
+.tpa-chrome-step-number {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgb(254 243 199);
+    background-color: rgb(255, 255, 255);
+    color: #111827;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* Combined notice sections */
+.tpa-chrome-language-pack-box,
+.tpa-chrome-unsupported-box {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tpa-chrome-combined-section h4,
+.tpa-chrome-combined-heading {
+    font-weight: 600;
+    margin-bottom: 12px;
 }
 
 /* ================================================
@@ -867,11 +1160,6 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 /* ================================================
    Feedback Container
 ================================================ */
-.tpa-dashboard-feedback-container {
-    margin-top: 20px;
-    padding: 20px;
-    background: white;
-}
 
 .tpa-dashboard-feedback-container .feedback-row {
     display: flex;
@@ -887,9 +1175,6 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 
 .tpa-dashboard-feedback-container p {
     margin: 0;
-    font-size: 14px;
-    color: var(--text-color);
-    flex: 1;
 }
 
 .tpa-dashboard-feedback-container .tpa-see-terms {
@@ -897,7 +1182,6 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     text-decoration: none;
     font-size: 13px;
     white-space: nowrap;
-    margin-left: auto;
 }
 
 .tpa-dashboard-feedback-container .tpa-see-terms:hover {
@@ -968,10 +1252,6 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     color: #000;
     margin: 14px 0px 22px 0px;
     font-size: 22px;
-}
-
-.tpa-dashboard-settings .tpa-dashboard-settings-container p {
-    font-size: 14px;
 }
 
 /* ================================================
