@@ -593,9 +593,13 @@ const tpAutoTranslator = (function (window, $) {
     if (arr.includes(default_code)) {
       addStringsInModal(tr_type);
     } else {
-      $(".yandex-widget-container").find(".tpa-preloader-wrap").hide();
-      $(".yandex-widget-container").find(".notice-container")
-        .addClass("notice inline notice-warning")
+      const $modal = $(`#tpa_${tr_type}_model`);
+      $modal.find(".tpa-preloader-wrap").hide();
+      // modal-body is hidden at the start of the flow; show it so the warning is visible.
+      $modal.find(".modal-body").show();
+      // keep the widget/table hidden, only show the notice message
+      $modal.find(".notice-container")
+        .addClass("notice inline notice-warning tpa-modern-alert tpa-modern-alert not-supported")
         .show()
         .html("Yandex Automatic Translator Does not support this language.");
     }
@@ -792,15 +796,17 @@ const tpAutoTranslator = (function (window, $) {
   function settingsModel() {
     const icons = {
         yandex: extradata['yt_preview'],
+        openai: extradata['openai_preview'],
+        gemini: extradata['gemini_preview'],
+        anthropic: extradata['anthropic_preview'],
         google: extradata['gt_preview'],
         chrome: extradata['chrome_preview'],
         docs: extradata['document_preview'],
         error: extradata['error_preview']
     };
 
-    const url = 'https://docs.coolplugins.net/docs/';
-    const getGTProLink = "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_google";
-    const getChromeProLink = "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_chrome";
+    const url = 'https://docs.coolplugins.net/docs/automatic-translate-addon-for-translatepress-pro/';
+    const getGTProLink = "https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=popup_";
 
     const TPA_IMG = (key) => icons[key];
     const DOC_ICON = `<img src="${TPA_IMG('docs')}" width="20" alt="Docs">`;
@@ -816,7 +822,7 @@ const tpAutoTranslator = (function (window, $) {
             icon: 'yandex',
             info: 'https://translate.yandex.com/',
             btn: `<button id="tpa_yandex_translate_btn" class="tpa-provider-btn translate">Translate</button>`,
-            doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_yandex`,
+            doc: `${url}how-to-translate-your-website-content-automatically-via-yandex/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_yandex`,
             enabled: isYandexEnabled,
             selectable: true,
             cta: ''
@@ -826,15 +832,15 @@ const tpAutoTranslator = (function (window, $) {
           name: 'Google Translate',
           icon: 'google',
           info: 'https://translate.google.com/',
-          btn: `<a href="${getGTProLink}" target="_blank">
+          btn: `<a href="${getGTProLink}google" target="_blank">
                   <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
                       <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
                   </button>
                 </a>`,
-          doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google`,
+          doc: `${url}how-to-translate-your-website-content-automatically-via-google/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_google`,
           enabled: true, // Google Translate is always shown (Pro feature)
           selectable: false,
-          cta: `<a href="${getGTProLink}" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--warning">Buy Pro</a>`
+          cta: `<a href="${getGTProLink}google" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--warning">Buy Pro</a>`
         },
         {
             key: 'chrome',
@@ -862,7 +868,7 @@ const tpAutoTranslator = (function (window, $) {
                                         Loading...
                                     </button>
                                 `)),
-            doc: `${url}automatic-translate-addon-for-translatepress-pro/how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome`,
+            doc: `${url}how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome`,
             enabled: isChromeEnabled,
             selectable: chromeAIStatus === true,
             cta: chromeAIStatus === true
@@ -874,7 +880,52 @@ const tpAutoTranslator = (function (window, $) {
                   : '<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" disabled>Loading…</button>'
                 )
               )
-        }
+        },
+        {
+          key: 'openai',
+          name: 'OpenAI Translate',
+          icon: 'openai',
+          info: 'https://openai.com/',
+          btn: `<a href="${getGTProLink}openai" target="_blank">
+                  <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
+                      <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
+                  </button>
+                </a>`,
+          doc: `${url}generate-open-ai-api-key-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_openai`,
+          enabled: true, // OpenAI Translate is always shown (Pro feature)
+          selectable: false,
+          cta: `<a href="${getGTProLink}openai" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--warning">Buy Pro</a>`
+        },
+        {
+          key: 'gemini',
+          name: 'Google Gemini Translate',
+          icon: 'gemini',
+          info: 'https://gemini.google.com/',
+          btn: `<a href="${getGTProLink}gemini" target="_blank">
+                  <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
+                      <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
+                  </button>
+                </a>`,
+          doc: `${url}generate-google-gemini-ai-api-key-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_gemini`,
+          enabled: true, // Google Gemini Translate is always shown (Pro feature)
+          selectable: false,
+          cta: `<a href="${getGTProLink}gemini" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--warning">Buy Pro</a>`
+        },
+        {
+          key: 'anthropic',
+          name: 'Anthropic Translate',
+          icon: 'anthropic',
+          info: 'https://www.anthropic.com/',
+          btn: `<a href="${getGTProLink}anthropic" target="_blank">
+                  <button id="tpa_google_translate_btn" class="tpa-provider-btn error">
+                      <img src="${TPA_IMG('error')}" width="16" style="vertical-align:middle; margin-right:5px;" alt="Pro"> Buy Pro
+                  </button>
+                </a>`,
+          doc: `${url}generate-anthropic-ai-api-key-translatepress/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_anthropic`,
+          enabled: true, // Anthropic Translate is always shown (Pro feature)
+          selectable: false,
+          cta: `<a href="${getGTProLink}anthropic" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--warning">Buy Pro</a>`
+        },
     ];
 
     // Filter rows based on saved provider states - only show enabled providers

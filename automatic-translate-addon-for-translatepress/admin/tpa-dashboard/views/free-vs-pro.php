@@ -21,24 +21,26 @@ if ( ! defined( 'ABSPATH' ) ) {
     <table>
         <thead>
             <tr>
-                <th><?php echo esc_html__('Dynamic Content', 'automatic-translate-addon-for-translatepress'); ?></th>
-                <th><?php echo esc_html__('Free', 'automatic-translate-addon-for-translatepress'); ?></th>
-                <th><?php echo esc_html__('Pro', 'automatic-translate-addon-for-translatepress'); ?></th>
+                <th><?php echo esc_html__( 'Feature', 'automatic-translate-addon-for-translatepress' ); ?></th>
+                <th><?php echo esc_html__( 'Free', 'automatic-translate-addon-for-translatepress' ); ?></th>
+                <th><?php echo esc_html__( 'Pro', 'automatic-translate-addon-for-translatepress' ); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php
-                $features = [
-                    'Yandex Translate Widget Support' => [true, true],
-                    'No API Key Required' => [true, true],
-                    'Unlimited Translations' => [true, true],
-                    'Google Translate Widget Support' => [false, true],
-                    'Chrome Built-in AI Support' => [true, true],
-                    'Premium Support' => [false, true],
-                ];
-             foreach ($features as $feature => $availability): ?>
+                // Matches readme "Free vs. Pro" and the translation provider UI (Yandex/Chrome free; Google & AI providers Pro).
+                $features = array(
+                    esc_html__( 'Yandex automatic translation', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
+                    esc_html__( 'Chrome Built-in AI translator', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
+                    esc_html__( 'Google Translate widget', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
+                    esc_html__( 'OpenAI, Google Gemini & Anthropic translation', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
+                    esc_html__( 'Unlimited strings & characters (no plugin API key)', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
+                    esc_html__( 'Premium support (24–48h response)', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
+                );
+            foreach ( $features as $feature => $availability ) :
+                ?>
                 <tr>
-                    <td><?php echo esc_html($feature); ?></td>
+                    <td><?php echo esc_html( $feature ); ?></td>
                     <td class="<?php echo esc_attr($availability[0] ? 'check' : 'cross'); ?>">
                         <?php echo esc_html($availability[0] ? '✓' : '✗'); ?>
                     </td>

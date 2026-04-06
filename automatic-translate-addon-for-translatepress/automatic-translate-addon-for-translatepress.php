@@ -5,7 +5,7 @@
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 2.0.3
+ * Version: 2.0.4
  * License: GPL2
  * Text Domain:automatic-translate-addon-for-translatepress
  * Requires Plugins: translatepress-multilingual
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '2.0.3' );
+define( 'TPA_VERSION', '2.0.4' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -650,7 +650,6 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 				include_once TPA_PATH . 'admin/tpap-register/tpap-admin-menu.php';
 				/** Feedback form after deactivation */
 				require_once __DIR__ . '/admin/feedback/admin-feedback-form.php';
-				
 			}
 		}
 
@@ -668,6 +667,9 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			$extra_data['gt_preview']     = TPA_URL . '/assets/images/google.png';
 			$extra_data['yt_preview']     = TPA_URL . '/assets/images/yandex.png';
 			$extra_data['chrome_preview']     = TPA_URL . '/assets/images/chrome.png';
+			$extra_data['openai_preview']  = TPA_URL . '/assets/images/openAi.png';
+			$extra_data['gemini_preview']  = TPA_URL . '/assets/images/google-gemini.png';
+			$extra_data['anthropic_preview']  = TPA_URL . '/assets/images/anthropic.png';
 			$extra_data['document_preview']  = TPA_URL . '/assets/images/document.svg';
         	$extra_data['error_preview'] = TPA_URL . '/assets/images/error-icon.svg';
 			$extra_data['dashboard_url'] = admin_url('admin.php?page=');
@@ -940,7 +942,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			return;
 		}
 
-		echo '<a type="button" class="button tpa-bulk-translate-btn" href="https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=plugins_list#pricing" target="_blank">' . esc_html__( 'AI Translate', 'automatic-translate-addon-for-translatepress' ) . '</a>';
+		echo '<a type="button" class="button tpa-bulk-translate-btn" href="https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=get_pro&utm_content=bulk_translate#pricing" target="_blank">' . esc_html__( 'AI Translate', 'automatic-translate-addon-for-translatepress' ) . '</a>';
 	}
 
 	public static function tpa_get_user_info() {
