@@ -61,7 +61,8 @@ class TranslatepressAutomaticTranslateAddonFree {
 		
 		// Get published languages
 		$published_languages = isset( $trp_settings['publish-languages'] ) ? $trp_settings['publish-languages'] : array();
-		
+		$translation_languages = isset( $trp_settings['translation-languages'] ) ? $trp_settings['translation-languages'] : array();
+		$published_languages = count( array_diff( $published_languages, array( $default_lang ) ) ) > 0 ? $published_languages : $translation_languages;
 		// Get language names - pass language codes to get_language_names()
 		$language_names = array();
 		$all_language_codes = array_unique( array_merge( array( $default_lang ), $published_languages ) );

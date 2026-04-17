@@ -66,6 +66,8 @@
         $tpa_trp_settings          = get_option( 'trp_settings', array() );
         $tpa_default_lang          = isset( $tpa_trp_settings['default-language'] ) ? $tpa_trp_settings['default-language'] : '';
         $tpa_publish_languages     = isset( $tpa_trp_settings['publish-languages'] ) && is_array( $tpa_trp_settings['publish-languages'] ) ? $tpa_trp_settings['publish-languages'] : array();
+        $tpa_translation_languages = isset( $tpa_trp_settings['translation-languages'] ) && is_array( $tpa_trp_settings['translation-languages'] ) ? $tpa_trp_settings['translation-languages'] : array();
+        $tpa_publish_languages     = count( array_diff( $tpa_publish_languages, array( $tpa_default_lang ) ) ) > 0 ? $tpa_publish_languages : $tpa_translation_languages;
         $tpa_has_translation_langs = ! empty( $tpa_publish_languages ) && count( array_diff( $tpa_publish_languages, array( $tpa_default_lang ) ) ) > 0;
         ?>
 

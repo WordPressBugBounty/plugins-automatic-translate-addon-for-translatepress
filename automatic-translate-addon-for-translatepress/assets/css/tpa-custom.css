@@ -1412,6 +1412,16 @@ body.tpa-provider-modal-open {
     background: #f1f5f9;
 }
 
+.yandex-widget-body .string_container .yandex-translation-info {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    font-weight: 500;
+}
+
 .tpa-provider-footer-btn.tpa-provider-start {
     background: var(--wp-admin-theme-color, #2271b1);
     border-color: var(--wp-admin-theme-color, #2271b1);

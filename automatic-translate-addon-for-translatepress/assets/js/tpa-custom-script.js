@@ -548,28 +548,60 @@ const tpAutoTranslator = (function (window, $) {
   }
 
   // When the user clicks anywhere outside of the modal, close it
+  function isYandexModal($modal) {
+    return $modal && $modal.length && ($modal.is("#tpa_yandex_model") || $modal.hasClass("yandex-widget-container"));
+  }
+
   $(window).on("click", function (event) {
     if ($(event.target).hasClass("tpa_custom_model")) {
-        $(event.target).fadeOut("slow");
+        const $modal = $(event.target);
+        if (isYandexModal($modal)) {
+            destroyYandexTranslator();
+        }
+        $modal.fadeOut("slow");
     }
+  });
+
+  $(document).on("click", ".tpa_custom_model .close", function () {
+      const $modal = $(this).closest(".tpa_custom_model");
+      if (isYandexModal($modal)) {
+        destroyYandexTranslator();
+      }
+      $modal.fadeOut("slow");
+      location.reload();
+  });
+
+  $(document).on("click", ".tpa_custom_model .tpa-modern-close", function () {
+      const $modal = $(this).closest(".tpa_custom_model");
+      if (isYandexModal($modal)) {
+        destroyYandexTranslator();
+      }
+      $modal.fadeOut("slow");
+      location.reload();
   });
 
   $(document).on("click", ".tpa_custom_model .notice-dismiss", function () {
       $(".notice.inline.notice-info.is-dismissible").fadeOut("slow");
   });
 
-  // Get the <span> element that closes the modal
-  $(document).on("click", ".tpa_custom_model .close", function () {
-      $(this).closest(".tpa_custom_model").fadeOut("slow");
-      location.reload();
-  });
-
-  $(document).on("click", ".tpa_custom_model .tpa-modern-close", function () {
-      $(this).closest(".tpa_custom_model").fadeOut("slow");
-      location.reload();
-  });
-
   // When the user clicks Yandex button, open the modal
+
+  function destroyYandexTranslator() {
+    console.log('destroyYandexTranslator');
+    if (typeof window.tpaDestroyYandexTranslation === 'function') {
+        window.tpaDestroyYandexTranslation();
+    } else {
+        $(document).trigger('tpa:yandex-cancel');
+    }
+    $('.yt-button__icon.yt-button__icon_type_right').trigger('click');
+    $('.yandex-widget-container').find('.string_container').scrollTop(0);
+
+    const progressContainer = $('.yandex-widget-container').find('.my_translate_progress');
+    progressContainer.hide();
+    progressContainer.find('.progress-wrapper').hide();
+    progressContainer.find('#myProgressBar').css('width', '0');
+    progressContainer.find('#progressText').text('0%');
+}
 
   function onYandexTranslateClick() {
     var tr_type = "yandex";
@@ -587,6 +619,9 @@ const tpAutoTranslator = (function (window, $) {
     $(".save_it").prop("disabled", true);
     $(".tpa-stats").css("display", "none");
     var default_code = localStorage.getItem("language_code");
+    if($(".string_container").find(".yandex-translation-info").length === 0) {
+      $(".string_container").prepend("<div class='yandex-translation-info'>Translating Strings into " + localStorage.getItem("target_language_name") + " Using Yandex Translator.</div>");
+    }
     var arr = [
       "ki","en","pl","af","jv","no","am","ar","az","ba","be","bg","bn","bs","ca","ceb","cs","cy","da","de","el","en","eo","es","et","eu","fa","fi","fr","ga","gd","gl","gu","he","hi","hr","ht","hu","hy","id","is","it","ja","jv","ka","kk","km","kn","ko","ky","la","lb","lo","lt","lv","mg","mhr","mi","mk","ml","mn","mr","mrj","ms","mt","my","ne","nl","no","pa","pap","pl","pt","ro","ru","si","sk","sl","sq","sr","su","sv","sw","ta","te","tg","th","tl","tr","tt","udm","uk","ur","uz","vi","xh","yi","zh",
     ];
@@ -687,6 +722,9 @@ const tpAutoTranslator = (function (window, $) {
           }
           printStringsInPopup(strings, tr_type, group, idss);
           if (tr_type == "yandex") {
+            // Start Yandex translation only after rows are rendered to avoid
+            // races where progress UI is hidden while translation is active.
+            $(document).trigger('tpa:yandex-start');
             setTimeout(function() {
               $("#ytWidget .yt-button_type_left").trigger("click");
             }, 1000);
@@ -1172,12 +1210,7 @@ const tpAutoTranslator = (function (window, $) {
 
   function translatorWidget(widgetType) {
     if (widgetType === "yandex") {
-      const widgetPlaceholder = '<div id="ytWidget">..Loading</div>';
-      return `
-            <div class="translator-widget">
-            <h3 class="choose-lang">Choose language <span class="dashicons-before dashicons-translation"></span></h3>
-                ${widgetPlaceholder}
-            </div>`;
+      return ` <div id="ytWidget" style="display:none"></div>`;
     } else if (widgetType === 'chrome-ai-translator'){
       return `
       <div class="translator-widget ${widgetType}">

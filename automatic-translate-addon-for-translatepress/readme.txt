@@ -5,7 +5,7 @@ Tags: AI translation, translate, Translatepress, multilingual, automatic transla
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 2.0.4
+Stable tag: 2.0.5
 License: GPLv2 or later 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Auto-translate unlimited strings and characters using AI & Machine Translation tools without any external API Key!
@@ -111,8 +111,11 @@ For Chrome's built-in AI translation, detailed setup instructions are required. 
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage, and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+= Version 2.0.5 || 17/April/2026 = 
+- **Fixed:** Issue with Yandex translator.
+
 = Version 2.0.4 || 06/April/2026 = 
--**Improved:** UI changes
+- **Improved:** UI changes
 
 = Version 2.0.3 || 23/March/2026 = 
 - **Improved:** Single Page Translation UI for better usability.
