@@ -11,14 +11,28 @@
                 $.post(ajaxURL, { 'action':ajaxCallback, 'nonce':nonce }, function( data ) {
                     if(data.success) {
                         wrapper.slideUp('fast');
-                    } else {
-                        console.error('Failed to dismiss notice:', data.data.message);
                     }
                   }, 'json');
             });
             
         let plugin_slug = 'automatic-translate-addon-for-translatepress';
-		let text_domain = 'TPA';
+		let plugin_prefix = 'TPA';
+        const $feedbackDialog = $("#cool-plugins-deactivate-feedback-dialog-wrapper[data-slug='" + plugin_slug + "']");
+
+        function showFeedbackValidationError(message) {
+            let $error = $feedbackDialog.find('.cool-plugins-feedback-error');
+            if (!$error.length) {
+                $error = $('<p class="cool-plugins-feedback-error" role="alert"></p>');
+                $feedbackDialog.find('.cool-plugin-popup-button-wrapper').before($error);
+            }
+            $error.text(message).show();
+        }
+
+        function clearFeedbackValidationError() {
+            $feedbackDialog.find('.cool-plugins-feedback-error').hide().text('');
+            $feedbackDialog.find('.cool-plugins-feedback-text').removeClass('cool-plugins-feedback-input-error');
+        }
+
         $target = $('#the-list').find('[data-slug="'+plugin_slug+'"] span.deactivate a');
 
         var plugin_deactivate_link = $target.attr('href');
@@ -37,7 +51,8 @@
         });
 
         $('.cool-plugins-deactivate-feedback-dialog-input').on('click',function(){
-            if($(`#cool-plugins-GDPR-data-notice-${text_domain}`).is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){
+            clearFeedbackValidationError();
+            if($(`#cool-plugins-GDPR-data-notice-${plugin_prefix}`).is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){
                 $('#cool-plugin-submitNdeactivate').removeClass('button-deactivate');
             }
             else{
@@ -46,9 +61,11 @@
 
         });
 
-        $(`#cool-plugins-GDPR-data-notice-${text_domain}`).on('click', function(){
+        $feedbackDialog.on('input', '.cool-plugins-feedback-text', clearFeedbackValidationError);
 
-            if($(`#cool-plugins-GDPR-data-notice-${text_domain}`).is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){ 
+        $(`#cool-plugins-GDPR-data-notice-${plugin_prefix}`).on('click', function(){
+            clearFeedbackValidationError();
+            if($(`#cool-plugins-GDPR-data-notice-${plugin_prefix}`).is(":checked") === true && $('.cool-plugins-deactivate-feedback-dialog-input').is(':checked') === true){ 
                 $('#cool-plugin-submitNdeactivate').removeClass('button-deactivate');
             }
             else{
@@ -63,48 +80,61 @@
                     opacity:0
                 },200,function(){
                     $("#cool-plugins-deactivate-feedback-dialog-wrapper").addClass("hide-feedback-popup");
-                    $("#cool-plugins-deactivate-feedback-dialog-wrapper").find('#cool-plugin-submitNdeactivate').removeClass(text_domain);
+                    $("#cool-plugins-deactivate-feedback-dialog-wrapper").find('#cool-plugin-submitNdeactivate').removeClass(plugin_prefix);
+                    clearFeedbackValidationError();
                     $('#wpwrap').css('opacity','1');
                 })
 
             }
         })
 
-        $(document).on('click','#cool-plugin-submitNdeactivate.'+plugin_slug+':not(".button-deactivate")', function(event){
-            let nonce = $('#_wpnonce').val();
-            let reason = $('.cool-plugins-deactivate-feedback-dialog-input:checked').val();
+        function submitDeactivationFeedback() {
+            const $submit = $('#cool-plugin-submitNdeactivate');
+            if ($submit.hasClass('button-deactivate') || !$submit.hasClass(plugin_slug)) {
+                return;
+            }
+
+            const nonce = $('#_wpnonce').val();
+            const reason = $('.cool-plugins-deactivate-feedback-dialog-input:checked').val();
             let message = '';
-            if( $('textarea[name="reason_'+reason+'"]').length>0 ){
-                if( $('textarea[name="reason_'+reason+'"]').val() == '' ){
-                    alert('Please provide some extra information!');
+
+            if ($('textarea[name="reason_' + reason + '"]').length > 0) {
+                const $reasonTextarea = $('textarea[name="reason_' + reason + '"]');
+                if ($reasonTextarea.val().trim() === '') {
+                    showFeedbackValidationError('Please provide some extra information!');
+                    $reasonTextarea.addClass('cool-plugins-feedback-input-error').focus();
                     return;
-                }else{
-                    message=$('textarea[name="reason_'+reason+'"]').val();
                 }
+                clearFeedbackValidationError();
+                message = $reasonTextarea.val();
             }
 
             $.ajax({
-                url:ajaxurl,
-                method:'POST',
-                data:{
-                    'action':text_domain+'_submit_deactivation_response',
-                    '_wpnonce':nonce,
-                    'reason':reason,
-                    'message':message,
+                url: ajaxurl,
+                method: 'POST',
+                data: {
+                    action: plugin_prefix + '_submit_deactivation_response',
+                    _wpnonce: nonce,
+                    reason: reason,
+                    message: message,
                 },
-                beforeSend:function(data){
-                    $('#cool-plugin-submitNdeactivate').text('Deactivating...');
-                    $('#cool-plugin-submitNdeactivate').attr('id','deactivating-plugin');
+                beforeSend: function () {
+                    $submit.text('Deactivating...');
+                    $submit.attr('id', 'deactivating-plugin');
                     $('#cool-plugins-loader-wrapper').show();
                     $('#cool-plugin-skipNdeactivate').remove();
                 },
-                success:function(res){
+                success: function () {
                     $('#cool-plugins-loader-wrapper').hide();
                     window.location = plugin_deactivate_link;
                     $('#deactivating-plugin').text('Deactivated');
-                }
-            })
+                },
+            });
+        }
 
+        $(document).on('submit', '#cool-plugins-deactivate-feedback-dialog-form', function (event) {
+            event.preventDefault();
+            submitDeactivationFeedback();
         });
 
         $(document).on('click', '#cool-plugin-skipNdeactivate.'+plugin_slug+':not(".button-deactivate")', function(){

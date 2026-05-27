@@ -34,7 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                     esc_html__( 'Chrome Built-in AI translator', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
                     esc_html__( 'Google Translate widget', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
                     esc_html__( 'OpenAI, Google Gemini & Anthropic translation', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
-                    esc_html__( 'Unlimited strings & characters (no plugin API key)', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
+                    esc_html__( 'Bulk translation', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
+                    esc_html__( 'Unlimited strings & characters', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
                     esc_html__( 'Premium support (24–48h response)', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
                 );
             foreach ( $features as $feature => $availability ) :

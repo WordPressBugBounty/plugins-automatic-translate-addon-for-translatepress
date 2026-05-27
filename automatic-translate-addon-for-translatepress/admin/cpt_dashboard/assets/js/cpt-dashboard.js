@@ -12,11 +12,23 @@ jQuery(document).ready(function($){
     });
 
     $('.tpa-review-notice-dismiss button').click(function(){
-        var prefix = $(this).closest('.tpa-review-notice-dismiss').data('prefix');
-        var nonce = $(this).closest('.tpa-review-notice-dismiss').data('nonce');
+        var $button = $(this);
+        var prefix = $button.closest('.tpa-review-notice-dismiss').data('prefix');
+        var nonce = $button.closest('.tpa-review-notice-dismiss').data('nonce');
+        var $notice = $button.closest('.cpt-review-notice');
 
-        $.post(ajaxurl, {action: 'tpa_hide_review_notice', prefix: prefix, nonce: nonce}, (response)=>{
-            $(this).closest('.cpt-review-notice').slideUp();
+        $.post(ajaxurl, {
+            action: 'tpa_hide_review_notice',
+            prefix: prefix,
+            nonce: nonce
+        }, function(response) {
+            if (response && response.success) {
+                $notice.slideUp();
+            } else {
+                console.error('Failed to hide review notice:', response);
+            }
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error('Failed to hide review notice:', textStatus, errorThrown);
         });
     });
 });

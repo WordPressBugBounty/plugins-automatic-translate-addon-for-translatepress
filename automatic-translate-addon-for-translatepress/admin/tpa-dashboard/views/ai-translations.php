@@ -58,13 +58,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="tpa-dashboard-translation-card">
                     <div class="logo">
                         <img src="<?php echo esc_url( TPA_URL . 'assets/images/' . sanitize_file_name( $translation['logo'] ) ); ?>"
-                            alt="<?php echo esc_attr( substr( sanitize_text_field( $translation['alt'] ), 0, 100 ) ); ?>">
+                            alt="<?php echo esc_attr( substr( $translation['alt'], 0, 100 ) ); ?>">
                     </div>
                     <h3><?php echo esc_html( substr( $translation['title'], 0, 100 ) ); ?></h3>
                     <p><?php echo esc_html( substr( $translation['description'], 0, 250 ) ); ?></p>
                     <div class="play-btn-container">
                         <a href="<?php echo esc_url($translation['url']); ?>" target="_blank">
-                            <img src="<?php echo esc_url( TPA_URL . 'admin/tpa-dashboard/images/' . sanitize_file_name( $translation['icon'] ) ); ?>" alt="<?php echo esc_attr( substr( sanitize_text_field( $translation['alt'] ), 0, 100 ) ); ?>">
+                            <img src="<?php echo esc_url( TPA_URL . 'admin/tpa-dashboard/images/' . sanitize_file_name( $translation['icon'] ) ); ?>" alt="<?php echo esc_attr( substr( $translation['alt'], 0, 100 ) ); ?>">
                         </a>
                     </div>
                 </div>

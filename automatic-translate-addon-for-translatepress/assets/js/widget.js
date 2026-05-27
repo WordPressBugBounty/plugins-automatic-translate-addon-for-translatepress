@@ -439,4 +439,4 @@
     } else {
         doc.addEventListener('DOMContentLoaded', initWidget, false);
     }
-})(jQuery, this, this.document, this.navigator, { "pageLang": "en", "autoMode": "false", "widgetId": "ytWidget", "widgetTheme": "light" }, this.yt = this.yt || {});
+})(jQuery, this, this.document, this.navigator, { "pageLang": window.localStorage.getItem('page_lang'), "autoMode": "false", "widgetId": "ytWidget", "widgetTheme": "light" }, this.yt = this.yt || {});

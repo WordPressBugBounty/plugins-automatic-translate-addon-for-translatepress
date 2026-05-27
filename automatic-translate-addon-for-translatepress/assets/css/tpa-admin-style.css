@@ -27,7 +27,7 @@
 }
 
 .tpa-bulk-translate-btn:hover::after {
-    content: "Pro";
+    content: "Upgrade";
     position: absolute;
     top: -40px;
     left: 50%;

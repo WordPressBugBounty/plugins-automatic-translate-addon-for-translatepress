@@ -3,9 +3,9 @@ Contributors: narinder-singh, satindersingh, coolplugins
 Donate link: https://paypal.me/CoolPlugins/10USD/
 Tags: AI translation, translate, Translatepress, multilingual, automatic translation
 Requires at least: 5.0
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 5.6
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 License: GPLv2 or later 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Auto-translate unlimited strings and characters using AI & Machine Translation tools without any external API Key!
@@ -111,6 +111,10 @@ For Chrome's built-in AI translation, detailed setup instructions are required. 
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage, and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+= Version 2.0.6 || 27/May/2026 = 
+- **Improved:** Code Improvements & Optimization.
+- **Tested upto:** Wordpress 7.0.
+
 = Version 2.0.5 || 17/April/2026 = 
 - **Fixed:** Issue with Yandex translator.
 

@@ -21,7 +21,6 @@ jQuery(function($) {
         let button   = $(this);
         let $wrapper = button.closest('.tpa-dashboard-addon-l');
         let slug     = button.data('slug');
-        let nonce    = button.data('nonce');
         const originalText = button.text().trim();
         
         // Determine action based on button text
@@ -29,12 +28,16 @@ jQuery(function($) {
         if (originalText.toLowerCase() === 'activate' || originalText.toLowerCase().includes('activate')) {
             action = 'activate';
         }
+
+        let nonce = action === 'activate'
+            ? button.attr('data-nonce-activate')
+            : button.attr('data-nonce-install');
     
         $wrapper.find('.tpa-install-message').empty();
     
         if (!slug || !nonce || typeof ajaxurl === 'undefined') {
             $wrapper.find('.tpa-install-message')
-                .text('Missing required data. Please reload the page.');
+                .text(tpaDashboard.strings.missingData);
             return;
         }
     
@@ -47,43 +50,44 @@ jQuery(function($) {
             slug: slug,
             plugin_action: action,
             _wpnonce: nonce
-        }, function (response) {
+        })
+        .done(function (response) {
             if (response && response.success) {
-    
                 const $container = button.closest('.tpa-dashboard-addon-l');
                 if (response.data && response.data.activated === true) {
                     button.remove();
                     $container.find('.tpa-install-message').remove();
-        
-                    $container.append(`
-                        <span class="installed">Activated</span>
-                    `);
+                    $container.append('<span class="installed">Activated</span>');
                 } else {
                     // Not activated yet (e.g. Loco Translate missing)
-                    let message = 'Installed successfully.';
+                    let message = tpaDashboard.strings.installedSuccessfully;
                     if (response.data && response.data.message) {
-                        message = response.data.message;
+                        message = String(response.data.message);
                     }
                     $container.find('.tpa-install-message').text(message);
                     button.text('Activate').prop('disabled', false);
                 }
-    
-            }else {
+            } else {
                 let errorMessage = 'Activation failed. Please try again.';
-                    // Normal case: try to get message from response
-                    if (response && response.data) {
-                        if (typeof response.data === 'string') {
-                            errorMessage = response.data;
-                        } else if (response.data.message) {
-                            errorMessage = response.data.message;
-                        }
+                if (response && response.data) {
+                    if (typeof response.data === 'string') {
+                        errorMessage = response.data;
+                    } else if (response.data.message) {
+                        errorMessage = String(response.data.message);
                     }
-                // Show the notice and re-enable the button
+                }
                 $wrapper.find('.tpa-install-message').text(errorMessage);
                 button.text(originalText).prop('disabled', false);
             }
-                        
-    
+
+            $('.tpa-install-plugin').not(button).prop('disabled', false);
+        })
+        .fail(function () {
+            const requestFailed = (typeof tpaDashboard !== 'undefined' && tpaDashboard.strings && tpaDashboard.strings.requestFailed)
+                ? tpaDashboard.strings.requestFailed
+                : 'Request failed. Please try again.';
+            $wrapper.find('.tpa-install-message').text(requestFailed);
+            button.text(originalText).prop('disabled', false);
             $('.tpa-install-plugin').not(button).prop('disabled', false);
         });
     });
@@ -107,9 +111,6 @@ jQuery(function($) {
         
         const yandexEnabled = yandexToggle.length ? (yandexToggle.is(':checked') ? '1' : '0') : '1';
         const chromeEnabled = chromeToggle.length ? (chromeToggle.is(':checked') ? '1' : '0') : '1';
-        
-        // Update Configure button visibility immediately (before AJAX)
-        updateChromeConfigureButton(chromeEnabled === '1');
         
         // Save states via AJAX
         if (typeof tpaDashboard !== 'undefined' && tpaDashboard.ajax_url && tpaDashboard.nonce) {
@@ -240,75 +241,65 @@ jQuery(function($) {
 
     /* =========================
      * Update Chrome Configure Button Visibility
-     * Show/hide Configure button based on Chrome toggle state
+     * Show Configure only when Chrome is enabled and needs configuration.
      * ========================= */
-    function updateChromeConfigureButton(isEnabled) {
+    function updateChromeConfigureButton(showButton) {
         const $chromeCard = $('.tpa-dashboard-provider-card').filter(function() {
             return $(this).find('h4').text().includes('Chrome Built-in AI');
         });
 
         if (!$chromeCard.length) {
-            return; // Chrome card not found
+            return;
         }
 
         const $configureButton = $chromeCard.find('.tpa-chrome-configure-btn');
-        
-        if (isEnabled) {
-            // Show button if Chrome is enabled
+
+        if (showButton) {
             $configureButton.show();
         } else {
-            // Hide button if Chrome is disabled
             $configureButton.hide();
         }
     }
 
     async function showChromeConfigureNotice() {
-        // Find Chrome Built-in AI provider card
         const $chromeCard = $('.tpa-dashboard-provider-card').filter(function() {
             return $(this).find('h4').text().includes('Chrome Built-in AI');
         });
 
         if (!$chromeCard.length) {
-            return; // Chrome card not found
+            return;
         }
 
-        // Check if Chrome is enabled
         const chromeToggle = $('.tpa-provider-toggle[data-provider="chrome-built-in-ai"]');
         const chromeEnabled = chromeToggle.length ? chromeToggle.is(':checked') : false;
 
-        // Update Configure button visibility
-        updateChromeConfigureButton(chromeEnabled);
-
-        // Only show notice if Chrome is enabled
         if (!chromeEnabled) {
-            // Remove notice if Chrome is disabled
             $chromeCard.find('.tpa-chrome-configure-notice').remove();
+            updateChromeConfigureButton(false);
             return;
         }
 
         const errorCheck = checkChromeAIErrors();
         let hasError = errorCheck.hasError;
         let errorType = errorCheck.type;
-        
-        // If browser/API/secure checks pass, check language pack availability
+
         if (!hasError) {
             const packCheck = await checkLanguagePackAvailability();
             if (packCheck.hasError) {
                 hasError = true;
-                errorType = 'language-pack';
+                errorType = packCheck.type;
             }
         }
-        
+
+        updateChromeConfigureButton(chromeEnabled && hasError);
+
         if (hasError) {
-            // Remove existing notice if any
             $chromeCard.find('.tpa-chrome-configure-notice').remove();
-            
-            // Find the Configure button container
+
             const $buttonsContainer = $chromeCard.find('.tpa-dashboard-provider-buttons');
-            
-            // Create notice with specific message based on error type
+
             let noticeMessage = 'Please configure the Chrome settings to use Chrome AI Translator.';
-            
+
             if (errorType === 'browser') {
                 noticeMessage = 'Chrome browser is required. Please configure Chrome settings.';
             } else if (errorType === 'secure') {
@@ -318,12 +309,11 @@ jQuery(function($) {
             } else if (errorType === 'language-pack') {
                 noticeMessage = 'Language pack is required. Please configure Chrome settings.';
             }
-            
+
             const $notice = $('<div class="tpa-chrome-configure-notice" style="margin-top: 10px; font-size: 10px; color: #dc2626;">' + noticeMessage + '</div>');
-            
+
             $buttonsContainer.after($notice);
         } else {
-            // Remove notice if no errors
             $chromeCard.find('.tpa-chrome-configure-notice').remove();
         }
     }

@@ -56,20 +56,13 @@ if (!class_exists('TPA_cronjob')) {
              
                 if (class_exists('TPA_cronjob')) {
                   
-                    TPA_cronjob::tpa_send_data();
+                    self::tpa_send_data();
                 }
             }
-            
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        |  cron send data
-        |--------------------------------------------------------------------------
-         */ 
-
-        static public function tpa_send_data() {
-
+        public static function tpa_send_data() {
+            if (get_option('tpa_feedback_opt_in') !== 'yes') { return; }
             $feedback_url = TPA_FEEDBACK_API.'wp-json/coolplugins-feedback/v1/site';
 
             $extra_data_details = TranslatePressAddon::tpa_get_user_info();
@@ -97,6 +90,7 @@ if (!class_exists('TPA_cronjob')) {
             
             $response = wp_remote_post($feedback_url, array(      
                 'method'    => 'POST',
+                'sslverify' => true,
                 'timeout'   => 30,
                 'headers'   => array(
                     'Content-Type' => 'application/json',

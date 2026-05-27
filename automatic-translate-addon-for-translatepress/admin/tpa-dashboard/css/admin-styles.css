@@ -326,6 +326,9 @@ a.tpa-dashboard-docs:hover {
     position: relative;
 }
 
+.tpa-provider-toggle{
+    opacity: 0 !important;
+}
 .tpa-pro-provider:hover::after {
     content: "Pro";
     position: absolute;
@@ -861,9 +864,10 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     display: inline-block;
 }
 
-.chrome-url-link.chrome-ai-translator-flags a {
+.chrome-url-link.chrome-ai-translator-flags .chrome-url-text {
     color: #2563eb;
     text-decoration: none;
+    cursor: pointer;
 }
 
 /* Unsupported languages notice */

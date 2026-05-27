@@ -30,7 +30,6 @@ class CPFM_Feedback_Notice {
                 'always_show_on' => [],
             ]);
         }
-         self::$registered_notices[$key][] = $args;
     }
     
     public function cpfm_listen_for_external_notice_registration() {
@@ -50,6 +49,7 @@ class CPFM_Feedback_Notice {
          *     'pages' => ['dashboard', 'cpfm_'],
          * ]);
          */
+        // cpfm_register_notice receives no untrusted data; capability checked in listeners
         do_action('cpfm_register_notice');
     }
 
@@ -76,7 +76,7 @@ class CPFM_Feedback_Notice {
         }
     
         // Early return if not needed
-        if (!in_array($current_page, array_unique($allowed_pages))) {
+        if (!in_array($current_page, array_unique($allowed_pages), true)) {
             return;
         }
         wp_enqueue_style('cpfm-common-review-style', TPA_URL . 'admin/cpfm-feedback/css/cpfm-admin-feedback.css', null, TPA_VERSION, 'all');
@@ -91,6 +91,10 @@ class CPFM_Feedback_Notice {
         wp_localize_script('cpfm-common-review-script', 'adminNotice', [
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('dismiss_admin_notice'),
+            'strings' => array(
+                'requestFailed'  => esc_html__( 'Request failed. Please try again.', 'automatic-translate-addon-for-translatepress' ),
+                'sessionExpired' => esc_html__( 'Your session has expired. Please try again.', 'automatic-translate-addon-for-translatepress' ),
+            ),
             'autoShowPages' => array_unique(
                 array_merge(
                     [],
@@ -106,11 +110,19 @@ class CPFM_Feedback_Notice {
     public function cpfm_handle_opt_in_choice() {
 
         if (!current_user_can('manage_options')) {
-
-            wp_send_json_error('Unauthorized access.');
+            wp_send_json_error( esc_html__( 'Unauthorized access.', 'automatic-translate-addon-for-translatepress' ) );
+            return;
         }
 
-        check_ajax_referer('dismiss_admin_notice', 'nonce');
+        if ( ! check_ajax_referer( 'dismiss_admin_notice', 'nonce', false ) ) {
+            wp_send_json_error(
+                array(
+                    'message' => esc_html__( 'Your session has expired. Please try again.', 'automatic-translate-addon-for-translatepress' ),
+                    'nonce'   => wp_create_nonce( 'dismiss_admin_notice' ),
+                )
+            );
+            return;
+        }
 
         $category           = isset($_POST['category']) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ): '';
         $opt_in_raw         = isset($_POST['opt_in']) ? sanitize_text_field( wp_unslash( $_POST['opt_in'] ) ) : '';
@@ -119,28 +131,36 @@ class CPFM_Feedback_Notice {
         $registered_notices = isset($GLOBALS['cool_plugins_feedback'])? $GLOBALS['cool_plugins_feedback']:$category_notices;
 
         if (!$category || !isset(self::$registered_notices[$category])) {
-
-            wp_send_json_error('Invalid notice category.');
+            wp_send_json_error( esc_html__( 'Invalid notice category.', 'automatic-translate-addon-for-translatepress' ) );
+            return;
         }
 
-        update_option("cpfm_opt_in_choice_{$category}", $opt_in);
-
+        $category = sanitize_key( $category ); 
+        update_option( "cpfm_opt_in_choice_{$category}", $opt_in );
         $review_option = get_option("cpfm_opt_in_choice_{$category}");
         
        
         if ($review_option === 'yes') {
-            
-             foreach (self::$registered_notices[$category] as $notice) {
+            $notices = isset($registered_notices[$category]) && is_array($registered_notices[$category])
+                ? $registered_notices[$category]
+                : [];
 
-                    $plugin_name = isset($notice['plugin_name'])?sanitize_key($notice['plugin_name']):'';
-
-                    if($plugin_name){
-
-                        do_action('cpfm_after_opt_in_' . $plugin_name, $category);
-                    }
-              
+            // A single registered notice is stored as an associative array; globals use a list.
+            if (!empty($notices) && isset($notices['title'])) {
+                $notices = array($notices);
             }
-          
+
+            foreach ($notices as $notice) {
+                if (!is_array($notice)) {
+                    continue;
+                }
+
+                $plugin_name = isset($notice['plugin_name']) ? sanitize_key($notice['plugin_name']) : '';
+
+                if ($plugin_name) {
+                    do_action('cpfm_after_opt_in_' . $plugin_name, $category);
+                }
+            }
         }
 
         wp_send_json_success();
@@ -162,7 +182,7 @@ class CPFM_Feedback_Notice {
     
         foreach (self::$registered_notices as $notice) {
 
-            if (!empty($notice['always_show_on']) && in_array($current_page, (array) $notice['always_show_on'])) {
+            if (!empty($notice['always_show_on']) && in_array($current_page, (array) $notice['always_show_on'], true)) {
                 $auto_show = true;
                 break;
             }

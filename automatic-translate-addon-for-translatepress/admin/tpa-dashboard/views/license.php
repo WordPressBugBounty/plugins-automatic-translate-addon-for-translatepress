@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     <p>
     <?php 
     printf(
-        // translators: %1$s: Opening strong tag, %2$s: Closing strong tag
+        /* translators: %1$s: Opening strong tag, %2$s: Closing strong tag */
         esc_html__( "You're using %1\$sAI Translation For TranslatePress (free)%2\$s - no license needed. Enjoy! 😊", 'automatic-translate-addon-for-translatepress' ),
         '<strong>',
         '</strong>'

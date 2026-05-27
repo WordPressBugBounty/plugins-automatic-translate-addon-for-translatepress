@@ -64,11 +64,15 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <?php if ( $tw_installed && $tw_active ): ?>
                     <span class="installed"><?php esc_html_e('Activated', 'automatic-translate-addon-for-translatepress'); ?></span>
                 <?php else: ?>
+                    <?php
+                    $atlt_slug = 'automatic-translator-addon-for-loco-translate';
+                    ?>
                     <button
                         type="button"
                         class="tpa-dashboard-btn tpa-install-plugin"
-                        data-slug="automatic-translator-addon-for-loco-translate"
-                        data-nonce="<?php echo esc_attr( wp_create_nonce( 'tpa_install_nonce' ) ); ?>"
+                        data-slug="<?php echo esc_attr( $atlt_slug ); ?>"
+                        data-nonce-install="<?php echo esc_attr( wp_create_nonce( 'tpa_install_plugin_' . $atlt_slug ) ); ?>"
+                        data-nonce-activate="<?php echo esc_attr( wp_create_nonce( 'tpa_activate_plugin_' . $atlt_slug ) ); ?>"
                     >
                         <?php echo esc_html( $tw_installed ? __( 'Activate', 'automatic-translate-addon-for-translatepress' ) : __( 'Install', 'automatic-translate-addon-for-translatepress' ) ); ?>
                     </button>
@@ -89,29 +93,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php
 
-function tpa_format_time_taken($time_taken) {
-    if ($time_taken === 0) return esc_html__('0', 'automatic-translate-addon-for-translatepress');
-    if ($time_taken < 60) return sprintf(
-        // translators: %d: Number of seconds
-        esc_html__('%d sec', 'automatic-translate-addon-for-translatepress'), $time_taken);
-    if ($time_taken < 3600) {
-        $min = floor($time_taken / 60);
-        $sec = $time_taken % 60;
-        return sprintf(
-            // translators: %1$d: Number of minutes, %2$d: Number of seconds
-            esc_html__('%1$d min %2$d sec', 'automatic-translate-addon-for-translatepress'), $min, $sec
-        );
-    }
-    $hours = floor($time_taken / 3600);
-    $min = floor(($time_taken % 3600) / 60);
-    return sprintf(
-        // translators: %1$d: Number of hours, %2$d: Number of minutes
-        esc_html__('%1$d hours %2$d min', 'automatic-translate-addon-for-translatepress'), $hours, $min
-    );
-}
-
 function tpa_is_plugin_installed($plugin_slug) {
-    $plugins = get_plugins();
+    $plugins = tpa_get_installed_plugins();
     // Check if the plugin is installed
     if ($plugin_slug === 'automatic-translator-addon-for-loco-translate') {
         return isset($plugins['automatic-translator-addon-for-loco-translate/automatic-translator-addon-for-loco-translate.php']) || isset($plugins['loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php']);
@@ -124,7 +107,7 @@ function tpa_get_plugin_display_name($plugin_slug) {
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
 
-    $plugins = get_plugins();
+    $plugins = tpa_get_installed_plugins();
 
     // Define free and pro plugin paths
     $plugin_paths = [
@@ -165,11 +148,23 @@ function tpa_get_plugin_display_name($plugin_slug) {
 
 function tpa_format_number($number) {
     if ($number >= 1000000000) {
-        return round($number / 1000000000, 1) . esc_html__('B', 'automatic-translate-addon-for-translatepress');
+        return sprintf(
+            /* translators: %s: Abbreviated number (billions) */
+            esc_html_x('%sB', 'billion suffix', 'automatic-translate-addon-for-translatepress'),
+            round($number / 1000000000, 1)
+        );
     } elseif ($number >= 1000000) {
-        return round($number / 1000000, 1) . esc_html__('M', 'automatic-translate-addon-for-translatepress');
+        return sprintf(
+            /* translators: %s: Abbreviated number (millions) */
+            esc_html_x('%sM', 'million suffix', 'automatic-translate-addon-for-translatepress'),
+            round($number / 1000000, 1)
+        );
     } elseif ($number >= 1000) {
-        return round($number / 1000, 1) . esc_html__('K', 'automatic-translate-addon-for-translatepress');
+        return sprintf(
+            /* translators: %s: Abbreviated number (thousands) */
+            esc_html_x('%sK', 'thousand suffix', 'automatic-translate-addon-for-translatepress'),
+            round($number / 1000, 1)
+        );
     }
     return $number;
 }

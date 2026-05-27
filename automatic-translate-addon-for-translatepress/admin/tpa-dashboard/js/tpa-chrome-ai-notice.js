@@ -139,14 +139,30 @@ jQuery(function($) {
         }
     }
     
+    function escapeHtmlAttr(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function escapeHtmlText(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
     /**
-    * Helper to create copyable link HTML using user's preferred structure
-    */
+     * Copy-only chrome:// URL control (not a navigable link).
+     */
     function createCopyableLink(url) {
-        return '<span class="chrome-url-link chrome-ai-translator-flags tapa-tooltip-element" data-clipboard-text="' + url + '">' +
-        '<a href="' + url + '" onclick="return false;">' + url + '</a> ' + 
-        (typeof ChromeAiTranslator !== 'undefined' ? ChromeAiTranslator.svgIcons('copy') : '') +
-        '</span>';
+        const copyIcon = typeof ChromeAiTranslator !== 'undefined' ? ChromeAiTranslator.svgIcons('copy') : '';
+        return '<span class="chrome-url-link chrome-ai-translator-flags tapa-tooltip-element" role="button" tabindex="0" title="Click to copy" data-clipboard-text="' + escapeHtmlAttr(url) + '">' +
+            '<span class="chrome-url-text">' + escapeHtmlText(url) + '</span> ' + copyIcon +
+            '</span>';
     }
 
     /* =========================
@@ -233,7 +249,9 @@ jQuery(function($) {
         if (unsupportedLanguages.length > 0) {
             let unsupportedList = '';
             unsupportedLanguages.forEach(function(lang) {
-                unsupportedList += '<strong>' + lang.label + ' (' + lang.code + ')</strong>, ';
+                const safeLabel = $('<div>').text(lang.label).html(); 
+                const safeCode = $('<div>').text(lang.code).html();
+                unsupportedList += '<strong>' + safeLabel + ' (' + safeCode + ')</strong>, ';
             });
             // Remove trailing comma
             unsupportedList = unsupportedList.replace(/, $/, '');
@@ -643,7 +661,7 @@ jQuery(function($) {
                 } else {
                     errorMessage += 'Please check your Chrome AI Translator configuration.';
                 }
-                $errorDiv.html(errorMessage).show();
+                $errorDiv.text(errorMessage).show();
             } finally {
                 // Re-enable button
                 $testBtn.prop('disabled', false).text('Test Translation');

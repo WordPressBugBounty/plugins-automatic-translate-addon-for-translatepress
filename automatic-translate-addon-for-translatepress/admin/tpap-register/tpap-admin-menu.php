@@ -149,7 +149,12 @@ class TranslatepressAutomaticTranslateAddonFree {
 			// Localize script with AJAX URL and nonce for provider states
 			wp_localize_script( 'tpa-dashboard-script', 'tpaDashboard', array(
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( 'tpa_provider_states_nonce' ),
+				'nonce'    => wp_create_nonce( 'tpa_provider_states_nonce' ),
+				'strings'  => array(
+					'requestFailed' => esc_html__( 'Request failed. Please try again.', 'automatic-translate-addon-for-translatepress' ),
+					'missingData' => esc_html__( 'Missing required data. Please reload the page.', 'automatic-translate-addon-for-translatepress' ),
+					'installedSuccessfully' => esc_html__( 'Installed successfully.', 'automatic-translate-addon-for-translatepress' ),
+				),
 			) );
 			
 			// Get TRP language settings and pass to JavaScript (for language checks)
@@ -183,6 +188,12 @@ class TranslatepressAutomaticTranslateAddonFree {
 	 * Free license fom.
 	 */
 	public function tpa_dashboard_page() {
+		
+		if (!current_user_can('manage_options')) {
+			wp_die(esc_html__('You do not have permission to access this page.', 'automatic-translate-addon-for-translatepress'));
+		}
+		$chrome_settings_visible = ( '1' === (string) get_option( 'tpa_provider_chrome_enabled', '1' ) );
+		$feedback_settings_visible = (bool) get_option( 'cpfm_opt_in_choice_cool_translations', false );
 		$file_prefix = 'admin/tpa-dashboard/views/';
 		
 		$valid_tabs = [
@@ -192,6 +203,10 @@ class TranslatepressAutomaticTranslateAddonFree {
 			'ai-translations' => esc_html__('Documentation', 'automatic-translate-addon-for-translatepress'),
 			'free-vs-pro'     => esc_html__('Free vs Pro', 'automatic-translate-addon-for-translatepress')
 		];
+
+		if ( ! ($chrome_settings_visible || $feedback_settings_visible ) ) {
+			unset( $valid_tabs['settings'] );
+		}
 
 		// Get current tab with fallback
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key() and validated against whitelist
@@ -259,26 +274,26 @@ class TranslatepressAutomaticTranslateAddonFree {
 			
 			<div class="tab-content">
 				<?php
-				// Define whitelist of valid file names that can be included
-				$valid_files = array(
-					'dashboard', 'ai-translations', 'settings', 'license', 'free-vs-pro'
+				$tab_view_files = array(
+					'dashboard'       => 'dashboard.php',
+					'ai-translations' => 'ai-translations.php',
+					'settings'        => 'settings.php',
+					'license'         => 'license.php',
+					'free-vs-pro'     => 'free-vs-pro.php',
 				);
-				
-				// Validate tab against whitelist before including the file
-				if (in_array($tab, $valid_files, true)) {
-					$include_file = TPA_PATH . $file_prefix . $tab . '.php';
-					// Check if file exists as additional security measure
-					if (file_exists($include_file)) {
-						require_once $include_file;
-					} else {
-						// Fallback to dashboard if file doesn't exist
-						require_once TPA_PATH . $file_prefix . 'dashboard.php';
-					}
-				} else {
-					// If not in whitelist, load dashboard as default
-					require_once TPA_PATH . $file_prefix . 'dashboard.php';
+
+				if ( ! isset( $tab_view_files[ $tab ] ) ) {
+					$tab = 'dashboard';
 				}
-				
+
+				$include_file = TPA_PATH . $file_prefix . $tab_view_files[ $tab ];
+
+				if ( file_exists( $include_file ) ) {
+					require_once $include_file;
+				} else {
+					require_once TPA_PATH . $file_prefix . $tab_view_files['dashboard'];
+				}
+
 				require_once TPA_PATH . $file_prefix . 'sidebar.php';
 				
 				?>

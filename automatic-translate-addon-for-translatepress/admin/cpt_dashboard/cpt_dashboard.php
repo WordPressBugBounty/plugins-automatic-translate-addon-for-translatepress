@@ -4,76 +4,6 @@ if(!defined('ABSPATH')){
     exit;
 }
 
-/**
- * Dashboard
- * 
- * example:
- * 
- * Dashbord initialize
- * if(!class_exists('Tpa_Dashboard')){
- * $dashboard=Tpa_Dashboard::instance();
- * }
- * 
- * Store options
- * if(class_exists('Tpa_Dashboard')){
- *  Tpa_Dashboard::store_options(
- *      'prefix', // Required plugin prefix
- *      'unique_key',// Optional unique key is used to update the data based on post/page id or plugin/themes name
- *      'update', // Optional preview string count or character count update or replace
- *      array(
- *           'post/page or theme/plugin name' => 'name or id',
- *          'post_title (optional)' => 'Post Title',
- *          'service_provider' => 'google', // don't change this key
- *          'source_language' => 'en', // don't change this key
- *          'target_language' => 'fr', // don't change this key
- *          'time_taken' => '10', // don't change this key
- *          'string_count'=>10, 
- *          'character_count'=>100, 
- *          'date_time' => date('Y-m-d H:i:s'),
- *      ) // Required data array
- *  );
- * }
- * 
- * Add Tabs
- * add_filter('cpt_dashboard_tabs', function($tabs){
- *  $tabs[]=array(
- *      'prefix'=>'tab_name', // Required
- *      'tab_name'=>'Tab Name', // Required
- *      'columns'=>array(
- *          'post_id or plugin_name'=>'Post Id or Plugin Name',
- *          'post_title (optional)'=>'Post Title',
- *          'string_count'=>'String Count',
- *           'character_count'=>'Character Count',
- *           'service_provider'=>'Service Provider',
- *           'time_taken'=>'Time Taken',
- *           'date_time'=>'Date Time',
- *      ) // columns Required
- *  );
- *  return $tabs;
- * });
- * 
- * Display review notice
- * if(class_exists('Tpa_Dashboard')){
- *  Tpa_Dashboard::review_notice(
- *      'prefix', // Required
- *      'plugin_name', // Required
- *      'url', // Required
- *      'icon' // Optional
- *  );
- * }
- * 
- * Get translation data
- * if(class_exists('Tpa_Dashboard')){
- *  Tpa_Dashboard::get_translation_data(
- *      'prefix', // Required
- *      array(
- *          'editor_type' => 'gutenberg', // optional return data based on editor type
- *          'post_id' => '123', // optional return data based on post id
- *      ) // Optional
- *  );
- * }
- */
-
 if(!class_exists('Tpa_Dashboard')){
     class Tpa_Dashboard{
 
@@ -125,10 +55,15 @@ if(!class_exists('Tpa_Dashboard')){
          * @param array $data
          * @return void
          */
+
         public static function store_options($prefix='', $unique_key='', $old_data='update', array $data = array()){
             if(!empty($prefix) && isset($data['string_count']) && isset($data['character_count'])){
                 $prefix = sanitize_key($prefix);
                 $all_data = get_option('cpt_dashboard_data', array());
+
+                $data['time_taken'] = isset( $data['time_taken'] ) ? absint( $data['time_taken'] ) : 0;
+                $data['string_count'] = absint( $data['string_count'] );
+                $data['character_count'] = absint( $data['character_count'] );
                 
                 if(isset($all_data[$prefix])){
                     $data_update = false;
@@ -141,9 +76,9 @@ if(!class_exists('Tpa_Dashboard')){
                         ){
                             
                             if($old_data=='update'){
-                                $data['string_count'] = absint($data['string_count']) + absint($translate_data['string_count']);
-                                $data['character_count'] = absint($data['character_count']) + absint($translate_data['character_count']);
-                                $data['time_taken'] = absint($data['time_taken']) + absint($translate_data['time_taken']);
+                                $data['string_count'] = absint($data['string_count']) + absint($translate_data['string_count'] ?? 0);
+                                $data['character_count'] = absint($data['character_count']) + absint($translate_data['character_count'] ?? 0);
+                                $data['time_taken'] = absint($data['time_taken']) + absint($translate_data['time_taken'] ?? 0);
                             }
                             
                             foreach($data as $id => $value){
@@ -251,7 +186,7 @@ if(!class_exists('Tpa_Dashboard')){
 
             $cool_plugins_url = esc_url('https://coolplugins.net/');
             $message = sprintf(
-                // translators: %1$s: Plugin name, %2$s: Number of characters translated, %3$s: Cool Plugins URL
+                /* translators: %1$s: Plugin name, %2$s: Number of characters translated, %3$s: Cool Plugins URL */
                 __('Thanks for using <b>%1$s</b>! You have translated <b>%2$s</b> characters so far using our plugin!<br>Please give us a quick rating, it works as a boost for us to keep working on more <a style="text-decoration: none;" href="%3$s" target="_blank" rel="noopener noreferrer"><b>Cool Plugins</b></a>!', 'automatic-translate-addon-for-translatepress'),
                 $plugin_name,
                 $total_character_count,
@@ -262,47 +197,44 @@ if(!class_exists('Tpa_Dashboard')){
             $message = wp_kses_post($message);
             $url = esc_url($url);
 
-            add_action('admin_notices', function() use ($message, $prefix, $url){
-
-                $html= '<div class="notice notice-info is-dismissible cpt-review-notice">';
-                
-                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'automatic-translate-addon-for-translatepress').'</button><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'automatic-translate-addon-for-translatepress').'</button></div></div></div>';
-                
-                echo wp_kses_post($html);
-            });
-
             add_action('tpa_display_admin_notices', function() use ($message, $prefix, $url){
-                
+
                 $html= '<div class="notice notice-info is-dismissible cpt-review-notice">';
                 
-                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'automatic-translate-addon-for-translatepress').'</button><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'automatic-translate-addon-for-translatepress').'</button></div></div></div>';
+                $html .= '<div class="cpt-review-notice-content"><p>'.wp_kses_post($message).'</p><div class="tpa-review-notice-dismiss" data-prefix="'.esc_attr($prefix).'" data-nonce="'.esc_attr(wp_create_nonce('tpa_hide_review_notice')).'"><a href="'.esc_url($url).'" target="_blank" rel="noopener noreferrer" class="button button-primary">Rate Now! ★★★★★</a><button class="button cpt-already-reviewed">'.esc_html__('Already Reviewed', 'automatic-translate-addon-for-translatepress').'</button><button class="button cpt-not-interested">'.esc_html__('Not Interested', 'automatic-translate-addon-for-translatepress').'</button></div></div></div>';
                 
                 echo wp_kses_post($html);
             });
+
         }
 
         public static function tpa_hide_review_notice_status($prefix){
-            $review_notice_dismissed = get_option('cpt_review_notice_dismissed', array());
-            return isset($review_notice_dismissed[$prefix]) ? $review_notice_dismissed[$prefix] : false;
+            $prefix = sanitize_key( $prefix );
+            $review_notice_dismissed = get_option( 'cpt_review_notice_dismissed', array() );
+            if ( ! is_array( $review_notice_dismissed ) || ! isset( $review_notice_dismissed[ $prefix ] ) ) {
+                return false;
+            }
+            return absint( $review_notice_dismissed[ $prefix ] ) === 1;
         }
 
         public function tpa_hide_review_notice(){
 
-            // Check user capabilities first - restrict to administrators only
             if ( ! current_user_can( 'manage_options' ) ) {
                 wp_send_json_error( esc_html__( 'Insufficient permissions to dismiss notices. Administrator access required.', 'automatic-translate-addon-for-translatepress' ) );
                 return;
             }
-
-            if(isset($_POST['nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'tpa_hide_review_notice')){
-                $prefix = isset($_POST['prefix']) ? sanitize_key(wp_unslash($_POST['prefix'])) : 'tpa';
-                $review_notice_dismissed = get_option('cpt_review_notice_dismissed', array());
-                $review_notice_dismissed[$prefix] = true;
-                update_option('cpt_review_notice_dismissed', $review_notice_dismissed);
-                wp_send_json_success();
-            }else{
-                wp_send_json_error('Invalid nonce');
+            check_ajax_referer( 'tpa_hide_review_notice', 'nonce' );
+            $prefix = isset( $_POST['prefix'] ) ? sanitize_key( wp_unslash( $_POST['prefix'] ) ) : 'tpa';
+            if ( '' === $prefix ) {
+                $prefix = 'tpa';
             }
+            $review_notice_dismissed = get_option( 'cpt_review_notice_dismissed', array() );
+            if ( ! is_array( $review_notice_dismissed ) ) {
+                $review_notice_dismissed = array();
+            }
+            $review_notice_dismissed[ $prefix ] = 1;
+            update_option( 'cpt_review_notice_dismissed', $review_notice_dismissed );
+            wp_send_json_success();
         }
     }
 }

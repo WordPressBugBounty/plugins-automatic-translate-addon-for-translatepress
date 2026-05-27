@@ -26,6 +26,10 @@
     cursor: pointer;
     background-color: #7bc6de;
     color: white;
+    font-family: inherit;
+}
+button.cool-plugins-button {
+    line-height: inherit;
 }
 #cool-plugins-deactivate-feedback-dialog-form-body .cool-plugins-deactivate-feedback-dialog-input:not(:checked)~.cool-plugins-feedback-text {
     display: none;
@@ -55,6 +59,20 @@ span#cool-plugins-feedback-form-title {
 }
 .cool-plugin-popup-button-wrapper {
     margin-top: 25px;
+}
+.cool-plugins-feedback-error {
+    display: none;
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-left: 4px solid #d63638;
+    background: #fcf0f1;
+    color: #8a2424;
+    font-size: 14px;
+    line-height: 1.4;
+}
+.cool-plugins-feedback-text.cool-plugins-feedback-input-error {
+    border: 1px solid #d63638;
+    outline: none;
 }
 #cool-plugins-deactivate-feedback-dialog-form-caption {
     font-weight: 600;
@@ -104,7 +122,8 @@ span#cool-plugins-feedback-form-title {
     padding: 20px;
     background-color: #7bc6de;
 }
-a.cool-plugins-button:hover {
+a.cool-plugins-button:hover,
+button.cool-plugins-button:hover {
     background: #adebff;
     color: white;
 }

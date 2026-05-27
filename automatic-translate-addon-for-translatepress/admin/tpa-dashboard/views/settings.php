@@ -2,6 +2,9 @@
     if ( ! defined( 'ABSPATH' ) ) {
         exit;
     }
+    if ( ! current_user_can('manage_options') ) { 
+        return; 
+    }
     // Initialize variables
     $feedback_opt_in = 'no';
     $form_success = false;
@@ -15,10 +18,6 @@
         }
         
         // Check user capabilities
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('You do not have permission to access this page.', 'automatic-translate-addon-for-translatepress'));
-        }
-
         // Handle feedback checkbox with proper validation
         if (get_option('cpfm_opt_in_choice_cool_translations')) {
             // Sanitize and validate checkbox input  
@@ -93,12 +92,23 @@
                 <div id="tpa-chrome-local-ai-notice" class="tpa-chrome-local-ai-notice">
                     <?php if ( ! $tpa_has_translation_langs ) : ?>
                         <span class="tpa-chrome-no-languages-content"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg><?php
-                            printf(
-                                wp_kses_post(
-                                    // translators: %s is a link to the TranslatePress settings page.
-                                    __( 'Add at least %s to use the Chrome AI translation test', 'automatic-translate-addon-for-translatepress' )
+                            echo wp_kses(
+                                sprintf(
+                                    /* translators: %s: link to the TranslatePress settings page. */
+                                    __( 'Add at least %s to use the Chrome AI translation test', 'automatic-translate-addon-for-translatepress' ),
+                                    sprintf(
+                                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                                        esc_url( admin_url( 'options-general.php?page=translate-press' ) ),
+                                        esc_html__( 'one language in TranslatePress', 'automatic-translate-addon-for-translatepress' )
+                                    )
                                 ),
-                                '<a href="' . esc_url( admin_url( 'options-general.php?page=translate-press' ) ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'one language in TranslatePress', 'automatic-translate-addon-for-translatepress' ) . '</a>'
+                                array(
+                                    'a' => array(
+                                        'href'   => array(),
+                                        'target' => array(),
+                                        'rel'    => array(),
+                                    ),
+                                )
                             );
                         ?></span>
                     <?php else : ?>
@@ -136,7 +146,7 @@
             <?php if (get_option('cpfm_opt_in_choice_cool_translations')) : ?>
                 <div class="tpa-dashboard-feedback-container">
                     <h3 class="tpa-section-title">
-                        <?php esc_html_e( 'Usage Data Sharing', 'automatic-translate-addon-pro-for-translatepress' ); ?>
+                        <?php esc_html_e( 'Usage Data Sharing', 'automatic-translate-addon-for-translatepress' ); ?>
                     </h3>
                     <div class="feedback-row">
                         <input type="checkbox" 
@@ -148,7 +158,7 @@
                         <a href="#" class="tpa-see-terms">[See terms]</a>
                     </div>
                     <div id="termsBox" style="display: none;padding-left: 20px; margin-top: 10px; font-size: 12px; color: #999;">
-                        <p><?php esc_html_e("Opt in to receive email updates about security improvements, new features, helpful tutorials, and occasional special offers. We'll collect:", 'automatic-translate-addon-for-translatepress'); ?><a href="https://my.coolplugins.net/terms/usage-tracking/" target="_blank"><?php esc_html_e('Click here', 'automatic-translate-addon-for-translatepress'); ?></a></p>
+                        <p><?php esc_html_e("Opt in to receive email updates about security improvements, new features, helpful tutorials, and occasional special offers. We'll collect:", 'automatic-translate-addon-for-translatepress'); ?><a href="https://my.coolplugins.net/terms/usage-tracking/" rel="noopener noreferrer" target="_blank"><?php esc_html_e('Click here', 'automatic-translate-addon-for-translatepress'); ?></a></p>
                         <ul style="list-style-type:auto;">
                             <li><?php esc_html_e('Your website home URL and WordPress admin email.', 'automatic-translate-addon-for-translatepress'); ?></li>
                             <li><?php esc_html_e('To check plugin compatibility, we will collect the following: list of active plugins and themes, server type, MySQL version, WordPress version, memory limit, site language and database prefix.', 'automatic-translate-addon-for-translatepress'); ?></li>
