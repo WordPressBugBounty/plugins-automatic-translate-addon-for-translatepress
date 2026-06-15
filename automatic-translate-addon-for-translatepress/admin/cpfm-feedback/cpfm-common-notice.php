@@ -16,11 +16,26 @@ class CPFM_Feedback_Notice {
     }
     
     public static function cpfm_register_notice($key, $args) {
-        
-        if (!current_user_can('manage_options')) {
-            
+        $key = sanitize_key((string) $key);
+
+        if ('' === $key || !current_user_can('manage_options')) {
             return;
         }
+
+        $args = is_array($args) ? $args : array();
+        $args = wp_parse_args($args, [
+            'title'          => '',
+            'message'        => '',
+            'pages'          => [],
+            'always_show_on' => [],
+            'plugin_name'    => '',
+        ]);
+
+        $args['title']          = sanitize_text_field($args['title']);
+        $args['message']        = wp_kses_post($args['message']);
+        $args['pages']          = array_values(array_filter(array_map('sanitize_key', (array) $args['pages'])));
+        $args['always_show_on'] = array_values(array_filter(array_map('sanitize_key', (array) $args['always_show_on'])));
+        $args['plugin_name']    = sanitize_key($args['plugin_name']);
         
         if (!isset(self::$registered_notices[$key])) {
             self::$registered_notices[$key] = wp_parse_args($args, [
@@ -30,6 +45,12 @@ class CPFM_Feedback_Notice {
                 'always_show_on' => [],
             ]);
         }
+
+        if(!isset(self::$registered_notices[$key]['plugins'])){
+            self::$registered_notices[$key]['plugins'] = array();
+        }
+        
+        self::$registered_notices[$key]['plugins'][] = $args;
     }
     
     public function cpfm_listen_for_external_notice_registration() {
@@ -49,7 +70,7 @@ class CPFM_Feedback_Notice {
          *     'pages' => ['dashboard', 'cpfm_'],
          * ]);
          */
-        // cpfm_register_notice receives no untrusted data; capability checked in listeners
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- cpfm is our unique prefix.
         do_action('cpfm_register_notice');
     }
 
@@ -60,11 +81,9 @@ class CPFM_Feedback_Notice {
             return;
 
         }
- 
 
-        $screen         = get_current_screen();
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key()
-        $current_page   = isset($_GET['page'])? sanitize_key($_GET['page']):'';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here
+        $current_page   = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
     
         // Gather all unique pages from registered notices
         $allowed_pages = [];
@@ -91,10 +110,6 @@ class CPFM_Feedback_Notice {
         wp_localize_script('cpfm-common-review-script', 'adminNotice', [
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce'   => wp_create_nonce('dismiss_admin_notice'),
-            'strings' => array(
-                'requestFailed'  => esc_html__( 'Request failed. Please try again.', 'automatic-translate-addon-for-translatepress' ),
-                'sessionExpired' => esc_html__( 'Your session has expired. Please try again.', 'automatic-translate-addon-for-translatepress' ),
-            ),
             'autoShowPages' => array_unique(
                 array_merge(
                     [],
@@ -110,57 +125,45 @@ class CPFM_Feedback_Notice {
     public function cpfm_handle_opt_in_choice() {
 
         if (!current_user_can('manage_options')) {
+
             wp_send_json_error( esc_html__( 'Unauthorized access.', 'automatic-translate-addon-for-translatepress' ) );
             return;
         }
 
-        if ( ! check_ajax_referer( 'dismiss_admin_notice', 'nonce', false ) ) {
-            wp_send_json_error(
-                array(
-                    'message' => esc_html__( 'Your session has expired. Please try again.', 'automatic-translate-addon-for-translatepress' ),
-                    'nonce'   => wp_create_nonce( 'dismiss_admin_notice' ),
-                )
-            );
-            return;
-        }
+        check_ajax_referer('dismiss_admin_notice', 'nonce');
 
         $category           = isset($_POST['category']) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ): '';
         $opt_in_raw         = isset($_POST['opt_in']) ? sanitize_text_field( wp_unslash( $_POST['opt_in'] ) ) : '';
         $opt_in             = ($opt_in_raw === 'yes') ? 'yes' : 'no';
-        $category_notices   = self::$registered_notices;
-        $registered_notices = isset($GLOBALS['cool_plugins_feedback'])? $GLOBALS['cool_plugins_feedback']:$category_notices;
 
         if (!$category || !isset(self::$registered_notices[$category])) {
             wp_send_json_error( esc_html__( 'Invalid notice category.', 'automatic-translate-addon-for-translatepress' ) );
             return;
         }
 
-        $category = sanitize_key( $category ); 
-        update_option( "cpfm_opt_in_choice_{$category}", $opt_in );
+        if(!isset(self::$registered_notices[$category]['plugins'])){
+            wp_send_json_error( esc_html__( 'Invalid notice category plugins.', 'automatic-translate-addon-for-translatepress' ) );
+            return;
+        }
+
+        update_option("cpfm_opt_in_choice_{$category}", $opt_in);
+
         $review_option = get_option("cpfm_opt_in_choice_{$category}");
-        
-       
+
         if ($review_option === 'yes') {
-            $notices = isset($registered_notices[$category]) && is_array($registered_notices[$category])
-                ? $registered_notices[$category]
-                : [];
+            
+             foreach (self::$registered_notices[$category]['plugins'] as $notice) {
 
-            // A single registered notice is stored as an associative array; globals use a list.
-            if (!empty($notices) && isset($notices['title'])) {
-                $notices = array($notices);
+                    $plugin_name = isset($notice['plugin_name'])?sanitize_key($notice['plugin_name']):'';
+
+                    if($plugin_name){
+
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- cpfm is our unique prefix.
+                        do_action('cpfm_after_opt_in_' . $plugin_name, $category);
+                    }
+              
             }
-
-            foreach ($notices as $notice) {
-                if (!is_array($notice)) {
-                    continue;
-                }
-
-                $plugin_name = isset($notice['plugin_name']) ? sanitize_key($notice['plugin_name']) : '';
-
-                if ($plugin_name) {
-                    do_action('cpfm_after_opt_in_' . $plugin_name, $category);
-                }
-            }
+          
         }
 
         wp_send_json_success();
@@ -172,11 +175,9 @@ class CPFM_Feedback_Notice {
             return;
         }
 
-        $screen         = get_current_screen();
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key()
-        $current_page   = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here
+        $current_page   = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
 
-       
         $unread_count   = 0;
         $auto_show      = false;
     
@@ -192,9 +193,8 @@ class CPFM_Feedback_Notice {
         $output .= '<div id="cpfNoticePanel" class="notice-panel"' . ($auto_show ? ' data-auto-show="true"' : '') . '>';
         $output .= '<div class="notice-panel-header">' . esc_html__('Help Improve Plugins', 'automatic-translate-addon-for-translatepress') . ' <span class="dashicons dashicons-no" id="cpfm_remove_notice"></span></div>';
         $output .= '<div class="notice-panel-content">';
-    
-        foreach (self::$registered_notices as $key => $notice) {
 
+        foreach (self::$registered_notices as $key => $notice) {
             $choice = get_option("cpfm_opt_in_choice_{$key}");
 
             if ($choice !== false) continue;
@@ -223,8 +223,9 @@ class CPFM_Feedback_Notice {
             $output .= '<p>' . esc_html__('Opt in to receive email updates about security improvements, new features, helpful tutorials, and occasional special offers. We\'ll collect:', 'automatic-translate-addon-for-translatepress') . '</p>';
             $output .= '<ul>';
             $output .= '<li>' . esc_html__('Your website home URL and WordPress admin email.', 'automatic-translate-addon-for-translatepress') . '</li>';
-            $output .= '<li>' . esc_html__('To check plugin compatibility, we will collect the following: list of active plugins and themes, server type, MySQL version, WordPress version, memory limit, site language and database prefix.', 'automatic-translate-addon-for-translatepress') . '</li>';
-            $output .= '<a href="' . esc_url('https://my.coolplugins.net/terms/usage-tracking/') . '" target="_blank" rel="noopener noreferrer">' . esc_html__('Click Here', 'automatic-translate-addon-for-translatepress') . '</a>';
+            $output .= '<li>' . esc_html__('To check plugin compatibility, we will collect the following: list of active plugins and themes, server type, MySQL version, WordPress version, memory limit, site language and database prefix ', 'automatic-translate-addon-for-translatepress');
+            $output .= '<a href="' . esc_url('https://my.coolplugins.net/terms/usage-tracking/') . '" target="_blank" rel="noopener noreferrer">' . esc_html__('Click Here', 'automatic-translate-addon-for-translatepress') . '.</a> ';
+            $output .= '</li>';
             $output .= '</ul>';
             
             $output .= '</div>';
@@ -241,7 +242,17 @@ class CPFM_Feedback_Notice {
         $output .= '</div>'; 
      
         if ($unread_count > 0) {
-            echo wp_kses_post($output);
+            $allowed = array(
+                'div' => array('id' => array(), 'class' => array(), 'data-auto-show' => array(), 'data-notice-id' => array()),
+                'span' => array('id' => array(), 'class' => array()),
+                'strong' => array(),
+                'p' => array(),
+                'a' => array('href' => array(), 'class' => array(), 'target' => array(), 'rel' => array()),
+                'button' => array('class' => array(), 'data-category' => array(), 'id' => array(), 'value' => array()),
+                'ul' => array(),
+                'li' => array(), 'br' => array()
+            );
+            echo wp_kses($output, $allowed);
         }
     }
 }

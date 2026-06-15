@@ -8,7 +8,7 @@ declare(strict_types=1);
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 2.0.6
+ * Version: 2.0.7
  * License: GPL2
  * Text Domain:automatic-translate-addon-for-translatepress
  * Requires Plugins: translatepress-multilingual
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '2.0.6' );
+define( 'TPA_VERSION', '2.0.7' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
