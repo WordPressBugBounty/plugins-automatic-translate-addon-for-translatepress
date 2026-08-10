@@ -1,11 +1,102 @@
 jQuery(function($) {
+    const EDGE_PLAYGROUND_URL = 'https://microsoftedge.github.io/Demos/built-in-ai/playgrounds/translator-api/';
+
+    function getEdgePlaygroundRef() {
+        return '<a href="' + EDGE_PLAYGROUND_URL + '" target="_blank" rel="noopener noreferrer"><strong style="color: #2271b1;">test your language on the Edge Translator API playground</strong></a>';
+    }
+
+    const BUILTIN_AI_PROVIDERS = {
+        chrome: {
+            provider: 'chrome',
+            noticeSelector: '#tpa-chrome-local-ai-notice',
+            headingSelector: '#tpa-chrome-notice-heading',
+            messageSelector: '#tpa-chrome-notice-message',
+            testSectionSelector: '#tpa-chrome-test-translation',
+            sourceSelectSelector: '#tpa-test-translation-source',
+            targetSelectSelector: '#tpa-test-translation-target',
+            testButtonSelector: '#tpa-test-translation-btn',
+            resultSelector: '#tpa-test-translation-result',
+            errorSelector: '#tpa-test-translation-error',
+            browserLabel: 'Chrome',
+            docsUrl: 'https://developer.chrome.com/docs/ai/translator-api',
+            unsupportedLanguagesUrl: () => createCopyableLink('chrome://on-device-translation-internals'),
+            languagePackProgressUrl: () => createCopyableLink('chrome://on-device-translation-internals'),
+            languagePackInstallUrl: () => createCopyableLink('chrome://on-device-translation-internals'),
+            languageSettingsUrl: () => createCopyableLink('chrome://settings/languages'),
+            secureFlagsUrl: () => createCopyableLink('chrome://flags/#unsafely-treat-insecure-origin-as-secure'),
+            apiFlagsUrl: () => createCopyableLink('chrome://flags/#translation-api'),
+            checkBrowser: () => typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.checkBrowserCompatibility('chrome'),
+            getSupportedLanguages: () => typeof ChromeAiTranslator !== 'undefined' ? ChromeAiTranslator.getSupportedLanguages('chrome') : [],
+        },
+        edge: {
+            provider: 'edge',
+            noticeSelector: '#tpa-edge-local-ai-notice',
+            headingSelector: '#tpa-edge-notice-heading',
+            messageSelector: '#tpa-edge-notice-message',
+            testSectionSelector: '#tpa-edge-test-translation',
+            sourceSelectSelector: '#tpa-edge-test-translation-source',
+            targetSelectSelector: '#tpa-edge-test-translation-target',
+            testButtonSelector: '#tpa-edge-test-translation-btn',
+            resultSelector: '#tpa-edge-test-translation-result',
+            errorSelector: '#tpa-edge-test-translation-error',
+            browserLabel: 'Edge',
+            docsUrl: 'https://learn.microsoft.com/en-us/microsoft-edge/web-platform/translator-api',
+            unsupportedLanguagesUrl: () => getEdgePlaygroundRef(),
+            languagePackProgressUrl: () => createCopyableLink('edge://on-device-translation-internals'),
+            languagePackInstallUrl: () => createCopyableLink('edge://on-device-translation-internals'),
+            languageSettingsUrl: () => createCopyableLink('edge://settings/languages'),
+            secureFlagsUrl: () => createCopyableLink('edge://flags/#unsafely-treat-insecure-origin-as-secure'),
+            apiFlagsUrl: () => createCopyableLink('edge://flags/#translation-api'),
+            checkBrowser: () => typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.checkBrowserCompatibility('edge'),
+            getSupportedLanguages: () => typeof ChromeAiTranslator !== 'undefined' ? ChromeAiTranslator.getSupportedLanguages('edge') : [],
+        }
+    };
+
+    /**
+     * Chrome-only on Chrome, Edge-only on Edge, both on every other browser.
+     *
+     * @returns {string[]}
+     */
+    function getVisibleBuiltinAIProvidersForSettings() {
+        if (typeof ChromeAiTranslator === 'undefined') {
+            return ['chrome', 'edge'];
+        }
+        const browserType = ChromeAiTranslator.getBrowserType();
+        if (browserType === 'Edge') {
+            return ['edge'];
+        }
+        if (browserType === 'Chrome') {
+            return ['chrome'];
+        }
+        return ['chrome', 'edge'];
+    }
+
+    function applyBuiltinAISettingsSectionVisibility() {
+        const visibleProviders = getVisibleBuiltinAIProvidersForSettings();
+        ['chrome', 'edge'].forEach(function(providerKey) {
+            const $section = $('[data-tpa-builtin-ai-settings-section="' + providerKey + '"]');
+            if (!$section.length) {
+                return;
+            }
+            if (visibleProviders.indexOf(providerKey) !== -1) {
+                $section.show();
+            } else {
+                $section.hide();
+            }
+        });
+    }
+
     /* =========================
-     * Chrome Local AI Notice
-     * Initialize Chrome AI translator notice on settings page
+     * Built-in AI Notice
+     * Initialize Chrome/Edge AI translator notice on settings page
      * ========================= */
-    async function initChromeLocalAINotice() {
-        // Check if notice element exists
-        const $notice = $('#tpa-chrome-local-ai-notice');
+    async function initBuiltinAINotice(providerKey) {
+        const config = BUILTIN_AI_PROVIDERS[providerKey];
+        if (!config) {
+            return;
+        }
+
+        const $notice = $(config.noticeSelector);
         if (!$notice.length) {
             return; // Notice element doesn't exist, exit early
         }
@@ -27,8 +118,8 @@ jQuery(function($) {
         const effectiveApiAvailable = apiAvailable || bypassApi;
         const effectiveSecure = safeBrowser || browserContentSecure || bypassSecure;
 
-        const $heading = $('#tpa-chrome-notice-heading');
-        const $message = $('#tpa-chrome-notice-message');
+        const $heading = $(config.headingSelector);
+        const $message = $(config.messageSelector);
         
         let showBrowserNotice = false;
         let showSecureNotice = false;
@@ -37,9 +128,7 @@ jQuery(function($) {
         let languageNoticeData = null;
         
         // Browser check (must be Chrome, not Edge or others) - use centralized method
-        const isBrowserCompatible = (typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.checkBrowserCompatibility) 
-            ? ChromeAiTranslator.checkBrowserCompatibility() 
-            : (window?.hasOwnProperty("chrome") && navigator?.userAgent?.includes("Chrome") && !navigator?.userAgent?.includes("Edg"));
+        const isBrowserCompatible = config.checkBrowser();
         
         const effectiveBrowserCompatible = isBrowserCompatible || bypassBrowser;
 
@@ -51,7 +140,7 @@ jQuery(function($) {
             showApiNotice = true;
         } else {
             // Only check language issues if browser/API/secure checks pass
-            languageNoticeData = await checkLanguageIssues();
+            languageNoticeData = await checkLanguageIssues(config);
             if (languageNoticeData) {
                 showLanguageNotice = true;
             }
@@ -68,11 +157,11 @@ jQuery(function($) {
         const notices = {
             browserHeading: '⚠️ Important Notice: Browser Compatibility',
             browserMessage: '<ul><li>' +
-                'The <strong>Translator API</strong>, which uses Chrome Local AI Models, is designed exclusively for use with the <strong>Chrome browser</strong>.' +
+                'The <strong>Translator API</strong>, which uses ' + config.browserLabel + ' Local AI Models, is designed exclusively for use with the <strong>' + config.browserLabel + ' browser</strong>.' +
                 '</li><li>' +
-                'If you are using a different browser (such as Edge, Firefox, or Safari), the API may not function correctly.' +
+                'If you are using a different browser (such as Firefox, or Safari), the API may not function correctly.' +
                 '</li><li>' +
-                'Learn more in the <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" rel="noreferrer">official documentation</a>.' +
+                'Learn more in the <a href="' + config.docsUrl + '" target="_blank" rel="noreferrer">official documentation</a>.' +
                 '</li></ul>',
             secureHeading: '⚠️ Important Notice: Secure Connection Required',
             secureMessage: '<ul><li>' +
@@ -84,17 +173,17 @@ jQuery(function($) {
                 '<ol>' +
                 '<li>Switch to a secure connection by using <strong><code>https://</code></strong>.</li>' +
                 '<li>' +
-                'Alternatively, add this URL to Chrome\'s list of insecure origins treated as secure: ' + createCopyableLink('chrome://flags/#unsafely-treat-insecure-origin-as-secure') + 
+                'Alternatively, add this URL to ' + config.browserLabel + ' list of insecure origins treated as secure: ' + config.secureFlagsUrl() +
                 '<br />Copy the URL and then open a new window and paste this URL to access the settings.' +
                 '</li></ol>',
             apiHeading: '⚠️ Important Notice: API Availability',
             apiMessage: '<ol>' +
-                '<li>Open this URL in a new Chrome tab: ' + createCopyableLink('chrome://flags/#translation-api') + '. Copy this URL and then open a new window and paste this URL to access the settings.</li>' +
+                '<li>Open this URL in a new ' + config.browserLabel + ' tab: ' + config.apiFlagsUrl() + '. Copy this URL and then open a new window and paste this URL to access the settings.</li>' +
                 '<li>Ensure that the <strong>Experimental translation API</strong> option is set to <strong>Enabled</strong>.</li>' +
                 '<li>After change the setting, Click on the <strong>Relaunch</strong> button to apply the changes.</li>' +
                 '<li>The Translator AI modal should now be enabled and ready for use.</li>' +
                 '</ol>' +
-                '<p>For more information, please refer to the <a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank">documentation</a>.</p>' +
+                '<p>For more information, please refer to the <a href="' + config.docsUrl + '" target="_blank">documentation</a>.</p>' +
                 '<p>If the issue persists, please ensure that your browser is up to date and restart your browser.</p>' +
                 '<p>If you continue to experience issues after following the above steps, please <a href="https://my.coolplugins.net/account/support-tickets/" target="_blank" rel="noopener">open a support ticket</a> with our team. We are here to help you resolve any problems and ensure a smooth translation experience.</p>'
         };
@@ -165,13 +254,75 @@ jQuery(function($) {
             '</span>';
     }
 
+    function buildLanguagePackDownloadingNotice(config, downloadingList) {
+        const installUrl = config.languagePackInstallUrl ? config.languagePackInstallUrl() : createCopyableLink(config.provider === 'edge' ? 'edge://on-device-translation-internals' : 'chrome://on-device-translation-internals');
+
+        if (config.provider === 'edge') {
+            return '<div class="tpa-chrome-language-pack-box">' +
+                '<p>Language packs are being downloaded: ' + downloadingList + '</p>' +
+                '<p>Please wait for the download to complete. Translation will be available automatically once finished.</p>' +
+                '<p>You can check the download progress by opening: ' + installUrl + '</p>' +
+                '<p><strong>What to do next:</strong></p>' +
+                '<ul style="margin-top: .5em;">' +
+                '<li>Wait for the download to finish. The status will change to <strong>Ready</strong> or <strong>Installed</strong> in the <strong>Language Packs</strong> section.</li>' +
+                '<li>After the language pack is installed, you may need to <strong>reload</strong> or <strong>restart</strong> your browser for the changes to take effect.</li>' +
+                '</ul>' +
+                '</div>';
+        }
+
+        return '<div class="tpa-chrome-language-pack-box">' +
+            '<p>Language packs are being downloaded: ' + downloadingList + '</p>' +
+            '<p>Please wait for the download to complete. Translation will be available automatically once finished.</p>' +
+            '<p>Check download progress: ' + installUrl + '</p>' +
+            '</div>';
+    }
+
+    function buildLanguagePackRequiredNotice(config, sourceLang, requiredList) {
+        const installUrl = config.languagePackInstallUrl ? config.languagePackInstallUrl() : createCopyableLink(config.provider === 'edge' ? 'edge://on-device-translation-internals' : 'chrome://on-device-translation-internals');
+        const settingsUrl = config.languageSettingsUrl ? config.languageSettingsUrl() : createCopyableLink(config.provider === 'edge' ? 'edge://settings/languages' : 'chrome://settings/languages');
+        const docsUrl = config.provider === 'edge'
+            ? 'https://learn.microsoft.com/en-us/microsoft-edge/web-platform/translator-api#supported-languages'
+            : 'https://developer.chrome.com/docs/ai/translator-api#supported-languages';
+
+        if (config.provider === 'edge') {
+            return '<div class="tpa-chrome-language-pack-box">' +
+                '<p>Edge needs language packs installed for translation to work. This is a one-time setup.</p>' +
+                '<div class="tpa-chrome-language-pack-inner">' +
+                '<p><strong class="tpa-required-label">Required Languages:</strong><br>' + sourceLang.label + ' (Source), <span class="tpa-required-lang">' + requiredList + '</span></p>' +
+                '<p><strong>Quick Setup:</strong></p>' +
+                '<ol class="tpa-chrome-steps-list">' +
+                '<li><span class="tpa-chrome-step-number">1</span>Open <strong>Edge Settings → Languages</strong>: ' + settingsUrl + '</li>' +
+                '<li><span class="tpa-chrome-step-number">2</span>Click <strong class="tpa-required-lang">Add languages</strong> and add the languages listed above as preferred languages.</li>' +
+                '<li><span class="tpa-chrome-step-number">3</span>Reload this page to verify configuration.</li>' +
+                '</ol>' +
+                '<p>Verify language packs: ' + installUrl + '</p>' +
+                '<p>For more help, refer to the <a href="' + docsUrl + '" target="_blank" rel="noopener noreferrer">supported languages documentation</a> or open the <a href="' + EDGE_PLAYGROUND_URL + '" target="_blank" rel="noopener noreferrer">Edge Translator API playground</a>.</p>' +
+                '</div>' +
+                '</div>';
+        }
+
+        return '<div class="tpa-chrome-language-pack-box">' +
+            '<p>' + config.browserLabel + ' needs language packs installed for translation to work. This is a one-time setup.</p>' +
+            '<div class="tpa-chrome-language-pack-inner">' +
+            '<p><strong class="tpa-required-label">Required Languages:</strong><br>' + sourceLang.label + ' (Source), <span class="tpa-required-lang">' + requiredList + '</span></p>' +
+            '<p><strong>Quick Setup:</strong></p>' +
+            '<ol class="tpa-chrome-steps-list">' +
+            '<li><span class="tpa-chrome-step-number">1</span>Open <strong>' + config.browserLabel + ' Settings → Languages</strong>: ' + settingsUrl + '</li>' +
+            '<li><span class="tpa-chrome-step-number">2</span>Click <strong class="tpa-required-lang">Add languages</strong> and add the languages listed above</li>' +
+            '<li><span class="tpa-chrome-step-number">3</span>Reload this page to verify configuration.</li>' +
+            '</ol>' +
+            '<p>Verify language packs: ' + installUrl + '</p>' +
+            '<p>For more help, refer to the <a href="' + docsUrl + '" target="_blank" rel="noopener noreferrer">supported languages documentation</a>.</p>' +
+            '</div>' +
+            '</div>';
+    }
+
     /* =========================
      * Check Language Issues
      * Check for language support and language pack issues for ALL languages
      * ========================= */
-    async function checkLanguageIssues() {
-        // Get supported languages list from centralized Chrome AI Translator
-        const supportedLanguages = ChromeAiTranslator.getSupportedLanguages();
+    async function checkLanguageIssues(config) {
+        const supportedLanguages = config.getSupportedLanguages();
         
         // Get languages from TRP settings (passed via wp_localize_script)
         let sourceLanguage = 'en';
@@ -260,7 +411,9 @@ jQuery(function($) {
                 heading: '<span class="tpa-chrome-unsupported-heading"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg>Unsupported Languages</span> ',
                 message: '<div class="tpa-chrome-unsupported-box">' +
                     '<p>The following languages are not supported by the current AI engine: </br><span class="tpa-unsupported-list">' + unsupportedList + '</span></p>' +
-                    '<p>To see the full list of supported translation languages, visit: '+ createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
+                    '<p>' + (config.provider === 'edge'
+                        ? 'To check whether your languages are supported, ' + getEdgePlaygroundRef() + '.'
+                        : 'To see the full list of supported translation languages, visit: ' + config.unsupportedLanguagesUrl()) + '</p>' +
                     '</div>',
                 isCombined: true
             };
@@ -346,11 +499,7 @@ jQuery(function($) {
                 
                 languagePackNotice = {
                     heading: '⏳ Language Packs Downloading',
-                    message: '<div class="tpa-chrome-language-pack-box">' +
-                        '<p>Language packs are being downloaded: ' + downloadingList + '</p>' +
-                        '<p>Please wait for the download to complete. Translation will be available automatically once finished.</p>' +
-                        '<p>Check download progress: ' + createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
-                        '</div>',
+                    message: buildLanguagePackDownloadingNotice(config, downloadingList),
                     isCombined: true
                 };
             } else if (requiredIssues.length > 0) {
@@ -370,19 +519,7 @@ jQuery(function($) {
                 const sourceLang = requiredIssues[0].sourceLang;
                 languagePackNotice = {
                     heading: '<span class="tpa-chrome-language-pack-heading"><svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="15" viewBox="0 0 24 24" width="15"><g><rect fill="none"/></g><g><path d="M20,2H4C3,2,2,2.9,2,4v3.01C2,7.73,2.43,8.35,3,8.7V20c0,1.1,1.1,2,2,2h14c0.9,0,2-0.9,2-2V8.7c0.57-0.35,1-0.97,1-1.69V4 C22,2.9,21,2,20,2z M15,14H9v-2h6V14z M20,7H4V4h16V7z"/></g></svg>Language Pack Required</span> ',
-                    message: '<div class="tpa-chrome-language-pack-box">' +
-                        '<p>Chrome needs language packs installed for translation to work. This is a one-time setup.</p>' +
-                        '<div class="tpa-chrome-language-pack-inner">' +
-                        '<p><strong class="tpa-required-label">Required Languages:</strong><br>' + sourceLang.label + ' (Source), <span class="tpa-required-lang">' + requiredList + '</span></p>' +
-                        '<p><strong>Quick Setup:</strong></p>' +
-                        '<ol class="tpa-chrome-steps-list">' +
-                        '<li><span class="tpa-chrome-step-number">1</span>Open <strong>Chrome Settings → Languages</strong>: ' + createCopyableLink('chrome://settings/languages') + '</li>' +
-                        '<li><span class="tpa-chrome-step-number">2</span>Click <strong class="tpa-required-lang">Add languages</strong> and add the languages listed above</li>' +
-                        '<li><span class="tpa-chrome-step-number">3</span>Reload this page to verify configuration.</li>' +
-                        '</ol>' +
-                        '<p>Verify language packs: '+ createCopyableLink('chrome://on-device-translation-internals') + '</p>' +
-                        '</div>' +
-                        '</div>',
+                    message: buildLanguagePackRequiredNotice(config, sourceLang, requiredList),
                     isCombined: true
                 };
             }
@@ -420,8 +557,8 @@ jQuery(function($) {
      * Test Translation Feature
      * Allow users to test Chrome AI translation
      * ========================= */
-    async function initTestTranslation() {
-        const $testSection = $('#tpa-chrome-test-translation');
+    async function initTestTranslation(config) {
+        const $testSection = $(config.testSectionSelector);
         if (!$testSection.length) {
             return; // Test section doesn't exist
         }
@@ -441,7 +578,7 @@ jQuery(function($) {
         const apiAvailable = ChromeAiTranslator.checkApiAvailability();
         
         // Browser check (must be Chrome, not Edge or others)
-        const hasBrowserError = !ChromeAiTranslator.checkBrowserCompatibility();
+        const hasBrowserError = !config.checkBrowser();
         
         // Secure connection check
         const hasSecureError = !apiAvailable && !safeBrowser && !browserContentSecure;
@@ -454,14 +591,13 @@ jQuery(function($) {
             return; // Don't initialize test translation if critical errors exist
         }
         
-        const $sourceSelect = $('#tpa-test-translation-source');
-        const $targetSelect = $('#tpa-test-translation-target');
-        const $testBtn = $('#tpa-test-translation-btn');
-        const $resultDiv = $('#tpa-test-translation-result');
-        const $errorDiv = $('#tpa-test-translation-error');
+        const $sourceSelect = $(config.sourceSelectSelector);
+        const $targetSelect = $(config.targetSelectSelector);
+        const $testBtn = $(config.testButtonSelector);
+        const $resultDiv = $(config.resultSelector);
+        const $errorDiv = $(config.errorSelector);
 
-        // Supported languages list (use centralized method)
-        const supportedLanguages = ChromeAiTranslator.getSupportedLanguages();
+        const supportedLanguages = config.getSupportedLanguages();
 
         // Helper function to check language pair availability (use centralized method)
         async function checkLanguagePairAvailability(source, target) {
@@ -637,7 +773,7 @@ jQuery(function($) {
                 }
                 
                 if (!translator) {
-                    throw new Error('Chrome AI Translator API is not available. Please check your browser configuration.');
+                    throw new Error(config.browserLabel + ' AI Translator API is not available. Please check your browser configuration.');
                 }
                 
                 // Perform translation
@@ -659,7 +795,7 @@ jQuery(function($) {
                 if (error.message) {
                     errorMessage += error.message;
                 } else {
-                    errorMessage += 'Please check your Chrome AI Translator configuration.';
+                    errorMessage += 'Please check your ' + config.browserLabel + ' AI Translator configuration.';
                 }
                 $errorDiv.text(errorMessage).show();
             } finally {
@@ -669,40 +805,40 @@ jQuery(function($) {
         });
     }
     
-    // Initialize Chrome AI notice first, then show test translation section after notice is displayed
-    if ($('#tpa-chrome-local-ai-notice').length) {
-        // Initialize notice and wait for it to complete
-        initChromeLocalAINotice().then(function() {
-            // After notice is shown (or hidden if no notice needed), initialize test translation
-            if ($('#tpa-chrome-test-translation').length) {
-                initTestTranslation().catch(function(error) {
-                    console.error('Failed to initialize test translation:', error);
-                    const $errorDiv = $('#tpa-test-translation-error');
+    function initializeBuiltinAIProvider(providerKey) {
+        const config = BUILTIN_AI_PROVIDERS[providerKey];
+        if (!config || !$(config.noticeSelector).length) {
+            return;
+        }
+
+        if (getVisibleBuiltinAIProvidersForSettings().indexOf(providerKey) === -1) {
+            return;
+        }
+
+        initBuiltinAINotice(providerKey).then(function() {
+            if ($(config.testSectionSelector).length) {
+                initTestTranslation(config).catch(function(error) {
+                    console.error('Failed to initialize ' + config.browserLabel + ' test translation:', error);
+                    const $errorDiv = $(config.errorSelector);
                     if ($errorDiv.length) {
                         $errorDiv.html('Failed to load available languages. Please refresh the page.').show();
                     }
                 });
             }
         }).catch(function(error) {
-            console.error('Failed to initialize Chrome AI notice:', error);
-            // Even if notice fails, try to initialize test translation
-            if ($('#tpa-chrome-test-translation').length) {
-                initTestTranslation().catch(function(testError) {
-                    console.error('Failed to initialize test translation:', testError);
+            console.error('Failed to initialize ' + config.browserLabel + ' AI notice:', error);
+            if ($(config.testSectionSelector).length) {
+                initTestTranslation(config).catch(function(testError) {
+                    console.error('Failed to initialize ' + config.browserLabel + ' test translation:', testError);
                 });
             }
         });
-    } else {
-        // If no notice element exists, initialize test translation directly
-        if ($('#tpa-chrome-test-translation').length) {
-            initTestTranslation().catch(function(error) {
-                console.error('Failed to initialize test translation:', error);
-                const $errorDiv = $('#tpa-test-translation-error');
-                if ($errorDiv.length) {
-                    $errorDiv.html('Failed to load available languages. Please refresh the page.').show();
-                }
-            });
-        }
     }
+
+    applyBuiltinAISettingsSectionVisibility();
+
+    Object.keys(BUILTIN_AI_PROVIDERS).forEach(function(providerKey) {
+        initializeBuiltinAIProvider(providerKey);
+    });
 
 });

@@ -8,7 +8,7 @@ declare(strict_types=1);
  * Author: Cool Plugins
  * Author URI: https://coolplugins.net/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=author_page&utm_content=plugins_list
  * Plugin URI:
- * Version: 2.0.7
+ * Version: 2.0.8
  * License: GPL2
  * Text Domain:automatic-translate-addon-for-translatepress
  * Requires Plugins: translatepress-multilingual
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( defined( 'TPA_VERSION' ) ) {
 	return;
 }
-define( 'TPA_VERSION', '2.0.7' );
+define( 'TPA_VERSION', '2.0.8' );
 define( 'TPA_FILE', __FILE__ );
 define( 'TPA_PATH', plugin_dir_path( TPA_FILE ) );
 define( 'TPA_URL', plugin_dir_url( TPA_FILE ) );
@@ -131,6 +131,10 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			
 			if(!get_option('tpa_provider_chrome_enabled')) {
 				add_option('tpa_provider_chrome_enabled', '1');
+			}
+
+			if(!get_option('tpa_provider_edge_enabled')) {
+				add_option('tpa_provider_edge_enabled', '1');
 			}
 		}
 
@@ -342,12 +346,23 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
             // Get provider states from POST data
             $yandex_enabled = isset($_POST['yandex_enabled']) ? sanitize_text_field(wp_unslash($_POST['yandex_enabled'])) : '1';
             $chrome_enabled = isset($_POST['chrome_enabled']) ? sanitize_text_field(wp_unslash($_POST['chrome_enabled'])) : '1';
+            $edge_enabled = isset($_POST['edge_enabled']) ? sanitize_text_field(wp_unslash($_POST['edge_enabled'])) : '1';
 
             // Save to database
             update_option('tpa_provider_yandex_enabled', $yandex_enabled === '1' ? '1' : '0');
             update_option('tpa_provider_chrome_enabled', $chrome_enabled === '1' ? '1' : '0');
+            update_option('tpa_provider_edge_enabled', $edge_enabled === '1' ? '1' : '0');
 
-            wp_send_json_success(['message' => esc_html__('Provider settings saved successfully.', 'automatic-translate-addon-for-translatepress')]);
+            if ( ! function_exists( 'tpa_settings_tab_is_visible' ) ) {
+                require_once TPA_PATH . 'includes/helpers.php';
+            }
+
+            wp_send_json_success(
+                array(
+                    'message'              => esc_html__( 'Provider settings saved successfully.', 'automatic-translate-addon-for-translatepress' ),
+                    'settings_tab_visible' => tpa_settings_tab_is_visible(),
+                )
+            );
         }
 
 		public function tpa_add_docs_link_to_plugin_meta($links, $file) {
@@ -438,6 +453,10 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			}
 			if(!get_option('tpa_provider_chrome_enabled')) {
 				add_option('tpa_provider_chrome_enabled', '1');
+			}
+
+			if(!get_option('tpa_provider_edge_enabled')) {
+				add_option('tpa_provider_edge_enabled', '1');
 			}
 
 			$get_opt_in = get_option('tpa_feedback_opt_in');
@@ -671,12 +690,13 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 		public function tpa_register_assets() {
 			wp_register_script( 'tpa-yandex-widget', TPA_URL . 'assets/js/widget.js?widgetId=ytWidget&pageLang=en&widgetTheme=light&autoMode=false', array(), TPA_VERSION, true );
 			wp_register_script( 'tpa-chrome-ai-translation', TPA_URL . 'assets/js/chrome-ai-translation.js', array(), TPA_VERSION, true );
-			wp_register_script( 'tpscript', TPA_URL . 'assets/js/tpa-custom-script.js', array( 'jquery', 'jquery-ui-dialog', 'tpa-chrome-ai-translation' ), TPA_VERSION, true );
-			wp_register_style( 'tpa-editor-styles', TPA_URL . 'assets/css/tpa-custom.css', null, TPA_VERSION, 'all' );
+			wp_register_script( 'tpscript', TPA_URL . 'assets/js/tpa-custom-script.min.js', array( 'jquery', 'jquery-ui-dialog', 'tpa-chrome-ai-translation' ), TPA_VERSION, true );
+			wp_register_style( 'tpa-editor-styles', TPA_URL . 'assets/css/tpa-custom.min.css', null, TPA_VERSION, 'all' );
 			$extra_data['preloader_path'] = TPA_URL . '/assets/images/preloader.gif';
 			$extra_data['gt_preview']     = TPA_URL . '/assets/images/google.png';
 			$extra_data['yt_preview']     = TPA_URL . '/assets/images/yandex.png';
 			$extra_data['chrome_preview']     = TPA_URL . '/assets/images/chrome.png';
+			$extra_data['edge_preview']       = TPA_URL . '/assets/images/edge.png';
 			$extra_data['openai_preview']  = TPA_URL . '/assets/images/openAI.png';
 			$extra_data['gemini_preview']  = TPA_URL . '/assets/images/google-gemini.png';
 			$extra_data['anthropic_preview']  = TPA_URL . '/assets/images/anthropic.png';
@@ -690,6 +710,7 @@ if ( ! class_exists( 'TranslatePressAddon' ) ) {
 			$extra_data['post_id']        = get_the_ID();
 			$extra_data['provider_yandex_enabled'] = get_option('tpa_provider_yandex_enabled', '1');
 			$extra_data['provider_chrome_enabled'] = get_option('tpa_provider_chrome_enabled', '1');
+			$extra_data['provider_edge_enabled'] = get_option('tpa_provider_edge_enabled', '1');
 			$extra_data['chrome_ai_bypass_browser_check'] = get_option('tpa_chrome_ai_bypass_browser_check', '0');
 			$extra_data['chrome_ai_bypass_security_check'] = get_option('tpa_chrome_ai_bypass_security_check', '0');
 			$extra_data['chrome_ai_bypass_api_check'] = get_option('tpa_chrome_ai_bypass_api_check', '0');

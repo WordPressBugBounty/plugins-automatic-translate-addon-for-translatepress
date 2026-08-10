@@ -681,10 +681,11 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 }
 
 /* ================================================
-   Chrome AI Configuration (Settings)
+   Built-in AI Configuration (Settings)
 ================================================ */
-.tpa-dashboard-chrome-ai-settings{
-    margin-bottom:28px;
+.tpa-dashboard-chrome-ai-settings,
+.tpa-dashboard-edge-ai-settings {
+    margin-bottom: 28px;
 }
 
 .tpa-section-title-with-icon {
@@ -716,8 +717,8 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     line-height: 1.5;
 }
 
-/* Chrome Local AI Notice */
-#tpa-chrome-local-ai-notice {
+/* Built-in AI Notice (Chrome + Edge) */
+.tpa-chrome-local-ai-notice {
     display: none;
     background: var(--tpa-ald-bg, #f8f9fa);
     border: 1px solid var(--border-color);
@@ -739,7 +740,7 @@ ul.tpa-dashboard-sts-btm li span:first-child {
 }
 
 /* Test translation section (inside notice) - spacing when notice content is above */
-#tpa-chrome-test-translation {
+.tpa-chrome-test-translation {
     margin-top: 20px;
 }
 
@@ -814,11 +815,11 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     color: #0c4a6e;
 }
 
-#tpa-chrome-local-ai-notice.tpa-chrome-notice-combined .tpa-chrome-local-ai-notice-content {
+.tpa-chrome-local-ai-notice.tpa-chrome-notice-combined .tpa-chrome-local-ai-notice-content {
     color: inherit;
 }
 
-#tpa-chrome-local-ai-notice .tpa-chrome-no-languages-content {
+.tpa-chrome-local-ai-notice .tpa-chrome-no-languages-content {
     color: rgb(159 18 57);
     font-size: 14px;
     line-height: 1.5;
@@ -827,7 +828,7 @@ ul.tpa-dashboard-sts-btm li span:first-child {
     gap: 6px;
 }
 
-#tpa-chrome-local-ai-notice .tpa-chrome-no-languages-content svg {
+.tpa-chrome-local-ai-notice .tpa-chrome-no-languages-content svg {
     fill: rgb(159 18 57);
     vertical-align: middle;
 }

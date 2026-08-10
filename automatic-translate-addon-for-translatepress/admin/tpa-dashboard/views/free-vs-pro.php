@@ -32,6 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 $features = array(
                     esc_html__( 'Yandex automatic translation', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
                     esc_html__( 'Chrome Built-in AI translator', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
+                    esc_html__( 'Edge Built-in AI translator', 'automatic-translate-addon-for-translatepress' ) => array( true, true ),
                     esc_html__( 'Google Translate widget', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
                     esc_html__( 'OpenAI, Google Gemini & Anthropic translation', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),
                     esc_html__( 'Bulk translation', 'automatic-translate-addon-for-translatepress' ) => array( false, true ),

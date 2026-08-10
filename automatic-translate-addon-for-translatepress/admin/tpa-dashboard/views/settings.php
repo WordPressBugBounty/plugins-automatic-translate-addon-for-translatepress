@@ -71,10 +71,11 @@
         ?>
 
         <?php if(get_option('tpa_provider_chrome_enabled') == '1') : ?>
+        <div class="tpa-builtin-ai-settings-section" data-tpa-builtin-ai-settings-section="chrome">
             <h2 class="tpa-section-title tpa-section-title-with-icon">
                 <span class="tpa-section-icon tpa-icon-sparkle" aria-hidden="true">
                     <img
-                        src="<?php echo esc_url( TPA_URL . 'assets/images/single-page-chrome-translation.svg' ); ?>"
+                        src="<?php echo esc_url( TPA_URL . 'assets/images/chrome-translation.svg' ); ?>"
                         alt=""
                         width="20"
                         height="20"
@@ -89,7 +90,7 @@
             </p>
             <div class="tpa-dashboard-chrome-ai-settings">
                 <!-- Chrome Local AI Notice -->
-                <div id="tpa-chrome-local-ai-notice" class="tpa-chrome-local-ai-notice">
+                <div id="tpa-chrome-local-ai-notice" class="tpa-chrome-local-ai-notice" data-builtin-ai-provider="chrome">
                     <?php if ( ! $tpa_has_translation_langs ) : ?>
                         <span class="tpa-chrome-no-languages-content"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg><?php
                             echo wp_kses(
@@ -140,6 +141,78 @@
                 </div>
                 
             </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if(get_option('tpa_provider_edge_enabled') == '1') : ?>
+        <div class="tpa-builtin-ai-settings-section" data-tpa-builtin-ai-settings-section="edge">
+            <h2 class="tpa-section-title tpa-section-title-with-icon">
+                <span class="tpa-section-icon tpa-icon-sparkle" aria-hidden="true">
+                    <img
+                        src="<?php echo esc_url( TPA_URL . 'assets/images/edge-translation.svg' ); ?>"
+                        alt=""
+                        width="20"
+                        height="20"
+                        loading="lazy"
+                        decoding="async"
+                    />
+                </span>
+                <?php esc_html_e('Edge AI Configuration', 'automatic-translate-addon-for-translatepress'); ?>
+            </h2>
+            <p class="tpa-section-description">
+                <?php esc_html_e('Use Edge’s built-in AI to translate strings. Configure and test it here.', 'automatic-translate-addon-for-translatepress'); ?>
+            </p>
+            <div class="tpa-dashboard-edge-ai-settings">
+                <div id="tpa-edge-local-ai-notice" class="tpa-chrome-local-ai-notice" data-builtin-ai-provider="edge">
+                    <?php if ( ! $tpa_has_translation_langs ) : ?>
+                        <span class="tpa-chrome-no-languages-content"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" id="error"><g><rect fill="none"/></g><g><path d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1zm-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm1-3h-2v-2h2v2z"></path></g></svg><?php
+                            echo wp_kses(
+                                sprintf(
+                                    /* translators: %s: link to the TranslatePress settings page. */
+                                    __( 'Add at least %s to use the Edge AI translation test', 'automatic-translate-addon-for-translatepress' ),
+                                    sprintf(
+                                        '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                                        esc_url( admin_url( 'options-general.php?page=translate-press' ) ),
+                                        esc_html__( 'one language in TranslatePress', 'automatic-translate-addon-for-translatepress' )
+                                    )
+                                ),
+                                array(
+                                    'a' => array(
+                                        'href'   => array(),
+                                        'target' => array(),
+                                        'rel'    => array(),
+                                    ),
+                                )
+                            );
+                        ?></span>
+                    <?php else : ?>
+                        <div class="tpa-chrome-local-ai-notice-content">
+                            <h3 id="tpa-edge-notice-heading" class="tpa-chrome-notice-heading"></h3>
+                            <div id="tpa-edge-notice-message" class="tpa-chrome-notice-message"></div>
+                        </div>
+
+                        <div id="tpa-edge-test-translation" class="tpa-chrome-test-translation">
+                            <h3 class="tpa-chrome-test-translation-heading"><?php esc_html_e('Edge AI Translation Test', 'automatic-translate-addon-for-translatepress'); ?></h3>
+                            <p class="tpa-chrome-test-translation-description"><?php esc_html_e('Check whether Edge AI Translation is properly configured by translating a sample text.', 'automatic-translate-addon-for-translatepress'); ?></p>
+
+                            <div class="tpa-chrome-test-translation-language-pair">
+                                <label class="tpa-chrome-test-translation-label"><?php esc_html_e('Language Pair:', 'automatic-translate-addon-for-translatepress'); ?></label>
+                                <select id="tpa-edge-test-translation-source" class="tpa-chrome-test-translation-source"></select>
+                                <span class="tpa-chrome-test-translation-arrow">→</span>
+                                <select id="tpa-edge-test-translation-target" class="tpa-chrome-test-translation-target"></select>
+                            </div>
+
+                            <button id="tpa-edge-test-translation-btn" class="tpa-dashboard-btn primary tpa-chrome-test-translation-btn">
+                                <?php esc_html_e('Test Translation', 'automatic-translate-addon-for-translatepress'); ?>
+                            </button>
+
+                            <div id="tpa-edge-test-translation-result" class="tpa-chrome-test-translation-result"></div>
+                            <div id="tpa-edge-test-translation-error" class="tpa-chrome-test-translation-error"></div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
         <?php endif; ?>
         <form method="post">
             <?php wp_nonce_field('tpa_save_optin_settings', 'tpa_optin_nonce'); ?>

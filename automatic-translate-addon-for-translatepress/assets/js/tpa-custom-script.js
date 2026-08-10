@@ -6,6 +6,7 @@ const tpAutoTranslator = (function (window, $) {
   const dict_id = new Array();
   const gettxt_id = new Array();
   let chromeAIStatus = false;
+  let edgeAIStatus = false;
   let previousSelectedLang = null;
   onLoad();
 
@@ -17,17 +18,90 @@ const tpAutoTranslator = (function (window, $) {
     createStringsModal("yandex");
 
     //create strings modal - check Chrome status with current language values
-    chromeAIStatus = await checkChromeAILangStatus();
+    chromeAIStatus = await checkBuiltinAILangStatus('chrome');
+    edgeAIStatus = await checkBuiltinAILangStatus('edge');
     createStringsModal('chrome-ai-translator');
   }
 
-   async function checkChromeAILangStatus(){
-    const status = await ChromeAiTranslator.languageSupportedStatus(localStorage.getItem("page_lang"),localStorage.getItem("language_code"),localStorage.getItem("target_language_name"),localStorage.getItem("source_language_name"));
+   async function checkBuiltinAILangStatus(provider){
+    const status = await ChromeAiTranslator.languageSupportedStatus(
+      localStorage.getItem("page_lang"),
+      localStorage.getItem("language_code"),
+      localStorage.getItem("target_language_name"),
+      localStorage.getItem("source_language_name"),
+      provider
+    );
     return status;
   }
 
-  // Helper function to get the settings page URL
-  function getChromeSettingsPageUrl() {
+  function isBuiltinAILangReady(status) {
+    return !!(status && status.supported === true);
+  }
+
+  function escapeHtmlAttr(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function getLanguageNotSupportedDetails(provider, status) {
+    const browserLabel = provider === 'edge' ? 'Edge' : 'Chrome';
+    const fallbackUrl = (typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.getSupportedLanguagesDocsUrl)
+      ? ChromeAiTranslator.getSupportedLanguagesDocsUrl(provider)
+      : (provider === 'edge'
+        ? 'https://microsoftedge.github.io/Demos/built-in-ai/playgrounds/translator-api/'
+        : 'https://developer.chrome.com/docs/ai/translator-api');
+
+    if (status && status.supported === false && status.reason === 'language_not_supported') {
+      return {
+        message: status.message || `This language is not supported by ${browserLabel} AI yet.`,
+        url: status.supported_languages_url || fallbackUrl,
+      };
+    }
+
+    return {
+      message: `This language is not supported by ${browserLabel} AI yet.`,
+      url: fallbackUrl,
+    };
+  }
+
+  function getLanguageNotSupportedButton(provider, status) {
+    const details = getLanguageNotSupportedDetails(provider, status);
+    return `<button class="tpa-builtin-ai-disabled-message tpa-provider-btn error error-disabled" disabled title="${escapeHtmlAttr(details.message)}">Not Supported</button>`;
+  }
+
+  function getLanguageNotSupportedCta(provider, status) {
+    const details = getLanguageNotSupportedDetails(provider, status);
+    return `<a href="${escapeHtmlAttr(details.url)}" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" title="${escapeHtmlAttr(details.message)}">Supported languages</a>`;
+  }
+
+  function getVisibleBuiltinAIProviders() {
+    if (typeof ChromeAiTranslator === 'undefined') {
+      return ['chrome', 'edge'];
+    }
+    const browserType = ChromeAiTranslator.getBrowserType();
+    if (browserType === 'Edge') {
+      return ['edge'];
+    }
+    if (browserType === 'Chrome') {
+      return ['chrome'];
+    }
+    return ['chrome', 'edge'];
+  }
+
+  function getBuiltinAISettingsPageUrl() {
     // Try to get admin URL from various sources
     if (typeof ajaxurl !== 'undefined') {
       // Extract admin URL from ajaxurl (e.g., /wp-admin/admin-ajax.php)
@@ -44,44 +118,47 @@ const tpAutoTranslator = (function (window, $) {
     return '/wp-admin/options-general.php?page=translatepress-tpap-dashboard&tab=settings';
   }
 
-  function openChromeSettingsPage() {
-    window.open(getChromeSettingsPageUrl(), '_blank', 'noopener,noreferrer');
+  function openBuiltinAISettingsPage() {
+    window.open(getBuiltinAISettingsPageUrl(), '_blank', 'noopener,noreferrer');
   }
 
-  // Check if Chrome has browser/API/secure connection errors (not language errors)
-  function hasChromeConfigurationError() {
-    // Use centralized Chrome AI Translator utility methods
+  function hasBuiltinAIConfigurationError(provider) {
     if (typeof ChromeAiTranslator === 'undefined') {
-      return true; // If ChromeAiTranslator not loaded, assume error
+      return true;
     }
-    
-    // Browser check
+
     const bypassBrowser = configData.chrome_ai_bypass_browser_check === '1';
     const bypassSecure = configData.chrome_ai_bypass_secure_check === '1';
     const bypassApi = configData.chrome_ai_bypass_api_check === '1';
 
-    if (!ChromeAiTranslator.checkBrowserCompatibility() && !bypassBrowser) {
+    if (!ChromeAiTranslator.checkBrowserCompatibility(provider) && !bypassBrowser) {
       return true;
     }
-    
+
     const apiAvailable = ChromeAiTranslator.checkApiAvailability() || bypassApi;
     const secureConnection = ChromeAiTranslator.checkSecureConnection() || window.isSecureContext || bypassSecure;
-    
-    // Secure connection check
+
     if (!apiAvailable && !secureConnection) {
       return true;
     }
-    
-    // API availability check
+
     if (!apiAvailable) {
       return true;
     }
-    
+
     return false;
   }
 
+  function hasChromeConfigurationError() {
+    return hasBuiltinAIConfigurationError('chrome');
+  }
+
+  function hasEdgeConfigurationError() {
+    return hasBuiltinAIConfigurationError('edge');
+  }
+
   // Check if language is unsupported (not in supported languages list)
-  function isLanguageUnsupported(sourceLanguage, targetLanguage) {
+  function isLanguageUnsupported(sourceLanguage, targetLanguage, provider = 'chrome') {
     if (!sourceLanguage || !targetLanguage) {
       return false; // Can't determine if unsupported without language codes
     }
@@ -91,14 +168,13 @@ const tpAutoTranslator = (function (window, $) {
       return false; // If ChromeAiTranslator not loaded, can't check
     }
     
-    return !ChromeAiTranslator.isLanguageSupported(sourceLanguage) || 
-           !ChromeAiTranslator.isLanguageSupported(targetLanguage);
+    return !ChromeAiTranslator.isLanguageSupported(sourceLanguage, provider) || 
+           !ChromeAiTranslator.isLanguageSupported(targetLanguage, provider);
   }
 
   // Check if language pack is required (language is supported but pack not installed)
-  async function isLanguagePackRequired(sourceLanguage, targetLanguage) {
-    // First check if language is unsupported - if so, it's not a pack issue
-    if (isLanguageUnsupported(sourceLanguage, targetLanguage)) {
+  async function isLanguagePackRequired(sourceLanguage, targetLanguage, provider = 'chrome') {
+    if (isLanguageUnsupported(sourceLanguage, targetLanguage, provider)) {
       return false;
     }
     
@@ -134,63 +210,91 @@ const tpAutoTranslator = (function (window, $) {
     return false;
   }
 
-  // Function to update Chrome AI translator button in modal when status changes
-  async function updateChromeAIButton() {
-    const icons = {
-      error: extradata['error_preview']
-    };
+  function getBuiltinAIConfigureButton(provider) {
+    const icons = { error: extradata['error_preview'] };
     const TPA_IMG = (key) => icons[key];
-    
-    // Find the Chrome AI translator row in the modal
-    const $chromeRow = $('#tpa-dialog').find('tr').filter(function() {
-      return $(this).text().indexOf('Chrome Built-in AI') !== -1;
+    return `
+      <button type="button" class="tpa-builtin-ai-disabled-message tpa-provider-btn error tpa-builtin-ai-open-settings" data-builtin-ai-provider="${provider}">
+        <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
+        Configure
+      </button>
+    `;
+  }
+
+  function getBuiltinAIDisabledButton(provider, status) {
+    const icons = { error: extradata['error_preview'] };
+    const TPA_IMG = (key) => icons[key];
+    const providerLabels = {
+      chrome: 'Chrome Built-in AI',
+      edge: 'Edge Built-in AI'
+    };
+
+    if (isBuiltinAILangReady(status)) {
+      const buttonId = provider === 'edge' ? 'tpa_edge_ai_translate_btn' : 'tpa_chrome_ai_translate_btn';
+      return `<button id="${buttonId}" class="tpa-provider-btn translate" data-translate-engen="chrome-ai-translator" data-builtin-ai-provider="${provider}">Translate</button>`;
+    }
+
+    const hasConfigError = provider === 'edge' ? hasEdgeConfigurationError() : hasChromeConfigurationError();
+    if (hasConfigError) {
+      return `
+        <button type="button" class="tpa-builtin-ai-disabled-message tpa-provider-btn error tpa-builtin-ai-open-settings" data-builtin-ai-provider="${provider}">
+          <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
+          Configure
+        </button>
+      `;
+    }
+
+    if (status && status.reason === 'language_not_supported') {
+      return getLanguageNotSupportedButton(provider, status);
+    }
+
+    return `
+      <button class="tpa-builtin-ai-disabled-message tpa-provider-btn error error-disabled" disabled>
+        Not Supported
+      </button>
+    `;
+  }
+
+  async function updateBuiltinAIButton(provider) {
+    const providerLabels = {
+      chrome: 'Chrome Built-in AI',
+      edge: 'Edge Built-in AI'
+    };
+    const status = provider === 'edge' ? edgeAIStatus : chromeAIStatus;
+    const $row = $('#tpa-dialog').find('tr').filter(function() {
+      return $(this).text().indexOf(providerLabels[provider]) !== -1;
     });
-    
-    if ($chromeRow.length > 0) {
-      const $buttonCell = $chromeRow.find('td').eq(1); // Second column contains the button
-      
-      // Update button based on current chromeAIStatus
-      if (chromeAIStatus === true) {
-        $buttonCell.html('<button id="tpa_chrome_ai_translate_btn" class="tpa-provider-btn translate" data-translate-engen="chrome-ai-translator">Translate</button>');
-        // Re-attach click handler for the new button
-        $("#tpa_chrome_ai_translate_btn").off('click').on("click", function () {
-          onChromeTranslateClick();
+
+    if ($row.length > 0) {
+      const $buttonCell = $row.find('td').eq(1);
+      const sourceLanguage = localStorage.getItem("page_lang");
+      const targetLanguage = localStorage.getItem("language_code");
+
+      if (isBuiltinAILangReady(status)) {
+        $buttonCell.html(getBuiltinAIDisabledButton(provider, status));
+        const buttonId = provider === 'edge' ? '#tpa_edge_ai_translate_btn' : '#tpa_chrome_ai_translate_btn';
+        $(buttonId).off('click').on("click", function () {
+          onBuiltinAITranslateClick(provider);
         });
+      } else if ((provider === 'edge' ? hasEdgeConfigurationError() : hasChromeConfigurationError())) {
+        $buttonCell.html(getBuiltinAIDisabledButton(provider, status));
       } else {
-        const sourceLanguage = localStorage.getItem("page_lang");
-        const targetLanguage = localStorage.getItem("language_code");
-        
-        if (hasChromeConfigurationError()) {
-          // Browser/API/secure connection error
-          $buttonCell.html(`
-            <button type="button" class="tpa-chromeai-disabled-message tpa-provider-btn error tpa-chrome-open-settings">
-              <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
-              Configure
-            </button>
-          `);
+        const packRequired = await isLanguagePackRequired(sourceLanguage, targetLanguage, provider);
+        if (packRequired) {
+          $buttonCell.html(getBuiltinAIConfigureButton(provider));
         } else {
-          // Check if it's a language pack issue (supported but not installed) or unsupported language
-          const packRequired = await isLanguagePackRequired(sourceLanguage, targetLanguage);
-          
-          if (packRequired) {
-            // Language pack required (supported but not installed) → "Configure"
-            $buttonCell.html(`
-              <button type="button" class="tpa-chromeai-disabled-message tpa-provider-btn error tpa-chrome-open-settings">
-                <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
-                Configure
-              </button>
-            `);
-          } else {
-            // Unsupported language - show disabled "Not Supported" button
-            $buttonCell.html(`
-              <button class="tpa-chromeai-disabled-message tpa-provider-btn error error-disabled" disabled>
-                Not Supported
-              </button>
-            `);
-          }
+          $buttonCell.html(getBuiltinAIDisabledButton(provider, status));
         }
       }
     }
+  }
+
+  async function updateChromeAIButton() {
+    await updateBuiltinAIButton('chrome');
+  }
+
+  async function updateEdgeAIButton() {
+    await updateBuiltinAIButton('edge');
   }
 
   // Helper function to update localStorage with current language values
@@ -240,15 +344,13 @@ const tpAutoTranslator = (function (window, $) {
       onYandexTranslateClick();
     });
 
-    //on click on chrome ai translate button
-    $("#tpa_chrome_ai_translate_btn").on("click", function () {
-      onChromeTranslateClick();
+    $(document).on('click', '#tpa_chrome_ai_translate_btn, #tpa_edge_ai_translate_btn', function () {
+      onBuiltinAITranslateClick($(this).data('builtin-ai-provider') || 'chrome');
     });
 
-    // Open Chrome AI settings when "Configure" is clicked (URL resolved at click time).
-    $(document).on('click', '.tpa-chrome-open-settings', function(e) {
+    $(document).on('click', '.tpa-builtin-ai-open-settings, .tpa-chrome-open-settings', function(e) {
       e.preventDefault();
-      openChromeSettingsPage();
+      openBuiltinAISettingsPage();
     });
 
     //on click on merge button
@@ -332,9 +434,10 @@ const tpAutoTranslator = (function (window, $) {
       // Update localStorage with new language values
       updateLanguageStorage();
       // Re-check Chrome AI translator status with new language
-      chromeAIStatus = await checkChromeAILangStatus();
-      // Update Chrome AI translator button in modal if modal exists
+      chromeAIStatus = await checkBuiltinAILangStatus('chrome');
+      edgeAIStatus = await checkBuiltinAILangStatus('edge');
       updateChromeAIButton();
+      updateEdgeAIButton();
     }
     
     // Initialize previousSelectedLang on first run
@@ -385,7 +488,7 @@ const tpAutoTranslator = (function (window, $) {
         const $card = $(this);
         if(!isProviderCardSelectable($card)) return false;
         const $action = $card.find('[data-provider-action-slot]').first();
-        return $action.find('#tpa_yandex_translate_btn, #tpa_chrome_ai_translate_btn').filter(':not(:disabled)').length > 0;
+        return $action.find('#tpa_yandex_translate_btn, #tpa_chrome_ai_translate_btn, #tpa_edge_ai_translate_btn').filter(':not(:disabled)').length > 0;
       }).first();
       const $fallbackSelectable = $overlay.find(".tpa-provider-card").filter(function(){
         return isProviderCardSelectable($(this));
@@ -435,10 +538,10 @@ const tpAutoTranslator = (function (window, $) {
     const $action = $card.find('[data-provider-action-slot]').first();
     if(!$action.length) return null;
 
-    const $translateBtn = $action.find('#tpa_yandex_translate_btn, #tpa_chrome_ai_translate_btn').filter(':not(:disabled)').first();
+    const $translateBtn = $action.find('#tpa_yandex_translate_btn, #tpa_chrome_ai_translate_btn, #tpa_edge_ai_translate_btn').filter(':not(:disabled)').first();
     if($translateBtn.length) return { type: 'click', $el: $translateBtn };
 
-    const $configureBtn = $action.find('.tpa-chromeai-disabled-message:not(:disabled)').first();
+    const $configureBtn = $action.find('.tpa-builtin-ai-open-settings:not(:disabled), .tpa-chromeai-disabled-message:not(:disabled)').first();
     if($configureBtn.length) return { type: 'click', $el: $configureBtn };
 
     const $link = $action.find('a[href]').first();
@@ -683,8 +786,9 @@ const tpAutoTranslator = (function (window, $) {
     });
   }
   
-  function onChromeTranslateClick(){
-    var tr_type = $('#tpa_chrome_ai_translate_btn').attr("data-translate-engen");
+  function onBuiltinAITranslateClick(provider = 'chrome'){
+    const buttonId = provider === 'edge' ? '#tpa_edge_ai_translate_btn' : '#tpa_chrome_ai_translate_btn';
+    var tr_type = $(buttonId).attr("data-translate-engen");
     $(".tpa-preloader-wrap").show();
     $("#tpa-notice-check").hide();
     $(".modal-body").hide();
@@ -701,14 +805,26 @@ const tpAutoTranslator = (function (window, $) {
     if (arr.includes(default_code)) {
       addStringsInModal(tr_type, default_code);
     }else {
+      const details = getLanguageNotSupportedDetails(provider, provider === 'edge' ? edgeAIStatus : chromeAIStatus);
+      const docsLink = details.url
+        ? ` <a href="${escapeHtmlAttr(details.url)}" target="_blank" rel="noopener noreferrer">View supported languages</a>`
+        : '';
       $(".chrome-ai-translator-container").find(".tpa-preloader-wrap").hide();
       $(".chrome-ai-translator-container").find(".notice-container")
         .addClass("notice inline notice-warning")
         .show()
-        .html("Chrome Translator Does not support this language.");
+        .html(escapeHtml(details.message) + docsLink);
     }
     closeProviderModal();
     $(".chrome-ai-translator-container").css("display", "flex").hide().fadeIn("slow");
+  }
+
+  function onChromeTranslateClick(){
+    onBuiltinAITranslateClick('chrome');
+  }
+
+  function onEdgeTranslateClick(){
+    onBuiltinAITranslateClick('edge');
   }
 
   function addStringsInModal(tr_type, default_code){
@@ -900,6 +1016,7 @@ const tpAutoTranslator = (function (window, $) {
         anthropic: extradata['anthropic_preview'],
         google: extradata['gt_preview'],
         chrome: extradata['chrome_preview'],
+        edge: extradata['edge_preview'],
         docs: extradata['document_preview'],
         error: extradata['error_preview']
     };
@@ -913,6 +1030,48 @@ const tpAutoTranslator = (function (window, $) {
     // Get provider states from saved settings (extradata) - default to enabled if not set
     const isYandexEnabled = typeof extradata !== 'undefined' && extradata.provider_yandex_enabled ? extradata.provider_yandex_enabled === '1' : true;
     const isChromeEnabled = typeof extradata !== 'undefined' && extradata.provider_chrome_enabled ? extradata.provider_chrome_enabled === '1' : true;
+    const isEdgeEnabled = typeof extradata !== 'undefined' && extradata.provider_edge_enabled ? extradata.provider_edge_enabled === '1' : true;
+    const visibleBuiltinProviders = getVisibleBuiltinAIProviders();
+
+    function buildBuiltinAIRow(provider) {
+      const isEdge = provider === 'edge';
+      const providerStatus = isEdge ? edgeAIStatus : chromeAIStatus;
+      const providerEnabled = isEdge ? isEdgeEnabled : isChromeEnabled;
+      const hasConfigError = isEdge ? hasEdgeConfigurationError() : hasChromeConfigurationError();
+      const providerName = isEdge ? 'Edge Built-in AI' : 'Chrome Built-in AI';
+      const providerIcon = isEdge ? 'edge' : 'chrome';
+      const infoUrl = isEdge
+        ? 'https://microsoftedge.github.io/Demos/built-in-ai/playgrounds/translator-api/'
+        : 'https://developer.chrome.com/docs/ai/translator-api';
+      const docSlug = isEdge ? 'popup_edge' : 'popup_chrome';
+      const docUrlBase = isEdge 
+        ? 'https://docs.coolplugins.net/doc/microsoft-edge-ai-for-translatepress/'
+        : `${url}how-to-translate-your-website-content-automatically-via-chrome-ai/`;
+
+      return {
+        key: provider,
+        name: providerName,
+        icon: providerIcon,
+        info: infoUrl,
+        btn: isBuiltinAILangReady(providerStatus)
+          ? `<button id="tpa_${provider}_ai_translate_btn" class="tpa-provider-btn translate" data-translate-engen="chrome-ai-translator" data-builtin-ai-provider="${provider}">Translate</button>`
+          : (hasConfigError
+            ? getBuiltinAIConfigureButton(provider)
+            : (isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"), provider)
+              ? getLanguageNotSupportedButton(provider, providerStatus)
+              : getBuiltinAIConfigureButton(provider))),
+        doc: `${docUrlBase}?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=${docSlug}`,
+        enabled: providerEnabled && visibleBuiltinProviders.includes(provider),
+        selectable: isBuiltinAILangReady(providerStatus),
+        cta: isBuiltinAILangReady(providerStatus)
+          ? ''
+          : (hasConfigError
+            ? `<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--danger tpa-builtin-ai-open-settings" data-builtin-ai-provider="${provider}">Configure</button>`
+            : (isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"), provider)
+              ? getLanguageNotSupportedCta(provider, providerStatus)
+              : `<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--danger tpa-builtin-ai-open-settings" data-builtin-ai-provider="${provider}">Configure</button>`))
+      };
+    }
 
     const allRows = [
         {
@@ -926,45 +1085,8 @@ const tpAutoTranslator = (function (window, $) {
             selectable: true,
             cta: ''
         },
-        {
-            key: 'chrome',
-            name: 'Chrome Built-in AI',
-            icon: 'chrome',
-            info: 'https://developer.chrome.com/docs/ai/translator-api',
-            btn: chromeAIStatus === true
-                        ? `<button id="tpa_chrome_ai_translate_btn" class="tpa-provider-btn translate" data-translate-engen="chrome-ai-translator">Translate</button>`
-                        : (hasChromeConfigurationError()
-                            ? `
-                                <button type="button" class="tpa-chromeai-disabled-message tpa-provider-btn error tpa-chrome-open-settings">
-                                    <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
-                                    Configure
-                                </button>
-                            `
-                            : (isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"))
-                                ? `
-                                    <button class="tpa-chromeai-disabled-message tpa-provider-btn error error-disabled" disabled>
-                                        Not Supported
-                                    </button>
-                                `
-                                : `
-                                    <button type="button" class="tpa-chromeai-disabled-message tpa-provider-btn error tpa-chrome-open-settings">
-                                    <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
-                                    Configure
-                                </button>
-                                `)),
-            doc: `${url}how-to-translate-your-website-content-automatically-via-chrome-ai/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=popup_chrome`,
-            enabled: isChromeEnabled,
-            selectable: chromeAIStatus === true,
-            cta: chromeAIStatus === true
-              ? ''
-              : (hasChromeConfigurationError()
-                ? `<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--danger tpa-chrome-open-settings">Configure</button>`
-                : (isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"))
-                  ? '<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" disabled>Not Supported</button>'
-                  : '<button type="button" class="tpa-provider-cta-btn tpa-provider-cta-btn--danger tpa-chrome-open-settings">Configure</button>'
-                )
-              )
-        },
+        buildBuiltinAIRow('chrome'),
+        buildBuiltinAIRow('edge'),
         {
           key: 'google',
           name: 'Google Translate',
@@ -1075,44 +1197,36 @@ const tpAutoTranslator = (function (window, $) {
     $("body").append(overlayHTML);
     bindProviderModalEvents();
     
-    // After modal is created, check language pack status and update Chrome button if needed
-    if (chromeAIStatus !== true && !hasChromeConfigurationError() && !isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"))) {
-        (async function() {
-            const sourceLanguage = localStorage.getItem("page_lang");
-            const targetLanguage = localStorage.getItem("language_code");
-            const packRequired = await isLanguagePackRequired(sourceLanguage, targetLanguage);
-            const $chromeCard = $('#tpa-dialog').find('.tpa-provider-card[data-provider-key="chrome"]').first();
-            
-            if ($chromeCard.length > 0) {
-                const $actionSlot = $chromeCard.find('[data-provider-action-slot]').first();
-                const icons = {
-                    error: extradata['error_preview']
-                };
-                const TPA_IMG = (key) => icons[key];
-                
-                if (packRequired) {
-                    // Language pack required → "Configure"
-                    $actionSlot.html(`
-                        <button type="button" class="tpa-chromeai-disabled-message tpa-provider-btn error tpa-chrome-open-settings">
-                            <img src="${TPA_IMG('error')}" alt="error" style="height:16px; vertical-align:middle; margin-right:5px;">
-                            Configure
-                        </button>
-                    `);
-                    setProviderCardSelectable($chromeCard, false);
-                } else {
-                    // Unsupported language - show disabled "Not Supported" button
-                    $actionSlot.html(`
-                        <button class="tpa-chromeai-disabled-message tpa-provider-btn error error-disabled" disabled>
-                            Not Supported
-                        </button>
-                    `);
-                    setProviderCardSelectable($chromeCard, false);
-                }
-                refreshProviderStartButtonState();
+    ['chrome', 'edge'].forEach(function(provider) {
+      const providerStatus = provider === 'edge' ? edgeAIStatus : chromeAIStatus;
+      const hasConfigError = provider === 'edge' ? hasEdgeConfigurationError() : hasChromeConfigurationError();
+      if (!isBuiltinAILangReady(providerStatus) && !hasConfigError && !isLanguageUnsupported(localStorage.getItem("page_lang"), localStorage.getItem("language_code"), provider)) {
+        (async function(currentProvider) {
+          const sourceLanguage = localStorage.getItem("page_lang");
+          const targetLanguage = localStorage.getItem("language_code");
+          const packRequired = await isLanguagePackRequired(sourceLanguage, targetLanguage, currentProvider);
+          const $providerCard = $('#tpa-dialog').find('.tpa-provider-card[data-provider-key="' + currentProvider + '"]').first();
+
+          if ($providerCard.length > 0) {
+            const $actionSlot = $providerCard.find('[data-provider-action-slot]').first();
+            const $ctaSlot = $providerCard.find('[data-provider-cta-slot]').first();
+
+            if (packRequired) {
+              $actionSlot.html(getBuiltinAIConfigureButton(currentProvider));
+              setProviderCardSelectable($providerCard, false);
+            } else {
+              $actionSlot.html(getLanguageNotSupportedButton(currentProvider, providerStatus));
+              if ($ctaSlot.length) {
+                $ctaSlot.html(getLanguageNotSupportedCta(currentProvider, providerStatus));
+              }
+              setProviderCardSelectable($providerCard, false);
             }
-        })();
-    }
-}
+            refreshProviderStartButtonState();
+          }
+        })(provider);
+      }
+    });
+  }
 
   // modal to show strings
   function createStringsModal(widgetType) {
@@ -1274,7 +1388,7 @@ const tpAutoTranslator = (function (window, $) {
     } else if (widgetType === 'chrome-ai-translator'){
       return `
       <div class="translator-widget ${widgetType}">
-        <h3 class="choose-lang">Translate Using Chrome AI Translator <span class="dashicons-before dashicons-translation"></span></h3>
+        <h3 class="choose-lang">Translate Using ${typeof ChromeAiTranslator !== 'undefined' ? ChromeAiTranslator.browserName() : 'Chrome'} AI Translator <span class="dashicons-before dashicons-translation"></span></h3>
         <div id="chrome_ai_translator_element"></div>
       </div>`
     } else {

@@ -92,67 +92,113 @@ jQuery(function($) {
         });
     });
 
+    const BUILTIN_AI_PROVIDERS = {
+        chrome: {
+            toggleSelector: '.tpa-provider-toggle[data-provider="chrome-built-in-ai"]',
+            cardName: 'Chrome Built-in AI',
+            browserLabel: 'Chrome',
+            checkBrowser: () => typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.checkBrowserCompatibility('chrome'),
+        },
+        edge: {
+            toggleSelector: '.tpa-provider-toggle[data-provider="edge-built-in-ai"]',
+            cardName: 'Edge Built-in AI',
+            browserLabel: 'Edge',
+            checkBrowser: () => typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.checkBrowserCompatibility('edge'),
+        }
+    };
+
     /* =========================
      * Provider Toggle Switches
      * Save provider states to database
      * ========================= */
+    var tpaPendingToggleRequests = 0;
+    var tpaLatestSettingsTabVisible = null;
+
+    function tpaMaybeReloadForSettingsTab() {
+        if (tpaPendingToggleRequests > 0 || tpaLatestSettingsTabVisible === null) {
+            return;
+        }
+
+        var settingsTabPresent = $('.nav-tab-wrapper a[data-tab="settings"]').length > 0;
+
+        if (tpaLatestSettingsTabVisible !== settingsTabPresent) {
+            window.location.reload();
+        }
+    }
+
     $(document).on('change', '.tpa-provider-toggle', function() {
         const $toggle = $(this);
-        const provider = $toggle.data('provider');
         
         // Skip if toggle is disabled (Pro providers)
         if ($toggle.prop('disabled')) {
             return;
         }
 
-        // Get current states of all provider toggles
+        const savedStates = (typeof tpaDashboard !== 'undefined' && tpaDashboard.provider_states)
+            ? tpaDashboard.provider_states
+            : {};
+
         const yandexToggle = $('.tpa-provider-toggle[data-provider="yandex-translate"]');
         const chromeToggle = $('.tpa-provider-toggle[data-provider="chrome-built-in-ai"]');
+        const edgeToggle = $('.tpa-provider-toggle[data-provider="edge-built-in-ai"]');
+
+        const yandexEnabled = yandexToggle.length
+            ? (yandexToggle.is(':checked') ? '1' : '0')
+            : (savedStates.yandex_enabled || '1');
+        const chromeEnabled = chromeToggle.length
+            ? (chromeToggle.is(':checked') ? '1' : '0')
+            : (savedStates.chrome_enabled || '1');
+        const edgeEnabled = edgeToggle.length
+            ? (edgeToggle.is(':checked') ? '1' : '0')
+            : (savedStates.edge_enabled || '1');
         
-        const yandexEnabled = yandexToggle.length ? (yandexToggle.is(':checked') ? '1' : '0') : '1';
-        const chromeEnabled = chromeToggle.length ? (chromeToggle.is(':checked') ? '1' : '0') : '1';
-        
-        // Save states via AJAX
         if (typeof tpaDashboard !== 'undefined' && tpaDashboard.ajax_url && tpaDashboard.nonce) {
+            tpaPendingToggleRequests++;
+
             $.post(tpaDashboard.ajax_url, {
                 action: 'tpa_save_provider_states',
                 yandex_enabled: yandexEnabled,
                 chrome_enabled: chromeEnabled,
+                edge_enabled: edgeEnabled,
                 _wpnonce: tpaDashboard.nonce
-            }, function(response) {
-                if (response && response.success) {
-                    // Button visibility already updated above
-                } else {
+            }).done(function(response) {
+                if (!response || !response.success) {
                     console.error('Failed to save provider states:', response);
+                    return;
                 }
+                if (response.data && response.data.message) {
+                    console.info(response.data.message, response.data.changed || {});
+                }
+                tpaLatestSettingsTabVisible = !!(response.data && response.data.settings_tab_visible);
+            }).fail(function() {
+                console.error('Failed to save provider states.');
+            }).always(function() {
+                tpaPendingToggleRequests--;
+                tpaMaybeReloadForSettingsTab();
             });
         }
         
-        // Re-check Chrome notice after toggle change
-        showChromeConfigureNotice().catch(function(error) {
-            console.log('Error checking Chrome notice:', error);
+        Object.keys(BUILTIN_AI_PROVIDERS).forEach(function(providerKey) {
+            showBuiltinAIConfigureNotice(providerKey).catch(function(error) {
+                console.log('Error checking ' + BUILTIN_AI_PROVIDERS[providerKey].browserLabel + ' notice:', error);
+            });
         });
     });
 
-    /* =========================
-     * Chrome AI Error Check
-     * Check for Chrome AI errors and show notice below Configure button
-     * ========================= */
-    function checkChromeAIErrors() {
-        // Use centralized Chrome AI Translator utility methods
-        if (typeof ChromeAiTranslator === 'undefined') {
-            return { hasError: true, type: 'api' }; // If ChromeAiTranslator not loaded, assume API error
+    function checkBuiltinAIErrors(providerKey) {
+        const config = BUILTIN_AI_PROVIDERS[providerKey];
+        if (!config || typeof ChromeAiTranslator === 'undefined') {
+            return { hasError: true, type: 'api' };
         }
         
         const bypassBrowser = typeof tpaTrpLanguages !== 'undefined' && tpaTrpLanguages.chrome_ai_bypass_browser_check === '1';
         const bypassSecure = typeof tpaTrpLanguages !== 'undefined' && tpaTrpLanguages.chrome_ai_bypass_secure_check === '1';
         const bypassApi = typeof tpaTrpLanguages !== 'undefined' && tpaTrpLanguages.chrome_ai_bypass_api_check === '1';
 
-        const browserCompatible = ChromeAiTranslator.checkBrowserCompatibility() || bypassBrowser;
+        const browserCompatible = config.checkBrowser() || bypassBrowser;
         const secureConnection = ChromeAiTranslator.checkSecureConnection() || window?.isSecureContext || bypassSecure;
         const apiAvailable = ChromeAiTranslator.checkApiAvailability() || bypassApi;
         
-        // Browser check (must be Chrome, not Edge or others)
         if (!browserCompatible) {
             return { hasError: true, type: 'browser' };
         } else if (!apiAvailable && !secureConnection) {
@@ -164,17 +210,11 @@ jQuery(function($) {
         return { hasError: false };
     }
 
-    /* =========================
-     * Check Language Pack Availability
-     * Check if language packs are installed for supported languages
-     * ========================= */
-    async function checkLanguagePackAvailability() {
-        // Use centralized Chrome AI Translator utility methods
+    async function checkLanguagePackAvailability(providerKey) {
         if (typeof ChromeAiTranslator === 'undefined') {
-            return { hasError: false }; // Can't check if ChromeAiTranslator not loaded
+            return { hasError: false };
         }
         
-        // Helper function to check language pair availability (use centralized method)
         async function checkLanguagePairAvailability(source, target) {
             if (typeof ChromeAiTranslator !== 'undefined' && ChromeAiTranslator.languagePairAvality) {
                 return await ChromeAiTranslator.languagePairAvality(source, target);
@@ -182,7 +222,6 @@ jQuery(function($) {
             return false;
         }
         
-        // Get languages from TRP settings
         let sourceLanguage = 'en';
         let targetLanguage = 'hi';
         let allLanguages = [];
@@ -196,15 +235,11 @@ jQuery(function($) {
             targetLanguage = localStorage.getItem('language_code') || 'hi';
         }
         
-        // Check supported languages list (use centralized method)
-        const supportedLanguages = ChromeAiTranslator.getSupportedLanguages();
-        
-        // Get source language
+        const supportedLanguages = ChromeAiTranslator.getSupportedLanguages(providerKey);
         const sourceLang = sourceLanguage.toLowerCase();
         const targetLangs = [];
         
         if (allLanguages && allLanguages.length > 0) {
-            // Get all supported target languages
             allLanguages.forEach(function(lang) {
                 if (!lang.is_default && supportedLanguages.includes(lang.code.toLowerCase())) {
                     targetLangs.push(lang.code.toLowerCase());
@@ -214,23 +249,19 @@ jQuery(function($) {
             targetLangs.push(targetLanguage.toLowerCase());
         }
         
-        // Check language pack status for each target language
         if (targetLangs.length > 0 && supportedLanguages.includes(sourceLang)) {
             for (let i = 0; i < targetLangs.length; i++) {
                 try {
                     const status = await checkLanguagePairAvailability(sourceLang, targetLangs[i]);
                     
-                    // If status indicates pack is required or downloading, return error
                     if (status === "after-download" || status === "downloadable" || status === "unavailable" || status === "downloading") {
                         return { hasError: true, type: 'language-pack' };
                     }
                     
-                    // If status is not 'readily' or 'available', pack might be required
                     if (status !== 'readily' && status !== 'available' && status !== false) {
                         return { hasError: true, type: 'language-pack' };
                     }
                 } catch (error) {
-                    // Continue checking other language pairs if one fails
                     console.log('Language pack check failed for ' + sourceLang + '-' + targetLangs[i] + ':', error);
                 }
             }
@@ -239,21 +270,17 @@ jQuery(function($) {
         return { hasError: false };
     }
 
-    /* =========================
-     * Update Chrome Configure Button Visibility
-     * Show Configure only when Chrome is enabled and needs configuration.
-     * ========================= */
-    function updateChromeConfigureButton(showButton) {
-        const $chromeCard = $('.tpa-dashboard-provider-card').filter(function() {
-            return $(this).find('h4').text().includes('Chrome Built-in AI');
+    function updateBuiltinAIConfigureButton(providerKey, showButton) {
+        const config = BUILTIN_AI_PROVIDERS[providerKey];
+        const $card = $('.tpa-dashboard-provider-card').filter(function() {
+            return $(this).find('h4').text().includes(config.cardName);
         });
 
-        if (!$chromeCard.length) {
+        if (!$card.length) {
             return;
         }
 
-        const $configureButton = $chromeCard.find('.tpa-chrome-configure-btn');
-
+        const $configureButton = $card.find('.tpa-builtin-ai-configure-btn[data-provider="' + providerKey + '"]');
         if (showButton) {
             $configureButton.show();
         } else {
@@ -261,65 +288,62 @@ jQuery(function($) {
         }
     }
 
-    async function showChromeConfigureNotice() {
-        const $chromeCard = $('.tpa-dashboard-provider-card').filter(function() {
-            return $(this).find('h4').text().includes('Chrome Built-in AI');
+    async function showBuiltinAIConfigureNotice(providerKey) {
+        const config = BUILTIN_AI_PROVIDERS[providerKey];
+        const $card = $('.tpa-dashboard-provider-card').filter(function() {
+            return $(this).find('h4').text().includes(config.cardName);
         });
 
-        if (!$chromeCard.length) {
+        if (!$card.length) {
             return;
         }
 
-        const chromeToggle = $('.tpa-provider-toggle[data-provider="chrome-built-in-ai"]');
-        const chromeEnabled = chromeToggle.length ? chromeToggle.is(':checked') : false;
+        const providerToggle = $(config.toggleSelector);
+        const providerEnabled = providerToggle.length ? providerToggle.is(':checked') : false;
 
-        if (!chromeEnabled) {
-            $chromeCard.find('.tpa-chrome-configure-notice').remove();
-            updateChromeConfigureButton(false);
+        if (!providerEnabled) {
+            $card.find('.tpa-builtin-ai-configure-notice[data-provider="' + providerKey + '"]').remove();
+            updateBuiltinAIConfigureButton(providerKey, false);
             return;
         }
 
-        const errorCheck = checkChromeAIErrors();
+        const errorCheck = checkBuiltinAIErrors(providerKey);
         let hasError = errorCheck.hasError;
         let errorType = errorCheck.type;
 
         if (!hasError) {
-            const packCheck = await checkLanguagePackAvailability();
+            const packCheck = await checkLanguagePackAvailability(providerKey);
             if (packCheck.hasError) {
                 hasError = true;
                 errorType = packCheck.type;
             }
         }
 
-        updateChromeConfigureButton(chromeEnabled && hasError);
+        updateBuiltinAIConfigureButton(providerKey, providerEnabled && hasError);
+        $card.find('.tpa-builtin-ai-configure-notice[data-provider="' + providerKey + '"]').remove();
 
         if (hasError) {
-            $chromeCard.find('.tpa-chrome-configure-notice').remove();
-
-            const $buttonsContainer = $chromeCard.find('.tpa-dashboard-provider-buttons');
-
-            let noticeMessage = 'Please configure the Chrome settings to use Chrome AI Translator.';
+            const $buttonsContainer = $card.find('.tpa-dashboard-provider-buttons');
+            let noticeMessage = 'Please configure the ' + config.browserLabel + ' settings to use ' + config.browserLabel + ' AI Translator.';
 
             if (errorType === 'browser') {
-                noticeMessage = 'Chrome browser is required. Please configure Chrome settings.';
+                noticeMessage = config.browserLabel + ' browser is required. Please configure ' + config.browserLabel + ' settings.';
             } else if (errorType === 'secure') {
-                noticeMessage = 'Secure connection (HTTPS) is required. Please configure Chrome settings.';
+                noticeMessage = 'Secure connection (HTTPS) is required. Please configure ' + config.browserLabel + ' settings.';
             } else if (errorType === 'api') {
-                noticeMessage = 'Chrome Translation API is not available. Please configure Chrome settings.';
+                noticeMessage = config.browserLabel + ' Translation API is not available. Please configure ' + config.browserLabel + ' settings.';
             } else if (errorType === 'language-pack') {
-                noticeMessage = 'Language pack is required. Please configure Chrome settings.';
+                noticeMessage = 'Language pack is required. Please configure ' + config.browserLabel + ' settings.';
             }
 
-            const $notice = $('<div class="tpa-chrome-configure-notice" style="margin-top: 10px; font-size: 10px; color: #dc2626;">' + noticeMessage + '</div>');
-
+            const $notice = $('<div class="tpa-builtin-ai-configure-notice tpa-chrome-configure-notice" data-provider="' + providerKey + '" style="margin-top: 10px; font-size: 10px; color: #dc2626;">' + noticeMessage + '</div>');
             $buttonsContainer.after($notice);
-        } else {
-            $chromeCard.find('.tpa-chrome-configure-notice').remove();
         }
     }
 
-    // Check and show notice on page load
-    showChromeConfigureNotice().catch(function(error) {
-        console.log('Error checking Chrome notice:', error);
+    Object.keys(BUILTIN_AI_PROVIDERS).forEach(function(providerKey) {
+        showBuiltinAIConfigureNotice(providerKey).catch(function(error) {
+            console.log('Error checking ' + BUILTIN_AI_PROVIDERS[providerKey].browserLabel + ' notice:', error);
+        });
     });
 });

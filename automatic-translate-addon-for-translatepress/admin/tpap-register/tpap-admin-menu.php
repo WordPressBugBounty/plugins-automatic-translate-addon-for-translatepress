@@ -150,6 +150,11 @@ class TranslatepressAutomaticTranslateAddonFree {
 			wp_localize_script( 'tpa-dashboard-script', 'tpaDashboard', array(
 				'ajax_url' => admin_url( 'admin-ajax.php' ),
 				'nonce'    => wp_create_nonce( 'tpa_provider_states_nonce' ),
+				'provider_states' => array(
+					'yandex_enabled' => (string) get_option( 'tpa_provider_yandex_enabled', '1' ),
+					'chrome_enabled' => (string) get_option( 'tpa_provider_chrome_enabled', '1' ),
+					'edge_enabled'   => (string) get_option( 'tpa_provider_edge_enabled', '1' ),
+				),
 				'strings'  => array(
 					'requestFailed' => esc_html__( 'Request failed. Please try again.', 'automatic-translate-addon-for-translatepress' ),
 					'missingData' => esc_html__( 'Missing required data. Please reload the page.', 'automatic-translate-addon-for-translatepress' ),
@@ -192,27 +197,39 @@ class TranslatepressAutomaticTranslateAddonFree {
 		if (!current_user_can('manage_options')) {
 			wp_die(esc_html__('You do not have permission to access this page.', 'automatic-translate-addon-for-translatepress'));
 		}
-		$chrome_settings_visible = ( '1' === (string) get_option( 'tpa_provider_chrome_enabled', '1' ) );
-		$feedback_settings_visible = (bool) get_option( 'cpfm_opt_in_choice_cool_translations', false );
+		if ( ! function_exists( 'tpa_settings_tab_is_visible' ) ) {
+			require_once TPA_PATH . 'includes/helpers.php';
+		}
+
 		$file_prefix = 'admin/tpa-dashboard/views/';
-		
+
 		$valid_tabs = [
 			'dashboard'       => esc_html__('Dashboard', 'automatic-translate-addon-for-translatepress'),
-			'settings'        => esc_html__('Settings', 'automatic-translate-addon-for-translatepress'),
 			'license'         => esc_html__('License', 'automatic-translate-addon-for-translatepress'),
 			'ai-translations' => esc_html__('Documentation', 'automatic-translate-addon-for-translatepress'),
-			'free-vs-pro'     => esc_html__('Free vs Pro', 'automatic-translate-addon-for-translatepress')
+			'free-vs-pro'     => esc_html__('Free vs Pro', 'automatic-translate-addon-for-translatepress'),
 		];
 
-		if ( ! ($chrome_settings_visible || $feedback_settings_visible ) ) {
-			unset( $valid_tabs['settings'] );
+		if ( tpa_settings_tab_is_visible() ) {
+			$valid_tabs = array_merge(
+				array(
+					'dashboard' => esc_html__( 'Dashboard', 'automatic-translate-addon-for-translatepress' ),
+					'settings'  => esc_html__( 'Settings', 'automatic-translate-addon-for-translatepress' ),
+				),
+				array_slice( $valid_tabs, 1 )
+			);
 		}
 
 		// Get current tab with fallback
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter used for read-only navigation, sanitized with sanitize_key() and validated against whitelist
-		$tab 			= isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'dashboard';
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'dashboard';
+
+		if ( 'settings' === $tab && ! tpa_settings_tab_is_visible() ) {
+			$tab = 'dashboard';
+		}
+
 		// Make sure tab is on our whitelist of allowed values
-		$tab = array_key_exists($tab, $valid_tabs) ? $tab : 'dashboard';
+		$tab = array_key_exists( $tab, $valid_tabs ) ? $tab : 'dashboard';
 		$current_tab 	= $tab;
 		
 		// Action buttons configuration
@@ -265,7 +282,8 @@ class TranslatepressAutomaticTranslateAddonFree {
 			
 			<nav class="nav-tab-wrapper" aria-label="<?php esc_attr_e('Dashboard navigation', 'automatic-translate-addon-for-translatepress'); ?>">
 				<?php foreach ($valid_tabs as $tab_key => $tab_title): ?>
-					<a href="?page=translatepress-tpap-dashboard&tab=<?php echo esc_attr($tab_key); ?>" 
+					<a href="?page=translatepress-tpap-dashboard&tab=<?php echo esc_attr($tab_key); ?>"
+					data-tab="<?php echo esc_attr($tab_key); ?>"
 					class="nav-tab <?php echo esc_attr($tab === $tab_key ? 'nav-tab-active' : ''); ?>">
 						<?php echo esc_html($tab_title); ?>
 					</a>
