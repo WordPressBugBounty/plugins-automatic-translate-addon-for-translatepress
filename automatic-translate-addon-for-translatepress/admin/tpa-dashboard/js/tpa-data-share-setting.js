@@ -178,11 +178,6 @@ jQuery(function($) {
             });
         }
         
-        Object.keys(BUILTIN_AI_PROVIDERS).forEach(function(providerKey) {
-            showBuiltinAIConfigureNotice(providerKey).catch(function(error) {
-                console.log('Error checking ' + BUILTIN_AI_PROVIDERS[providerKey].browserLabel + ' notice:', error);
-            });
-        });
     });
 
     function checkBuiltinAIErrors(providerKey) {
@@ -341,9 +336,11 @@ jQuery(function($) {
         }
     }
 
+    /* 
     Object.keys(BUILTIN_AI_PROVIDERS).forEach(function(providerKey) {
         showBuiltinAIConfigureNotice(providerKey).catch(function(error) {
             console.log('Error checking ' + BUILTIN_AI_PROVIDERS[providerKey].browserLabel + ' notice:', error);
         });
     });
+    */
 });

@@ -84,7 +84,7 @@ const tpAutoTranslator = (function (window, $) {
 
   function getLanguageNotSupportedCta(provider, status) {
     const details = getLanguageNotSupportedDetails(provider, status);
-    return `<a href="${escapeHtmlAttr(details.url)}" target="_blank" rel="noopener noreferrer" class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" title="${escapeHtmlAttr(details.message)}">Supported languages</a>`;
+    return `<span class="tpa-provider-cta-btn tpa-provider-cta-btn--muted" title="${escapeHtmlAttr(details.message)}">Unsupported language</span>`;
   }
 
   function getVisibleBuiltinAIProviders() {

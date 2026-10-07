@@ -168,7 +168,74 @@ class TranslatepressAutomaticTranslateAddonFree {
 			
 			// Enqueue Chrome AI translation script for utility methods (browser/API/secure checks)
 			wp_enqueue_script( 'tpa-chrome-ai-translation', TPA_URL . 'assets/js/chrome-ai-translation.js', array(), TPA_VERSION, true );
-			wp_enqueue_script( 'tpa-chrome-ai-notice', TPA_URL . 'admin/tpa-dashboard/js/tpa-chrome-ai-notice.js', array( 'jquery', 'tpa-chrome-ai-translation' ), TPA_VERSION, true );
+			
+			wp_enqueue_style( 'cais-framework-style', TPA_URL . 'admin/chrome-ai-setup/css/chrome-ai-setup-framework.min.css', array(), time() );
+			wp_enqueue_script( 'cais-framework-script', TPA_URL . 'admin/chrome-ai-setup/js/chrome-ai-setup-framework.min.js', array(), time(), true );
+			wp_enqueue_script( 'cais-notice-script', TPA_URL . 'admin/chrome-ai-setup/js/chrome-ai-setup-notice.min.js', array('jquery', 'cais-framework-script'), time(), true );
+
+			wp_enqueue_script( 'tpa-chrome-ai-notice', TPA_URL . 'admin/tpa-dashboard/js/tpa-chrome-ai-notice.js', array( 'jquery', 'tpa-chrome-ai-translation', 'cais-framework-script' ), TPA_VERSION, true );
+			
+			$cais_all_languages = array();
+			if ( ! empty( $trp_languages['all_languages'] ) ) {
+				foreach ( $trp_languages['all_languages'] as $lang ) {
+					$cais_all_languages[ $lang['code'] ] = array( 'name' => $lang['label'] );
+				}
+			}
+
+			$tpa_cais_data = array(
+				'source_language' => $trp_languages['source_language'],
+				'source_language_label' => $trp_languages['source_language_label'],
+				'target_language_label' => $trp_languages['target_language_label'],
+				'chrome_icon_url' => esc_url( TPA_URL . 'assets/images/chrome-translation.svg' ),
+				'edge_icon_url'   => esc_url( TPA_URL . 'assets/images/edge-translation.svg' ),
+				'all_languages' => $cais_all_languages,
+				'alternative_url' => esc_url( admin_url( 'admin.php?page=translatepress-tpap-dashboard' ) ),
+				'chrome_ai_bypass_api_check' => $trp_languages['chrome_ai_bypass_api_check'],
+				'chrome_ai_bypass_language_check' => false,
+				'chrome_ai_bypass_browser_check' => $trp_languages['chrome_ai_bypass_browser_check'],
+				'chrome_ai_bypass_secure_check' => $trp_languages['chrome_ai_bypass_secure_check'],
+				'enabled_providers' => array(
+					get_option('tpa_provider_chrome_enabled', '1') === '1' ? 'chrome-built-in-ai' : '',
+					get_option('tpa_provider_edge_enabled', '1') === '1' ? 'edge-built-in-ai' : ''
+				),
+				'primary_btn_class' => 'tpa-dashboard-btn primary',
+				'secondary_btn_class' => 'tpa-dashboard-btn',
+				'chrome_setup_doc_url' => esc_url('https://docs.coolplugins.net/doc/chrome-language-translation-api-setup/?utm_source=tpa_plugin&utm_medium=inside&utm_campaign=docs&utm_content=dashboard_chrome'),
+				'edge_setup_doc_url' => esc_url('https://docs.coolplugins.net/doc/edge-ai-translation-language-setup/?utm_source=atfp_plugin&utm_medium=inside&utm_campaign=edge_ai_setup&utm_content=settings'),
+				'texts' => array(
+					'cardTitle' => esc_html__( 'Chrome AI Setup', 'automatic-translate-addon-for-translatepress' ),
+					'cardDescription' => esc_html__( 'Free on-device translation. We detect what your browser needs — usually just one click.', 'automatic-translate-addon-for-translatepress' ),
+					'statusChecking' => esc_html__( 'Checking your browser…', 'automatic-translate-addon-for-translatepress' ),
+					'statusCheckingDesc' => esc_html__( 'Give us a second while we detect Chrome AI support.', 'automatic-translate-addon-for-translatepress' ),
+					'statusReady' => esc_html__( 'Chrome AI is Ready', 'automatic-translate-addon-for-translatepress' ),
+					'statusReadyDesc' => esc_html__( 'On-device translation is set up. No API key, no cost.', 'automatic-translate-addon-for-translatepress' ),
+					'statusDownloadable' => esc_html__( 'Language pack required', 'automatic-translate-addon-for-translatepress' ),
+					'statusDownloadableDesc' => esc_html__( 'Add the target translation language in your browser settings to download the translation model.', 'automatic-translate-addon-for-translatepress' ),
+					'statusDownloading' => esc_html__( 'Downloading language model…', 'automatic-translate-addon-for-translatepress' ),
+					'statusDownloadingDesc' => esc_html__( 'Keep this tab open. This happens once.', 'automatic-translate-addon-for-translatepress' ),
+					'statusError' => esc_html__( 'Chrome AI is currently unavailable', 'automatic-translate-addon-for-translatepress' ),
+					'statusErrorDesc' => esc_html__( 'Something blocked the check. See advanced steps or use alternative options.', 'automatic-translate-addon-for-translatepress' ),
+					'statusHttpError' => esc_html__( 'Chrome AI needs a secure (HTTPS) connection', 'automatic-translate-addon-for-translatepress' ),
+					'statusHttpErrorDesc' => esc_html__( 'Serving wp-admin over HTTP prevents Chrome AI from launching. Serve pages over HTTPS or use an alternative engine.', 'automatic-translate-addon-for-translatepress' ),
+					'btnEnable' => esc_html__( 'Enable Chrome AI', 'automatic-translate-addon-for-translatepress' ),
+					'btnRetry' => esc_html__( 'Retry', 'automatic-translate-addon-for-translatepress' ),
+					'btnAlternative' => esc_html__( 'Use Another Provider', 'automatic-translate-addon-for-translatepress' ),
+					'previewTitle' => esc_html__( 'Try a real translation', 'automatic-translate-addon-for-translatepress' ),
+					'previewDesc' => esc_html__( 'Type anything and see the exact on-device result — no page needed.', 'automatic-translate-addon-for-translatepress' ),
+					'previewInputLabel' => esc_html__( 'Your text', 'automatic-translate-addon-for-translatepress' ),
+					'previewOutputLabel' => esc_html__( 'Translation', 'automatic-translate-addon-for-translatepress' ),
+					'previewPlaceholder' => esc_html__( 'Type or paste text to translate…', 'automatic-translate-addon-for-translatepress' ),
+					'previewOutPlaceholder' => esc_html__( 'Translation will appear here.', 'automatic-translate-addon-for-translatepress' ),
+					'btnTranslate' => esc_html__( 'Translate preview', 'automatic-translate-addon-for-translatepress' ),
+					'translatingText' => esc_html__( 'Translating…', 'automatic-translate-addon-for-translatepress' ),
+					'translationDone' => esc_html__( 'Done in {ms} ms · on-device · no data left your browser', 'automatic-translate-addon-for-translatepress' ),
+					'translationFailed' => esc_html__( '✗ Translation failed. This pair may need its own model, or see advanced steps below.', 'automatic-translate-addon-for-translatepress' ),
+					'advancedTitle' => esc_html__( 'Still not working? Advanced steps', 'automatic-translate-addon-for-translatepress' ),
+					'advancedBrowserRequirements' => esc_html__( 'Chrome AI translation needs Chrome or Edge on desktop (version 138+). It doesn’t run on mobile phones or tablets.', 'automatic-translate-addon-for-translatepress' ),
+					'openSetupGuide' => esc_html__( 'Open Official Setup Guide →', 'automatic-translate-addon-for-translatepress' )
+				)
+			);
+			wp_localize_script( 'tpa-chrome-ai-notice', 'caisNoticeData', $tpa_cais_data );
 			wp_localize_script( 'tpa-chrome-ai-notice', 'tpaTrpLanguages', $trp_languages );
 		}
 	}

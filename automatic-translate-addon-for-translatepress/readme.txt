@@ -3,28 +3,42 @@ Contributors: narinder-singh, satindersingh, coolplugins
 Donate link: https://paypal.me/CoolPlugins/10USD/
 Tags: AI translation, translate, Translatepress, multilingual, automatic translation
 Requires at least: 5.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 2.0.8
+Stable tag: 2.0.9
 License: GPLv2 or later 
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Auto-translate unlimited strings and characters using AI & Machine Translation tools without any external API Key!
 
 == Description ==
 
-https://youtu.be/kgu4hWn7bms
+https://youtu.be/cLDKJ29tNc0?si=ig5y2H3b2M8anh4c
 
-**[AI Translation For TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=top_description)** is a powerful TranslatePress extension that enhances the functionality of the TranslatePress plugin. This addon uses advanced translation services, like Google Translate, Yandex, and Chrome AI translator, to provide accurate and instant translations for your web pages automatically.
+**[AI Translation For TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=top_description)** is a powerful TranslatePress extension that enhances the functionality of the TranslatePress plugin. This addon uses advanced translation services, like Yandex, Edge Built-in AI, and, Chrome AI to provide accurate and instant translations for your web pages automatically.
 
 Powered by advanced AI translator resources, it delivers accurate and fast translations, helping you reach a global audience with ease.
 
-https://youtu.be/OyTHWn5CyKw
+https://youtu.be/LQDCRpGEUxc
+
+### Compatibility
+
+**AI Translation for TranslatePress** is fully compatible with popular WordPress editors, page builders, plugins, and custom fields, making it easier to create and manage multilingual websites.
+
+* **Elementor**: Translate supported Elementor page content, including text, widgets and other translatable elements, while keeping the existing page design and layout.
+* **Gutenberg Block Editor**: Translate supported content created with the WordPress block editor without changing the existing block structure or page layout.
+* **Astra Theme**: Create multilingual websites using the Astra theme and translate supported theme-related content through TranslatePress.
+* **WooCommerce**: Translate supported WooCommerce content, including store pages and other translatable elements, to help create multilingual online stores.
+* **Contact Form 7**: Translate supported form content, labels, and other strings automatically.
+* **WPForms**: Translate supported WPForms content and form-related strings.
+* **The Events Calendar**: Translate supported event page content, event details, and other translatable strings detected by TranslatePress.
 
 ### Key Features
 
 * **Chrome Built-in AI:** The addon uses Chrome's built-in AI for translation, providing a fast and efficient way to translate content without relying on external services or paid APIs.
 
-* **Machine Translation:** Automatically translate entire webpages using Yandex and Google Translate Widget into multiple languages.
+* **Edge Built-in AI Translation:** Translate website content using Microsoft Edge's built-in Translator API. The translation runs through the browser's supported AI translation features in real-time.
+
+* **Machine Translation:** Automatically translate entire webpages using Yandex Translate Widget into multiple languages.
 
 * **No API Key Required:** Access advanced translation resources without any need to set up or pay for an API key, just install the addon and start translating instantly.
 
@@ -36,20 +50,54 @@ https://youtu.be/OyTHWn5CyKw
 
 > *"If you spend too much time thinking about a thing, you'll never get it done. Stop wasting time, complete work smartly & quickly!"*
 
+### Pro Features
+
+* **Google Translate Widget:** Use the Google Translate widget to automatically translate your website into supported languages.
+
+* **OpenAI Translation:** Connect your OpenAI API key and use OpenAI models to automatically translate WordPress content.
+
+* **Gemini AI Translation:** Use Google Gemini as an AI translation provider for translation while preserving surrounding context, helping produce more natural and meaningful translations.
+
+* **Anthropic Translation:** Connect Anthropic as a translation provider to translate WordPress content using AI models.
+
+* **Front-End Page Translation:** Run page translation directly from the front end for a faster translation workflow.
+
+* **Automatic Language Detection:** Automatically detect a visitor’s preferred language and suggest switching the website to that language.
+
+* **Bulk Translation:**Translate multiple pages at once instead of opening and translating each page individually, saving time and manual efforts.
+
+* **Clear Translation:** Quickly remove existing automatic translations from supported pages when you want to reset the translated content and start the translation process again. 
+
 ### Free vs. Pro Version Comparison
 
 **Free Version:**
 
-✅ Supports the Yandex Translate widget for automatic translations
-✅ Supports the Chrome Built-in AI for automatic translations
-✅ Unlimited translations (via Yandex)
-❌ No Google Translate widget
-❌ No Premium Support
+✅ Yandex Translate Widget for automatic translations
+✅ Chrome Built-in AI translation
+✅ Edge Built-in AI translation
+✅ Unlimited translations
+✅ One-click automatic translation
+✅ Manual editing of translated content
+❌ OpenAI translation
+❌ Gemini AI translation
+❌ Anthropic Translation
+❌ Front-end page translation
+❌ Automatic language detection
+❌ Bulk Translation
+❌ Clear translation
+❌ Premium Support
 
 **Pro Version:**
 
 ✅ Google Translate widget for accurate translations
 ✅ Unlimited translations without API keys
+✅ OpenAI translation (Via API Key)
+✅ Gemini AI translation (Via API Key)
+✅ Anthropic Translation (Via API Key)
+✅ Bulk Translation
+✅ Clear Translation
+✅ Front-end page translation
+✅ Automatic language detection
 ✅ Premium Support (24-48 hour response time)
 
 **[Upgrade to Pro!!](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_pro)**
@@ -61,6 +109,8 @@ https://youtu.be/OyTHWn5CyKw
 * **[LocoAI – Auto Translate for Loco Translate](https://locoaddon.com/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=atlt_check_out)** is an addon that enhances the functionality of the Loco Translate plugin by enabling the automatic translation of WordPress themes and plugins. This addon connects with sources like Google, Yandex, DeepL, or AI-powered sources like ChatGPT, Gemini AI and Chrome AI to provide instant and automated translations.
 * **[AutoPoly - AI Translation For Polylang](https://coolplugins.net/product/automatic-translations-for-polylang/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=atfp_check_out)** duplicates your page or post titles, content, images, galleries, or meta fields, and automatically translates them into the selected language. Whether you're using Elementor or Gutenberg, this addon makes the translation process easier.
 * **[Linguator AI – Auto Translate & Create Multilingual Sites](https://go.coolplugins.net/ai-multilingual)** is a powerful multilingual plugin that helps you create and manage multilingual content on your WordPress website. Easily translate your **posts, pages, menus,** and **categories** into different languages using AI and connect with visitors worldwide.
+* **[AutoMLP – AI Translation for WPML](https://coolplugins.net/product/automlp-ai-translation-for-wpml/?utm_source=tpa_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=automlp_check_out)** is WPML automatic translation addon. It allows you to translate your WordPress website using different AI services like OpenAI, Google Gemini, or Chrome AI at low cost.
+
 ### Special THANKS!
 Special thanks to [TranslatePress – Translate Multilingual sites](https://wordpress.org/plugins/translatepress-multilingual/) plugin author, cozmoslabs, Razvan Mocanu, for creating an awesome plugin for translations and also thanks to Yandex for providing a translate widget for websites.
 
@@ -101,16 +151,19 @@ No, the plugin uses machine translation, which can be inaccurate. So, we recomme
 = Do I need to install TranslatePress first? =
 Yes, you need to install and activate the free version of "TranslatePress – Translate Multilingual sites" before using this addon.
 
-= What are the benefits of the pro version? =
-The pro version offers additional features like using the Google Translate widget and Chrome's built-in AI for automatic translation.
+= What are the benefits of the Pro version? =
+The Pro version adds Google Translate Widget, Chrome Built-in AI Translation, Edge Built-in AI Translation, OpenAI, Gemini AI, Anthropic Translation, Front-End Page Translation, Automatic Language Detection, Bulk Translation support, and Premium Support.
 
-= How do I set up Chrome's built-in AI translation? =
-For Chrome's built-in AI translation, detailed setup instructions are required. Please refer to the Chrome AI Translator API documentation for a step-by-step guide: [Chrome AI Translator API documentation](https://developer.chrome.com/docs/ai/translator-api)
+= Will automatic translation change my website design? =
+The plugin focuses on translating content available through TranslatePress. Your existing theme and page layout should remain in place, although compatibility can vary depending on how a theme, plugin, widget, block, or custom content is generated.
 
 = How can I report security bugs? =
 You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team helps validate, triage, and handle any security vulnerabilities. [Report a security vulnerability](https://patchstack.com/database/wordpress/plugin/automatic-translate-addon-for-translatepress/vdp)
 
 == Changelog ==
+= Version 2.0.9 || 07/October/2026 =
+- **Improved:** Chrome AI Translation Provider configuration UI improvements.
+
 = Version 2.0.8 || 10/August/2026 = 
 - **Added:** Edge AI Translation Provider for Edge Browser.
 
